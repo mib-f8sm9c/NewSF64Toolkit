@@ -1,0 +1,31 @@
+﻿File info:
+I'm going to use this file to keep track of my current goals/progress. It will get messy.
+
+Quick notation:
+On goal lists, I use certain characters to notate progress.
+! - Finished
+~ - In progress/Incomplete
+X - No longer needed/relevant
+  - [No marker] Not started
+
+List of priorities:
+!1. Make the program load up the ROM and parse the information correctly.
+2. Decide on how the program layout will look.
+3. Add in next features based on easiness.
+
+List of features:
+!About page [Still needs actual about text]
+!Load ROM
+!Save ROM
+!Load DMA
+!Save DMA
+~List DMA Files
+!Expand ROM (should it automatically expand the rom upon opening? Probably not)
+!Fix CRC
+Better feedback to user on successes/failures
+!Level Viewer
+Model Viewer
+Text editor (requires finding the pointers to the text, won't it? Will that work for all text in ALL the game??)
+
+More notes:
+-Organize tools that can be used by more than one rom into a generic n64 tools folder
