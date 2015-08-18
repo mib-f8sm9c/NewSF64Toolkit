@@ -1,5 +1,5 @@
 ﻿File info:
-I'm going to use this file to keep track of my current goals/progress. It will get messy.
+I'm going to use this file to keep track of my current goals/progress. It may get messy.
 
 Quick notation:
 On goal lists, I use certain characters to notate progress.
@@ -25,7 +25,7 @@ List of features:
 Better feedback to user on successes/failures
 !Level Viewer
 Model Viewer
-Text editor (requires finding the pointers to the text, won't it? Will that work for all text in ALL the game??)
+Text editor
 
 More notes:
 -Organize tools that can be used by more than one rom into a generic n64 tools folder

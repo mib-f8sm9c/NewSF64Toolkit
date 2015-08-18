@@ -63,7 +63,11 @@ namespace NewSF64Toolkit
         {
             glDisplay.Invalidate();
         }
-
+        private void OpenGLControl_Resize(object sender, EventArgs e)
+        {
+            if (GLLoaded)
+                gl_ResizeScene(glDisplay.Width, glDisplay.Height);
+        }
 
         #region draw.c functions
 
@@ -261,7 +265,7 @@ namespace NewSF64Toolkit
             GL.Enable(EnableCap.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, 1);
 
-	        GL.Begin(BeginMode.Quads);
+	        GL.Begin(PrimitiveType.Quads);
 		        GL.Vertex3(-12.0f, -0.01f,-1000.0f);
 		        GL.Vertex3(-12.0f, -0.01f,   10.0f);
 		        GL.Vertex3( 12.0f, -0.01f,   10.0f);

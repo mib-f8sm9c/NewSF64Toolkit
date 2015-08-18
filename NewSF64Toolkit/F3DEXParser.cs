@@ -37,6 +37,8 @@ namespace NewSF64Toolkit
             _dataBanks = new Dictionary<byte, List<BankData>>();
         }
 
+        #region Data Bank Functions
+
         public void AddBank(byte bankNo, byte[] bankData, uint startPos)
         {
             //Check that the bank won't interfere with others
@@ -188,6 +190,8 @@ namespace NewSF64Toolkit
             return _dataBanks.ContainsKey(bankNo);
         }
 
+#endregion
+
         public void ReadGameObject(StarFoxLevelLoader.GameObject gameObject)
         {
             byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
@@ -199,7 +203,7 @@ namespace NewSF64Toolkit
                 GL.Disable(EnableCap.Lighting);
                 GL.Disable(EnableCap.Texture2D);
 
-                GL.Begin(BeginMode.Quads);
+                GL.Begin(PrimitiveType.Quads);
                 GL.Color3(1.0f, 0.0f, 0.0f);
 
                 GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
@@ -1052,7 +1056,7 @@ namespace NewSF64Toolkit
 
         void DrawTriangle(int[] Vtxs)
         {
-	        GL.Begin(BeginMode.Triangles);
+            GL.Begin(PrimitiveType.Triangles);
 
 	        int i = 0;
 	        for(i = 0; i < 3; i++) {
@@ -2076,19 +2080,8 @@ namespace NewSF64Toolkit
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
-
-
-            //System.Drawing.Bitmap bmp = new System.Drawing.Bitmap((int)SFGfx.Textures[TextureID].RealWidth, (int)SFGfx.Textures[TextureID].RealHeight);
-            //int index;
-            //for (int h = 0; h < (int)SFGfx.Textures[TextureID].RealWidth; h++)
-            //{
-            //    for (int k = 0; k < (int)SFGfx.Textures[TextureID].RealHeight; k++)
-            //    {
-            //        index = h * 4 + k * (int)SFGfx.Textures[TextureID].RealWidth * 4;
-            //        bmp.SetPixel(h, k, Color.FromArgb(TextureData[index + 3], TextureData[index], TextureData[index + 1], TextureData[index + 2]));
-            //    }
-            //}
-            //bmp.Save(string.Format("Texture{0}.bmp", SFGfx.GLTextureCount));
+            //Debug outputting texture data
+            //DrawTextureRGBA(TextureData, (int)SFGfx.Textures[TextureID].RealWidth, (int)SFGfx.Textures[TextureID].RealHeight, string.Format("Texture{0}.bmp", SFGfx.GLTextureCount));
 
             SFGfx.GLTextureCount++;
 
@@ -2099,6 +2092,21 @@ namespace NewSF64Toolkit
 
         
         #endregion
+
+        private void DrawTextureRGBA(byte[] textureData, int width, int height, string fileName)
+        {
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width, height);
+            int index;
+            for (int h = 0; h < width; h++)
+            {
+                for (int k = 0; k < height; k++)
+                {
+                    index = h * 4 + k * width * 4;
+                    bmp.SetPixel(h, k, Color.FromArgb(textureData[index + 3], textureData[index], textureData[index + 1], textureData[index + 2]));
+                }
+            }
+            bmp.Save(fileName);
+        }
 
     }
 }

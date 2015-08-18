@@ -5,9 +5,9 @@ using System.Text;
 
 namespace NewSF64Toolkit
 {
-    //7-20 notes: Make it so it has 2 different data structures: the combined ROM data and the DMA table data.
-    //             the two should be interchangeable, though for our purposes we'll use the DMA table.
-    //             You should be able to load from both and convert between them.
+    //Notes: Make it so it has 2 different data structures: the combined ROM data and the separated DMA table data.
+    //        The two should be interchangeable, though for our purposes we'll use the DMA table.
+    //        You should be able to load from both and convert between them.
 
     public struct ROMInfo
     {
@@ -273,13 +273,12 @@ namespace NewSF64Toolkit
 
             IsROMLoaded = true;
 
-            //NEED TO FIX THE DMA TABLE HERE!!
             FixDMATable();
         }
 
         public bool FixCRC()
         {
-            //CRC only applies to the rom file, not the dma table entries
+            //Only apply crc fix to the full rom data container, not to the separated dma table data container
             if(N64Sums.FixChecksum(_romData))
             {
                 IsValidRom = true;
@@ -297,7 +296,7 @@ namespace NewSF64Toolkit
         {
             for (int i = 0; i < DMATable.Count; i++)
             {
-                if (i < 2) //Don't apply to early entries
+                if (i < 2) //Don't apply to early entries, it's okay
                     continue;
 
                 int CurrentPos = (int)Info.DMATableOffset + 16 * i;

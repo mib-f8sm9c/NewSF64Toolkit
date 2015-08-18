@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
-using System.Linq;
 using OpenTK;
 using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
@@ -343,47 +342,6 @@ namespace NewSF64Toolkit
             RefreshDMATable();
         }
 
-        #endregion
-
-        #region Private methods
-
-        private bool HasRomExtension(string fileName)
-        {
-            string ext = Path.GetExtension(fileName.ToUpper());
-
-            return VALID_ROM_EXTENSIONS.Contains(ext);
-        }
-
-        private void RefreshROMInfo()
-        {
-            txtFilename.Text = _rom.Filename;
-            txtSize.Text = ToolSettings.DisplayValue(_rom.Size);
-            txtTitle.Text = _rom.Info.Title;
-            txtGameID.Text = _rom.Info.GameID;
-            txtVersion.Text = _rom.Info.Version.ToString();
-            txtCRC1.Text = ToolSettings.DisplayValue(_rom.Info.CRC1);
-            txtCRC2.Text = ToolSettings.DisplayValue(_rom.Info.CRC2);
-        }
-
-        private void RefreshDMATable()
-        {
-            dgvDMA.Rows.Clear();
-
-            for (int i = 0; i < _rom.DMATable.Count; i++)
-            {
-                DMATableEntry entry = _rom.DMATable[i];
-
-                dgvDMA.Rows.Add();
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[0].Value = i + 1;
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[1].Value = ToolSettings.DisplayValue(entry.VStart);
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[2].Value = ToolSettings.DisplayValue(entry.PStart);
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[3].Value = ToolSettings.DisplayValue(entry.PEnd);
-            }
-        }
-        
-
-        #endregion
-
         private void dgvDMA_SelectionChanged(object sender, EventArgs e)
         {
             if (dgvDMA.SelectedCells.Count == 1)
@@ -424,6 +382,76 @@ namespace NewSF64Toolkit
             }
             else
                 btnLoadLevel.Enabled = true;
+        }
+
+        private void btnLoadLevel_Click(object sender, EventArgs e)
+        {
+            int levelDMAIndex = GetLevelDMAIndex();
+
+            if (!_rom.IsDMALoaded || _rom.DMATable.Count <= levelDMAIndex)
+            {
+                //Error message
+                MessageBox.Show("Rom file not loaded correctly, try reloading the ROM.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (_rom.DMATable[levelDMAIndex].CompFlag == 0x01)
+            {
+                //Error message
+                MessageBox.Show("Specified level file is compressed, decompress before trying again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            //Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
+            DMATableEntry offsetTableDMA = _rom.DMATable[1];
+            _parser.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
+
+            uint offset = ToolSettings.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
+            byte segment = (byte)((offset & 0xFF000000) >> 24);
+            offset &= 0x00FFFFFF;
+
+            //_glControl.Clear();
+            _parser.AddBank(segment, _rom.DMATable[levelDMAIndex].DMAData, 0x00);
+
+            _levelLoader.StartReadingLevelDataAt(segment, offset);
+        }
+
+        #endregion
+
+        #region Private methods
+
+        private bool HasRomExtension(string fileName)
+        {
+            string ext = Path.GetExtension(fileName.ToUpper());
+
+            return VALID_ROM_EXTENSIONS.Contains(ext);
+        }
+
+        private void RefreshROMInfo()
+        {
+            txtFilename.Text = _rom.Filename;
+            txtSize.Text = ToolSettings.DisplayValue(_rom.Size);
+            txtTitle.Text = _rom.Info.Title;
+            txtGameID.Text = _rom.Info.GameID;
+            txtVersion.Text = _rom.Info.Version.ToString();
+            txtCRC1.Text = ToolSettings.DisplayValue(_rom.Info.CRC1);
+            txtCRC2.Text = ToolSettings.DisplayValue(_rom.Info.CRC2);
+        }
+
+        private void RefreshDMATable()
+        {
+            dgvDMA.Rows.Clear();
+
+            for (int i = 0; i < _rom.DMATable.Count; i++)
+            {
+                DMATableEntry entry = _rom.DMATable[i];
+
+                dgvDMA.Rows.Add();
+                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[0].Value = i + 1;
+                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[1].Value = ToolSettings.DisplayValue(entry.VStart);
+                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[2].Value = ToolSettings.DisplayValue(entry.PStart);
+                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[3].Value = ToolSettings.DisplayValue(entry.PEnd);
+            }
         }
 
         private int GetLevelDMAIndex()
@@ -477,37 +505,7 @@ namespace NewSF64Toolkit
             }
         }
 
-        private void btnLoadLevel_Click(object sender, EventArgs e)
-        {
-            int levelDMAIndex = GetLevelDMAIndex();
-
-            if(!_rom.IsDMALoaded || _rom.DMATable.Count <= levelDMAIndex)
-            {
-                //Error message
-                MessageBox.Show("Rom file not loaded correctly, try reloading the ROM.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (_rom.DMATable[levelDMAIndex].CompFlag == 0x01)
-            {
-                //Error message
-                MessageBox.Show("Specified level file is compressed, decompress before trying again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            //Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
-            DMATableEntry offsetTableDMA = _rom.DMATable[1];
-            _parser.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
-
-            uint offset = ToolSettings.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
-            byte segment = (byte)((offset & 0xFF000000) >> 24);
-            offset &= 0x00FFFFFF;
-            
-            //_glControl.Clear();
-            _parser.AddBank(segment, _rom.DMATable[levelDMAIndex].DMAData, 0x00);
-
-            _levelLoader.StartReadingLevelDataAt(segment, offset);
-        }
+        #endregion
 
 
     }

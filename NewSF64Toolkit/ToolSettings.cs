@@ -132,6 +132,7 @@ namespace NewSF64Toolkit
 	        return true;
         }
 
+        #region Byte[] to Byte/Char/Short/UShort/Int/UInt/Float
 
         public static uint ReadUInt(byte[] data, uint position, Endianness endian = Endianness.BigEndian)
         {
@@ -359,5 +360,8 @@ namespace NewSF64Toolkit
 
             return;
         }
+
+        #endregion
+
     }
 }

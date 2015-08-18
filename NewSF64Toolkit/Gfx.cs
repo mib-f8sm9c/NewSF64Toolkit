@@ -158,7 +158,7 @@ namespace NewSF64Toolkit
 
         public static void sv_ClearStructures(bool Full)
         {
-            int i = 0, j = 0;
+            int i = 0;
 
             for (i = 0; i < SFGfx.Vertices.Length; i++) SFGfx.Vertices[i] = new Vertex();
 
@@ -204,10 +204,6 @@ namespace NewSF64Toolkit
             //    Camera = Camera_Empty;
             //}
         }
-
-
-
-        #region Constants
 
         public static class Constants
         {
@@ -301,7 +297,6 @@ namespace NewSF64Toolkit
             public const byte CHANGED_ALPHACOMPARE = 0x04;
         }
 
-        #endregion
-    };
+    }
 
 }

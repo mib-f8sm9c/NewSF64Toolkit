@@ -36,6 +36,8 @@
             this.lblCRC = new System.Windows.Forms.Label();
             this.lblParasyte = new System.Windows.Forms.Label();
             this.lblUCON = new System.Windows.Forms.Label();
+            this.lblHyper = new System.Windows.Forms.Label();
+            this.lblMIO0 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblTitle
@@ -118,10 +120,32 @@
             this.lblUCON.TabIndex = 7;
             this.lblUCON.Text = "uCON64";
             // 
+            // lblHyper
+            // 
+            this.lblHyper.AutoSize = true;
+            this.lblHyper.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.lblHyper.Location = new System.Drawing.Point(52, 223);
+            this.lblHyper.Name = "lblHyper";
+            this.lblHyper.Size = new System.Drawing.Size(70, 13);
+            this.lblHyper.TabIndex = 9;
+            this.lblHyper.Text = "HyperHacker";
+            // 
+            // lblMIO0
+            // 
+            this.lblMIO0.AutoSize = true;
+            this.lblMIO0.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.lblMIO0.Location = new System.Drawing.Point(33, 203);
+            this.lblMIO0.Name = "lblMIO0";
+            this.lblMIO0.Size = new System.Drawing.Size(110, 13);
+            this.lblMIO0.TabIndex = 8;
+            this.lblMIO0.Text = "MIO0 decompression:";
+            // 
             // AboutControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.lblHyper);
+            this.Controls.Add(this.lblMIO0);
             this.Controls.Add(this.lblUCON);
             this.Controls.Add(this.lblParasyte);
             this.Controls.Add(this.lblCRC);
@@ -131,7 +155,7 @@
             this.Controls.Add(this.lblBy);
             this.Controls.Add(this.lblTitle);
             this.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "AboutControl";
             this.Size = new System.Drawing.Size(396, 290);
             this.ResumeLayout(false);
@@ -149,5 +173,7 @@
         private System.Windows.Forms.Label lblCRC;
         private System.Windows.Forms.Label lblParasyte;
         private System.Windows.Forms.Label lblUCON;
+        private System.Windows.Forms.Label lblHyper;
+        private System.Windows.Forms.Label lblMIO0;
     }
 }

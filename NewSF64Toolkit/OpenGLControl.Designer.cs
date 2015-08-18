@@ -54,6 +54,7 @@
             this.Controls.Add(this.glDisplay);
             this.Name = "OpenGLControl";
             this.Size = new System.Drawing.Size(444, 279);
+            this.Resize += new System.EventHandler(this.OpenGLControl_Resize);
             this.ResumeLayout(false);
 
         }
