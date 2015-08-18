@@ -243,7 +243,6 @@ namespace NewSF64Toolkit
             {
                 SFGfx.DLStackPos = 0;
                 ParseDisplayList(gameObject.DListOffset);
-                //StartReadingF3DEXAt((byte)((gameObject.DListOffset & 0xFF000000) >> 24), gameObject.DListOffset & 0x00FFFFFF);
             }
         }
 

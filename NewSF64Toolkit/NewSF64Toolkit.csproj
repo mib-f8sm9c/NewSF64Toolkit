@@ -51,6 +51,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AboutControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="AboutControl.Designer.cs">
+      <DependentUpon>AboutControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Camera.cs" />
     <Compile Include="DMATableEntry.cs" />
     <Compile Include="F3DEXParser.cs" />
@@ -76,6 +82,9 @@
     <Compile Include="StarFoxModelLoader.cs" />
     <Compile Include="StarFoxRomInfo.cs" />
     <Compile Include="ToolSettings.cs" />
+    <EmbeddedResource Include="AboutControl.resx">
+      <DependentUpon>AboutControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

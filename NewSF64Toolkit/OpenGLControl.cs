@@ -141,7 +141,9 @@ namespace NewSF64Toolkit
 	        GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
 
 	        GL.ClearColor(0.2f, 0.5f, 0.7f, 1.0f);
-	        GL.ClearDepth(5.0f);
+
+            //Having issues with one computer at this line, it's generating an AccessViolationException. Appears to work okay without it
+	        //GL.ClearDepth(5.0f);
 
 	        GL.DepthFunc(DepthFunction.Lequal);
 	        GL.Enable(EnableCap.DepthTest);

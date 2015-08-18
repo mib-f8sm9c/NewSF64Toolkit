@@ -130,12 +130,6 @@ namespace NewSF64Toolkit
             }
         }
 
-        private void menuStripHelpAbout_Click(object sender, EventArgs e)
-        {
-            //Bring up the about window
-            MessageBox.Show("About text goes here please");
-        }
-
         private void menuStripViewHex_Click(object sender, EventArgs e)
         {
             ToolSettings.DisplayInHex = menuStripViewHex.Checked;
@@ -404,16 +398,19 @@ namespace NewSF64Toolkit
             {
                 _glControl.Visible = false;
                 _byteViewer.Visible = false;
+                _aboutControl.Visible = true;
             }
             else if (tabControl.SelectedIndex == 1) //DMA tables
             {
                 _glControl.Visible = false;
                 _byteViewer.Visible = true;
+                _aboutControl.Visible = false;
             }
             else
             {
                 _glControl.Visible = true;
                 _byteViewer.Visible = false;
+                _aboutControl.Visible = false;
             }
         }
 
