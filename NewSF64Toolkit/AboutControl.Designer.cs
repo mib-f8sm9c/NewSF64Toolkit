@@ -38,6 +38,8 @@
             this.lblUCON = new System.Windows.Forms.Label();
             this.lblHyper = new System.Windows.Forms.Label();
             this.lblMIO0 = new System.Windows.Forms.Label();
+            this.lblfku = new System.Windows.Forms.Label();
+            this.lblSF = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblTitle
@@ -64,7 +66,7 @@
             // 
             this.lblOrig.AutoSize = true;
             this.lblOrig.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.lblOrig.Location = new System.Drawing.Point(14, 78);
+            this.lblOrig.Location = new System.Drawing.Point(14, 82);
             this.lblOrig.Name = "lblOrig";
             this.lblOrig.Size = new System.Drawing.Size(225, 13);
             this.lblOrig.TabIndex = 2;
@@ -74,7 +76,7 @@
             // 
             this.lblOther.AutoSize = true;
             this.lblOther.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.lblOther.Location = new System.Drawing.Point(14, 112);
+            this.lblOther.Location = new System.Drawing.Point(14, 110);
             this.lblOther.Name = "lblOther";
             this.lblOther.Size = new System.Drawing.Size(70, 13);
             this.lblOther.TabIndex = 3;
@@ -94,7 +96,7 @@
             // 
             this.lblCRC.AutoSize = true;
             this.lblCRC.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.lblCRC.Location = new System.Drawing.Point(33, 139);
+            this.lblCRC.Location = new System.Drawing.Point(32, 173);
             this.lblCRC.Name = "lblCRC";
             this.lblCRC.Size = new System.Drawing.Size(82, 13);
             this.lblCRC.TabIndex = 5;
@@ -104,7 +106,7 @@
             // 
             this.lblParasyte.AutoSize = true;
             this.lblParasyte.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.lblParasyte.Location = new System.Drawing.Point(52, 159);
+            this.lblParasyte.Location = new System.Drawing.Point(51, 191);
             this.lblParasyte.Name = "lblParasyte";
             this.lblParasyte.Size = new System.Drawing.Size(48, 13);
             this.lblParasyte.TabIndex = 6;
@@ -114,7 +116,7 @@
             // 
             this.lblUCON.AutoSize = true;
             this.lblUCON.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.lblUCON.Location = new System.Drawing.Point(52, 178);
+            this.lblUCON.Location = new System.Drawing.Point(51, 210);
             this.lblUCON.Name = "lblUCON";
             this.lblUCON.Size = new System.Drawing.Size(48, 13);
             this.lblUCON.TabIndex = 7;
@@ -124,7 +126,7 @@
             // 
             this.lblHyper.AutoSize = true;
             this.lblHyper.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.lblHyper.Location = new System.Drawing.Point(52, 223);
+            this.lblHyper.Location = new System.Drawing.Point(51, 255);
             this.lblHyper.Name = "lblHyper";
             this.lblHyper.Size = new System.Drawing.Size(70, 13);
             this.lblHyper.TabIndex = 9;
@@ -134,16 +136,38 @@
             // 
             this.lblMIO0.AutoSize = true;
             this.lblMIO0.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
-            this.lblMIO0.Location = new System.Drawing.Point(33, 203);
+            this.lblMIO0.Location = new System.Drawing.Point(32, 236);
             this.lblMIO0.Name = "lblMIO0";
             this.lblMIO0.Size = new System.Drawing.Size(110, 13);
             this.lblMIO0.TabIndex = 8;
             this.lblMIO0.Text = "MIO0 decompression:";
             // 
+            // lblfku
+            // 
+            this.lblfku.AutoSize = true;
+            this.lblfku.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.lblfku.Location = new System.Drawing.Point(51, 152);
+            this.lblfku.Name = "lblfku";
+            this.lblfku.Size = new System.Drawing.Size(38, 13);
+            this.lblfku.TabIndex = 11;
+            this.lblfku.Text = "fkualol";
+            // 
+            // lblSF
+            // 
+            this.lblSF.AutoSize = true;
+            this.lblSF.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F);
+            this.lblSF.Location = new System.Drawing.Point(32, 132);
+            this.lblSF.Name = "lblSF";
+            this.lblSF.Size = new System.Drawing.Size(112, 13);
+            this.lblSF.TabIndex = 10;
+            this.lblSF.Text = "SF64 level format info:";
+            // 
             // AboutControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.lblfku);
+            this.Controls.Add(this.lblSF);
             this.Controls.Add(this.lblHyper);
             this.Controls.Add(this.lblMIO0);
             this.Controls.Add(this.lblUCON);
@@ -175,5 +199,7 @@
         private System.Windows.Forms.Label lblUCON;
         private System.Windows.Forms.Label lblHyper;
         private System.Windows.Forms.Label lblMIO0;
+        private System.Windows.Forms.Label lblfku;
+        private System.Windows.Forms.Label lblSF;
     }
 }
