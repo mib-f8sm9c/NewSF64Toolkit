@@ -119,6 +119,8 @@ namespace NewSF64Toolkit
 
         public static int GameObjCount;
 
+        public static int SelectedGameObject;
+
         public static uint ChangedModes;
         public static uint GeometryMode;
         public static uint OtherModeL;

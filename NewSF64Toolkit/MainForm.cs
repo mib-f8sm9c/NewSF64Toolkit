@@ -414,6 +414,10 @@ namespace NewSF64Toolkit
             _parser.AddBank(segment, _rom.DMATable[levelDMAIndex].DMAData, 0x00);
 
             _levelLoader.StartReadingLevelDataAt(segment, offset);
+
+            InitDListNavigEnabled(true);
+
+            _glControl.ReDraww();
         }
 
         #endregion
@@ -507,6 +511,79 @@ namespace NewSF64Toolkit
 
         #endregion
 
+        private void InitDListNavigEnabled(bool enable)
+        {
+            btnModLeft.Enabled = enable;
+            btnModRight.Enabled = enable;
+            btnModSnapTo.Enabled = enable;
 
+            if (!enable)
+            {
+                txtModDList.Clear();
+                txtModID.Clear();
+                txtModNum.Clear();
+                txtModPos.Clear();
+                txtModUnk.Clear();
+                txtModX.Clear();
+                txtModXRot.Clear();
+                txtModY.Clear();
+                txtModYRot.Clear();
+                txtModZ.Clear();
+                txtModZRot.Clear();
+            }
+            else
+            {
+                SFGfx.SelectedGameObject = 0;
+                LoadModelNavigInfo();
+            }
+        }
+
+        private void LoadModelNavigInfo()
+        {
+            txtModNum.Text = SFGfx.SelectedGameObject.ToString();
+
+            StarFoxLevelLoader.GameObject obj = _levelLoader.GameObjects[SFGfx.SelectedGameObject];
+
+
+            txtModDList.Text = ToolSettings.DisplayValue(obj.DListOffset);
+            txtModID.Text = obj.ID.ToString();
+            txtModPos.Text = obj.LvlPos.ToString();
+            txtModUnk.Text = obj.Unk.ToString();
+            txtModX.Text = obj.X.ToString();
+            txtModXRot.Text = obj.XRot.ToString();
+            txtModY.Text = obj.Y.ToString();
+            txtModYRot.Text = obj.YRot.ToString();
+            txtModZ.Text = obj.Z.ToString();
+            txtModZRot.Text = obj.ZRot.ToString();
+
+        }
+
+        private void btnModRight_Click(object sender, EventArgs e)
+        {
+            if (SFGfx.SelectedGameObject < SFGfx.GameObjCount - 1)
+            {
+                SFGfx.SelectedGameObject++;
+                LoadModelNavigInfo();
+                _glControl.ReDraww();
+            }
+        }
+
+        private void btnModLeft_Click(object sender, EventArgs e)
+        {
+            if (SFGfx.SelectedGameObject > 0)
+            {
+                SFGfx.SelectedGameObject--;
+                LoadModelNavigInfo();
+                _glControl.ReDraww();
+            }
+        }
+
+        private void btnModSnapTo_Click(object sender, EventArgs e)
+        {
+            //Move the camera to the object
+            StarFoxLevelLoader.GameObject obj = _levelLoader.GameObjects[SFGfx.SelectedGameObject];
+
+            SFCamera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
+        }
     }
 }

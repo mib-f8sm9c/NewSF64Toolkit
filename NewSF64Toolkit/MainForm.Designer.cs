@@ -77,7 +77,31 @@
             this.cbLevelSelect = new System.Windows.Forms.ComboBox();
             this.btnLoadLevel = new System.Windows.Forms.Button();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.txtModX = new System.Windows.Forms.TextBox();
+            this.lblModX = new System.Windows.Forms.Label();
+            this.txtModXRot = new System.Windows.Forms.TextBox();
+            this.lblModXRot = new System.Windows.Forms.Label();
+            this.txtModYRot = new System.Windows.Forms.TextBox();
+            this.lblModYRot = new System.Windows.Forms.Label();
+            this.txtModY = new System.Windows.Forms.TextBox();
+            this.lblModY = new System.Windows.Forms.Label();
+            this.txtModZRot = new System.Windows.Forms.TextBox();
+            this.lblModZRot = new System.Windows.Forms.Label();
+            this.txtModZ = new System.Windows.Forms.TextBox();
+            this.lblModZ = new System.Windows.Forms.Label();
+            this.txtModNum = new System.Windows.Forms.TextBox();
+            this.btnModLeft = new System.Windows.Forms.Button();
+            this.btnModRight = new System.Windows.Forms.Button();
+            this.txtModID = new System.Windows.Forms.TextBox();
+            this.lblModID = new System.Windows.Forms.Label();
+            this.txtModPos = new System.Windows.Forms.TextBox();
+            this.lblModPos = new System.Windows.Forms.Label();
+            this.txtModUnk = new System.Windows.Forms.TextBox();
+            this.lblModUnk = new System.Windows.Forms.Label();
+            this.txtModDList = new System.Windows.Forms.TextBox();
+            this.lblModDList = new System.Windows.Forms.Label();
             this._aboutControl = new NewSF64Toolkit.AboutControl();
+            this.btnModSnapTo = new System.Windows.Forms.Button();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
@@ -239,7 +263,7 @@
             // 
             this.splitContainer.Panel2.Controls.Add(this.infoPanel);
             this.splitContainer.Size = new System.Drawing.Size(766, 451);
-            this.splitContainer.SplitterDistance = 496;
+            this.splitContainer.SplitterDistance = 498;
             this.splitContainer.SplitterWidth = 2;
             this.splitContainer.TabIndex = 3;
             // 
@@ -249,7 +273,7 @@
             this.viewerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.viewerPanel.Location = new System.Drawing.Point(0, 0);
             this.viewerPanel.Name = "viewerPanel";
-            this.viewerPanel.Size = new System.Drawing.Size(496, 451);
+            this.viewerPanel.Size = new System.Drawing.Size(498, 451);
             this.viewerPanel.TabIndex = 0;
             // 
             // glPanel
@@ -259,7 +283,7 @@
             this.glPanel.Location = new System.Drawing.Point(0, 0);
             this.glPanel.Name = "glPanel";
             this.glPanel.Padding = new System.Windows.Forms.Padding(6);
-            this.glPanel.Size = new System.Drawing.Size(496, 451);
+            this.glPanel.Size = new System.Drawing.Size(498, 451);
             this.glPanel.TabIndex = 0;
             // 
             // infoPanel
@@ -269,7 +293,7 @@
             this.infoPanel.Location = new System.Drawing.Point(0, 0);
             this.infoPanel.Name = "infoPanel";
             this.infoPanel.Padding = new System.Windows.Forms.Padding(5);
-            this.infoPanel.Size = new System.Drawing.Size(268, 451);
+            this.infoPanel.Size = new System.Drawing.Size(266, 451);
             this.infoPanel.TabIndex = 0;
             // 
             // tabControl
@@ -281,7 +305,7 @@
             this.tabControl.Location = new System.Drawing.Point(5, 5);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(258, 441);
+            this.tabControl.Size = new System.Drawing.Size(256, 441);
             this.tabControl.TabIndex = 1;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
             // 
@@ -305,85 +329,85 @@
             this.romInfoPage.Location = new System.Drawing.Point(4, 22);
             this.romInfoPage.Name = "romInfoPage";
             this.romInfoPage.Padding = new System.Windows.Forms.Padding(3);
-            this.romInfoPage.Size = new System.Drawing.Size(250, 415);
+            this.romInfoPage.Size = new System.Drawing.Size(248, 415);
             this.romInfoPage.TabIndex = 0;
             this.romInfoPage.Text = "ROM Info";
             // 
             // txtCRC2
             // 
-            this.txtCRC2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtCRC2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtCRC2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.txtCRC2.Location = new System.Drawing.Point(90, 238);
             this.txtCRC2.Name = "txtCRC2";
             this.txtCRC2.ReadOnly = true;
-            this.txtCRC2.Size = new System.Drawing.Size(154, 23);
+            this.txtCRC2.Size = new System.Drawing.Size(152, 23);
             this.txtCRC2.TabIndex = 13;
             // 
             // txtCRC1
             // 
-            this.txtCRC1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtCRC1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtCRC1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.txtCRC1.Location = new System.Drawing.Point(90, 204);
             this.txtCRC1.Name = "txtCRC1";
             this.txtCRC1.ReadOnly = true;
-            this.txtCRC1.Size = new System.Drawing.Size(154, 23);
+            this.txtCRC1.Size = new System.Drawing.Size(152, 23);
             this.txtCRC1.TabIndex = 12;
             // 
             // txtVersion
             // 
-            this.txtVersion.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtVersion.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.txtVersion.Location = new System.Drawing.Point(90, 171);
             this.txtVersion.Name = "txtVersion";
             this.txtVersion.ReadOnly = true;
-            this.txtVersion.Size = new System.Drawing.Size(154, 23);
+            this.txtVersion.Size = new System.Drawing.Size(152, 23);
             this.txtVersion.TabIndex = 11;
             // 
             // txtGameID
             // 
-            this.txtGameID.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtGameID.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtGameID.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.txtGameID.Location = new System.Drawing.Point(90, 139);
             this.txtGameID.Name = "txtGameID";
             this.txtGameID.ReadOnly = true;
-            this.txtGameID.Size = new System.Drawing.Size(154, 23);
+            this.txtGameID.Size = new System.Drawing.Size(152, 23);
             this.txtGameID.TabIndex = 10;
             // 
             // txtSize
             // 
-            this.txtSize.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtSize.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtSize.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.txtSize.Location = new System.Drawing.Point(90, 76);
             this.txtSize.Name = "txtSize";
             this.txtSize.ReadOnly = true;
-            this.txtSize.Size = new System.Drawing.Size(154, 23);
+            this.txtSize.Size = new System.Drawing.Size(152, 23);
             this.txtSize.TabIndex = 9;
             // 
             // txtTitle
             // 
-            this.txtTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtTitle.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.txtTitle.Location = new System.Drawing.Point(90, 104);
             this.txtTitle.Name = "txtTitle";
             this.txtTitle.ReadOnly = true;
-            this.txtTitle.Size = new System.Drawing.Size(154, 23);
+            this.txtTitle.Size = new System.Drawing.Size(152, 23);
             this.txtTitle.TabIndex = 8;
             // 
             // txtFilename
             // 
-            this.txtFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtFilename.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.txtFilename.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.txtFilename.Location = new System.Drawing.Point(90, 44);
             this.txtFilename.Name = "txtFilename";
             this.txtFilename.ReadOnly = true;
-            this.txtFilename.Size = new System.Drawing.Size(154, 23);
+            this.txtFilename.Size = new System.Drawing.Size(152, 23);
             this.txtFilename.TabIndex = 7;
             // 
             // lblCRC2
@@ -463,15 +487,15 @@
             this.dmaTablesPage.Location = new System.Drawing.Point(4, 22);
             this.dmaTablesPage.Name = "dmaTablesPage";
             this.dmaTablesPage.Padding = new System.Windows.Forms.Padding(3);
-            this.dmaTablesPage.Size = new System.Drawing.Size(250, 415);
+            this.dmaTablesPage.Size = new System.Drawing.Size(248, 415);
             this.dmaTablesPage.TabIndex = 1;
             this.dmaTablesPage.Text = "DMA Tables";
             // 
             // pnlDMATables
             // 
-            this.pnlDMATables.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlDMATables.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlDMATables.Controls.Add(this.dgvDMA);
             this.pnlDMATables.Location = new System.Drawing.Point(0, 0);
             this.pnlDMATables.Name = "pnlDMATables";
@@ -524,12 +548,36 @@
             // levelViewerPage
             // 
             this.levelViewerPage.BackColor = System.Drawing.SystemColors.Control;
+            this.levelViewerPage.Controls.Add(this.btnModSnapTo);
+            this.levelViewerPage.Controls.Add(this.txtModDList);
+            this.levelViewerPage.Controls.Add(this.lblModDList);
+            this.levelViewerPage.Controls.Add(this.txtModUnk);
+            this.levelViewerPage.Controls.Add(this.lblModUnk);
+            this.levelViewerPage.Controls.Add(this.txtModPos);
+            this.levelViewerPage.Controls.Add(this.lblModPos);
+            this.levelViewerPage.Controls.Add(this.txtModID);
+            this.levelViewerPage.Controls.Add(this.lblModID);
+            this.levelViewerPage.Controls.Add(this.btnModRight);
+            this.levelViewerPage.Controls.Add(this.btnModLeft);
+            this.levelViewerPage.Controls.Add(this.txtModNum);
+            this.levelViewerPage.Controls.Add(this.txtModZRot);
+            this.levelViewerPage.Controls.Add(this.lblModZRot);
+            this.levelViewerPage.Controls.Add(this.txtModZ);
+            this.levelViewerPage.Controls.Add(this.lblModZ);
+            this.levelViewerPage.Controls.Add(this.txtModYRot);
+            this.levelViewerPage.Controls.Add(this.lblModYRot);
+            this.levelViewerPage.Controls.Add(this.txtModY);
+            this.levelViewerPage.Controls.Add(this.lblModY);
+            this.levelViewerPage.Controls.Add(this.txtModXRot);
+            this.levelViewerPage.Controls.Add(this.lblModXRot);
+            this.levelViewerPage.Controls.Add(this.txtModX);
+            this.levelViewerPage.Controls.Add(this.lblModX);
             this.levelViewerPage.Controls.Add(this.cbLevelSelect);
             this.levelViewerPage.Controls.Add(this.btnLoadLevel);
             this.levelViewerPage.Location = new System.Drawing.Point(4, 22);
             this.levelViewerPage.Name = "levelViewerPage";
             this.levelViewerPage.Padding = new System.Windows.Forms.Padding(3);
-            this.levelViewerPage.Size = new System.Drawing.Size(250, 415);
+            this.levelViewerPage.Size = new System.Drawing.Size(248, 415);
             this.levelViewerPage.TabIndex = 2;
             this.levelViewerPage.Text = "Level Viewer";
             // 
@@ -569,13 +617,236 @@
             // btnLoadLevel
             // 
             this.btnLoadLevel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.btnLoadLevel.Location = new System.Drawing.Point(71, 104);
+            this.btnLoadLevel.Location = new System.Drawing.Point(66, 97);
             this.btnLoadLevel.Name = "btnLoadLevel";
             this.btnLoadLevel.Size = new System.Drawing.Size(121, 36);
             this.btnLoadLevel.TabIndex = 0;
             this.btnLoadLevel.Text = "Load";
             this.btnLoadLevel.UseVisualStyleBackColor = true;
             this.btnLoadLevel.Click += new System.EventHandler(this.btnLoadLevel_Click);
+            // 
+            // txtModX
+            // 
+            this.txtModX.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModX.Location = new System.Drawing.Point(40, 187);
+            this.txtModX.Name = "txtModX";
+            this.txtModX.ReadOnly = true;
+            this.txtModX.Size = new System.Drawing.Size(63, 23);
+            this.txtModX.TabIndex = 9;
+            // 
+            // lblModX
+            // 
+            this.lblModX.AutoSize = true;
+            this.lblModX.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModX.Location = new System.Drawing.Point(15, 190);
+            this.lblModX.Name = "lblModX";
+            this.lblModX.Size = new System.Drawing.Size(21, 17);
+            this.lblModX.TabIndex = 8;
+            this.lblModX.Text = "X:";
+            // 
+            // txtModXRot
+            // 
+            this.txtModXRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModXRot.Location = new System.Drawing.Point(169, 187);
+            this.txtModXRot.Name = "txtModXRot";
+            this.txtModXRot.ReadOnly = true;
+            this.txtModXRot.Size = new System.Drawing.Size(63, 23);
+            this.txtModXRot.TabIndex = 11;
+            // 
+            // lblModXRot
+            // 
+            this.lblModXRot.AutoSize = true;
+            this.lblModXRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModXRot.Location = new System.Drawing.Point(120, 190);
+            this.lblModXRot.Name = "lblModXRot";
+            this.lblModXRot.Size = new System.Drawing.Size(43, 17);
+            this.lblModXRot.TabIndex = 10;
+            this.lblModXRot.Text = "XRot:";
+            // 
+            // txtModYRot
+            // 
+            this.txtModYRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModYRot.Location = new System.Drawing.Point(169, 216);
+            this.txtModYRot.Name = "txtModYRot";
+            this.txtModYRot.ReadOnly = true;
+            this.txtModYRot.Size = new System.Drawing.Size(63, 23);
+            this.txtModYRot.TabIndex = 15;
+            // 
+            // lblModYRot
+            // 
+            this.lblModYRot.AutoSize = true;
+            this.lblModYRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModYRot.Location = new System.Drawing.Point(120, 219);
+            this.lblModYRot.Name = "lblModYRot";
+            this.lblModYRot.Size = new System.Drawing.Size(43, 17);
+            this.lblModYRot.TabIndex = 14;
+            this.lblModYRot.Text = "YRot:";
+            // 
+            // txtModY
+            // 
+            this.txtModY.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModY.Location = new System.Drawing.Point(40, 216);
+            this.txtModY.Name = "txtModY";
+            this.txtModY.ReadOnly = true;
+            this.txtModY.Size = new System.Drawing.Size(63, 23);
+            this.txtModY.TabIndex = 13;
+            // 
+            // lblModY
+            // 
+            this.lblModY.AutoSize = true;
+            this.lblModY.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModY.Location = new System.Drawing.Point(15, 219);
+            this.lblModY.Name = "lblModY";
+            this.lblModY.Size = new System.Drawing.Size(21, 17);
+            this.lblModY.TabIndex = 12;
+            this.lblModY.Text = "Y:";
+            // 
+            // txtModZRot
+            // 
+            this.txtModZRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModZRot.Location = new System.Drawing.Point(169, 245);
+            this.txtModZRot.Name = "txtModZRot";
+            this.txtModZRot.ReadOnly = true;
+            this.txtModZRot.Size = new System.Drawing.Size(63, 23);
+            this.txtModZRot.TabIndex = 19;
+            // 
+            // lblModZRot
+            // 
+            this.lblModZRot.AutoSize = true;
+            this.lblModZRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModZRot.Location = new System.Drawing.Point(120, 248);
+            this.lblModZRot.Name = "lblModZRot";
+            this.lblModZRot.Size = new System.Drawing.Size(43, 17);
+            this.lblModZRot.TabIndex = 18;
+            this.lblModZRot.Text = "ZRot:";
+            // 
+            // txtModZ
+            // 
+            this.txtModZ.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModZ.Location = new System.Drawing.Point(40, 245);
+            this.txtModZ.Name = "txtModZ";
+            this.txtModZ.ReadOnly = true;
+            this.txtModZ.Size = new System.Drawing.Size(63, 23);
+            this.txtModZ.TabIndex = 17;
+            // 
+            // lblModZ
+            // 
+            this.lblModZ.AutoSize = true;
+            this.lblModZ.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModZ.Location = new System.Drawing.Point(15, 248);
+            this.lblModZ.Name = "lblModZ";
+            this.lblModZ.Size = new System.Drawing.Size(21, 17);
+            this.lblModZ.TabIndex = 16;
+            this.lblModZ.Text = "Z:";
+            // 
+            // txtModNum
+            // 
+            this.txtModNum.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModNum.Location = new System.Drawing.Point(109, 153);
+            this.txtModNum.Name = "txtModNum";
+            this.txtModNum.ReadOnly = true;
+            this.txtModNum.Size = new System.Drawing.Size(46, 23);
+            this.txtModNum.TabIndex = 20;
+            // 
+            // btnModLeft
+            // 
+            this.btnModLeft.Enabled = false;
+            this.btnModLeft.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.btnModLeft.Location = new System.Drawing.Point(48, 149);
+            this.btnModLeft.Name = "btnModLeft";
+            this.btnModLeft.Size = new System.Drawing.Size(46, 30);
+            this.btnModLeft.TabIndex = 21;
+            this.btnModLeft.Text = "<";
+            this.btnModLeft.UseVisualStyleBackColor = true;
+            this.btnModLeft.Click += new System.EventHandler(this.btnModLeft_Click);
+            // 
+            // btnModRight
+            // 
+            this.btnModRight.Enabled = false;
+            this.btnModRight.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.btnModRight.Location = new System.Drawing.Point(169, 149);
+            this.btnModRight.Name = "btnModRight";
+            this.btnModRight.Size = new System.Drawing.Size(46, 30);
+            this.btnModRight.TabIndex = 22;
+            this.btnModRight.Text = ">";
+            this.btnModRight.UseVisualStyleBackColor = true;
+            this.btnModRight.Click += new System.EventHandler(this.btnModRight_Click);
+            // 
+            // txtModID
+            // 
+            this.txtModID.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModID.Location = new System.Drawing.Point(94, 284);
+            this.txtModID.Name = "txtModID";
+            this.txtModID.ReadOnly = true;
+            this.txtModID.Size = new System.Drawing.Size(121, 23);
+            this.txtModID.TabIndex = 24;
+            // 
+            // lblModID
+            // 
+            this.lblModID.AutoSize = true;
+            this.lblModID.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModID.Location = new System.Drawing.Point(63, 287);
+            this.lblModID.Name = "lblModID";
+            this.lblModID.Size = new System.Drawing.Size(25, 17);
+            this.lblModID.TabIndex = 23;
+            this.lblModID.Text = "ID:";
+            // 
+            // txtModPos
+            // 
+            this.txtModPos.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModPos.Location = new System.Drawing.Point(94, 313);
+            this.txtModPos.Name = "txtModPos";
+            this.txtModPos.ReadOnly = true;
+            this.txtModPos.Size = new System.Drawing.Size(121, 23);
+            this.txtModPos.TabIndex = 26;
+            // 
+            // lblModPos
+            // 
+            this.lblModPos.AutoSize = true;
+            this.lblModPos.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModPos.Location = new System.Drawing.Point(14, 316);
+            this.lblModPos.Name = "lblModPos";
+            this.lblModPos.Size = new System.Drawing.Size(74, 17);
+            this.lblModPos.TabIndex = 25;
+            this.lblModPos.Text = "Level Pos:";
+            // 
+            // txtModUnk
+            // 
+            this.txtModUnk.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModUnk.Location = new System.Drawing.Point(94, 342);
+            this.txtModUnk.Name = "txtModUnk";
+            this.txtModUnk.ReadOnly = true;
+            this.txtModUnk.Size = new System.Drawing.Size(121, 23);
+            this.txtModUnk.TabIndex = 28;
+            // 
+            // lblModUnk
+            // 
+            this.lblModUnk.AutoSize = true;
+            this.lblModUnk.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModUnk.Location = new System.Drawing.Point(18, 345);
+            this.lblModUnk.Name = "lblModUnk";
+            this.lblModUnk.Size = new System.Drawing.Size(70, 17);
+            this.lblModUnk.TabIndex = 27;
+            this.lblModUnk.Text = "Unknown:";
+            // 
+            // txtModDList
+            // 
+            this.txtModDList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModDList.Location = new System.Drawing.Point(94, 371);
+            this.txtModDList.Name = "txtModDList";
+            this.txtModDList.ReadOnly = true;
+            this.txtModDList.Size = new System.Drawing.Size(121, 23);
+            this.txtModDList.TabIndex = 30;
+            // 
+            // lblModDList
+            // 
+            this.lblModDList.AutoSize = true;
+            this.lblModDList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModDList.Location = new System.Drawing.Point(2, 374);
+            this.lblModDList.Name = "lblModDList";
+            this.lblModDList.Size = new System.Drawing.Size(86, 17);
+            this.lblModDList.TabIndex = 29;
+            this.lblModDList.Text = "DList Offset:";
             // 
             // _aboutControl
             // 
@@ -584,8 +855,19 @@
             this._aboutControl.Location = new System.Drawing.Point(6, 6);
             this._aboutControl.Margin = new System.Windows.Forms.Padding(4);
             this._aboutControl.Name = "_aboutControl";
-            this._aboutControl.Size = new System.Drawing.Size(484, 439);
+            this._aboutControl.Size = new System.Drawing.Size(486, 439);
             this._aboutControl.TabIndex = 0;
+            // 
+            // btnModSnapTo
+            // 
+            this.btnModSnapTo.Enabled = false;
+            this.btnModSnapTo.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.btnModSnapTo.Location = new System.Drawing.Point(5, 137);
+            this.btnModSnapTo.Name = "btnModSnapTo";
+            this.btnModSnapTo.Size = new System.Drawing.Size(37, 26);
+            this.btnModSnapTo.TabIndex = 31;
+            this.btnModSnapTo.UseVisualStyleBackColor = true;
+            this.btnModSnapTo.Click += new System.EventHandler(this.btnModSnapTo_Click);
             // 
             // MainForm
             // 
@@ -615,6 +897,7 @@
             this.pnlDMATables.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvDMA)).EndInit();
             this.levelViewerPage.ResumeLayout(false);
+            this.levelViewerPage.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -672,6 +955,30 @@
         private System.Windows.Forms.Button btnLoadLevel;
         private System.Windows.Forms.ComboBox cbLevelSelect;
         private AboutControl _aboutControl;
+        private System.Windows.Forms.TextBox txtModX;
+        private System.Windows.Forms.Label lblModX;
+        private System.Windows.Forms.TextBox txtModNum;
+        private System.Windows.Forms.TextBox txtModZRot;
+        private System.Windows.Forms.Label lblModZRot;
+        private System.Windows.Forms.TextBox txtModZ;
+        private System.Windows.Forms.Label lblModZ;
+        private System.Windows.Forms.TextBox txtModYRot;
+        private System.Windows.Forms.Label lblModYRot;
+        private System.Windows.Forms.TextBox txtModY;
+        private System.Windows.Forms.Label lblModY;
+        private System.Windows.Forms.TextBox txtModXRot;
+        private System.Windows.Forms.Label lblModXRot;
+        private System.Windows.Forms.Button btnModRight;
+        private System.Windows.Forms.Button btnModLeft;
+        private System.Windows.Forms.TextBox txtModID;
+        private System.Windows.Forms.Label lblModID;
+        private System.Windows.Forms.TextBox txtModDList;
+        private System.Windows.Forms.Label lblModDList;
+        private System.Windows.Forms.TextBox txtModUnk;
+        private System.Windows.Forms.Label lblModUnk;
+        private System.Windows.Forms.TextBox txtModPos;
+        private System.Windows.Forms.Label lblModPos;
+        private System.Windows.Forms.Button btnModSnapTo;
     }
 }
 
