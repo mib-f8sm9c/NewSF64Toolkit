@@ -544,6 +544,12 @@ namespace NewSF64Toolkit
 
             StarFoxLevelLoader.GameObject obj = _levelLoader.GameObjects[SFGfx.SelectedGameObject];
 
+            txtModX.TextChanged -= txtMod_TextChanged;
+            txtModXRot.TextChanged -= txtMod_TextChanged;
+            txtModY.TextChanged -= txtMod_TextChanged;
+            txtModYRot.TextChanged -= txtMod_TextChanged;
+            txtModY.TextChanged -= txtMod_TextChanged;
+            txtModYRot.TextChanged -= txtMod_TextChanged;
 
             txtModDList.Text = ToolSettings.DisplayValue(obj.DListOffset);
             txtModID.Text = obj.ID.ToString();
@@ -555,6 +561,13 @@ namespace NewSF64Toolkit
             txtModYRot.Text = obj.YRot.ToString();
             txtModZ.Text = obj.Z.ToString();
             txtModZRot.Text = obj.ZRot.ToString();
+
+            txtModX.TextChanged += txtMod_TextChanged;
+            txtModXRot.TextChanged += txtMod_TextChanged;
+            txtModY.TextChanged += txtMod_TextChanged;
+            txtModYRot.TextChanged += txtMod_TextChanged;
+            txtModY.TextChanged += txtMod_TextChanged;
+            txtModYRot.TextChanged += txtMod_TextChanged;
 
         }
 
@@ -584,6 +597,25 @@ namespace NewSF64Toolkit
             StarFoxLevelLoader.GameObject obj = _levelLoader.GameObjects[SFGfx.SelectedGameObject];
 
             SFCamera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
+        }
+
+        private void txtMod_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                StarFoxLevelLoader.GameObject obj = _levelLoader.GameObjects[SFGfx.SelectedGameObject];
+                obj.X = Convert.ToInt16(txtModX.Text);
+                obj.XRot = Convert.ToInt16(txtModXRot.Text);
+                obj.Y = Convert.ToInt16(txtModY.Text);
+                obj.YRot = Convert.ToInt16(txtModYRot.Text);
+                obj.Z = Convert.ToInt16(txtModZ.Text);
+                obj.ZRot = Convert.ToInt16(txtModZRot.Text);
+                _levelLoader.GameObjects[SFGfx.SelectedGameObject] = obj;
+
+                _levelLoader.ExecuteDisplayLists(SFGfx.SelectedGameObject);
+                _glControl.ReDraww();
+            }
+            catch(Exception ee) {};
         }
     }
 }

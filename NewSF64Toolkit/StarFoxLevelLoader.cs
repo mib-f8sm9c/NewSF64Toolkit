@@ -110,18 +110,26 @@ namespace NewSF64Toolkit
             SFCamera.Reset();
         }
 
-        void ExecuteDisplayLists()
+        public void ExecuteDisplayLists(int index = -1)
         {
             SFGfx.DLStackPos = 0;
 
-            SFGfx.GLListCount = (uint)GL.GenLists(GameObjects.Count);
-            GL.ListBase(SFGfx.GLListCount);
+            if (index == -1)
+            {
+                GL.DeleteLists(SFGfx.GLListBase, SFGfx.GameObjCount);
+
+                SFGfx.GLListBase = (uint)GL.GenLists(GameObjects.Count);
+                GL.ListBase(SFGfx.GLListBase);
+            }
 
             for(int ObjectNo = 0; ObjectNo < GameObjects.Count; ObjectNo++)
             {
+                if (index != -1 && ObjectNo != index)
+                    continue;
+
                 GameObject gameObject = GameObjects[ObjectNo];
 
-                GL.NewList(SFGfx.GLListCount + (uint)ObjectNo, ListMode.Compile);
+                GL.NewList(SFGfx.GLListBase + (uint)ObjectNo, ListMode.Compile);
                 
                 GL.PushMatrix();
 

@@ -115,7 +115,7 @@ namespace NewSF64Toolkit
 
         public static OpenGLSetting OpenGlSettings;
 
-        public static uint GLListCount;
+        public static uint GLListBase;
 
         public static int GameObjCount;
 
@@ -149,7 +149,7 @@ namespace NewSF64Toolkit
         {
             if (Full)
             {
-                if (GL.IsList(SFGfx.GLListCount)) GL.DeleteLists(SFGfx.GLListCount, SFGfx.GameObjCount);
+                if (GL.IsList(SFGfx.GLListBase)) GL.DeleteLists(SFGfx.GLListBase, SFGfx.GameObjCount);
             }
 
             if (SFGfx.GLTextureID[0] != 0) GL.DeleteTextures(SFGfx.GLTextureCount, SFGfx.GLTextureID);

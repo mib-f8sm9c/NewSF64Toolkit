@@ -288,7 +288,7 @@ namespace NewSF64Toolkit
 	        int ObjectNo = 0;
             while (ObjectNo < SFGfx.GameObjCount)
             {
-                if (ObjectNo == SFGfx.SelectedGameObject)
+                if (ObjectNo == SFGfx.SelectedGameObject + 1)
                 {
                     GL.PushAttrib(AttribMask.AllAttribBits);
                     GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Add);
