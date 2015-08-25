@@ -247,6 +247,11 @@ namespace NewSF64Toolkit
             return true;
         }
 
+        public void SaveChanges()
+        {
+            DMAToRom();
+        }
+
         private void DMAToRom()
         {
             if(!IsDMALoaded)
@@ -278,12 +283,18 @@ namespace NewSF64Toolkit
 
         public bool FixCRC()
         {
+            //Have to save changes
+            DMAToRom();
+
             //Only apply crc fix to the full rom data container, not to the separated dma table data container
             if(N64Sums.FixChecksum(_romData))
             {
                 IsValidRom = true;
                 uint crc1 = ToolSettings.ReadUInt(_romData, 16, ROMEndianness);
                 uint crc2 = ToolSettings.ReadUInt(_romData, 20, ROMEndianness);
+
+                //Load changes back to DMA (will need to reset the level stuff
+                RomToDMA();
 
                 Info = new ROMInfo(Info.Title, Info.GameID, Info.Version, crc1, crc2, Info.DMATableOffset);
 

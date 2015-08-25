@@ -152,6 +152,9 @@ namespace NewSF64Toolkit
                 return;
             }
 
+            //Debug, need to ask about saving changes
+            _rom.SaveChanges();
+
             using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
             {
                 writer.BaseStream.Write(_rom.RomData, 0, _rom.RomData.Length);
@@ -402,16 +405,18 @@ namespace NewSF64Toolkit
                 return;
             }
 
+            MemoryManager.Instance.ClearBanks();
+
             //Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
             DMATableEntry offsetTableDMA = _rom.DMATable[1];
-            _parser.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
+            MemoryManager.Instance.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
 
             uint offset = ToolSettings.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
             byte segment = (byte)((offset & 0xFF000000) >> 24);
             offset &= 0x00FFFFFF;
 
             //_glControl.Clear();
-            _parser.AddBank(segment, _rom.DMATable[levelDMAIndex].DMAData, 0x00);
+            MemoryManager.Instance.AddBank(segment, _rom.DMATable[levelDMAIndex].DMAData, 0x00);
 
             _levelLoader.StartReadingLevelDataAt(segment, offset);
 
@@ -548,8 +553,8 @@ namespace NewSF64Toolkit
             txtModXRot.TextChanged -= txtMod_TextChanged;
             txtModY.TextChanged -= txtMod_TextChanged;
             txtModYRot.TextChanged -= txtMod_TextChanged;
-            txtModY.TextChanged -= txtMod_TextChanged;
-            txtModYRot.TextChanged -= txtMod_TextChanged;
+            txtModZ.TextChanged -= txtMod_TextChanged;
+            txtModZRot.TextChanged -= txtMod_TextChanged;
 
             txtModDList.Text = ToolSettings.DisplayValue(obj.DListOffset);
             txtModID.Text = obj.ID.ToString();
@@ -566,8 +571,8 @@ namespace NewSF64Toolkit
             txtModXRot.TextChanged += txtMod_TextChanged;
             txtModY.TextChanged += txtMod_TextChanged;
             txtModYRot.TextChanged += txtMod_TextChanged;
-            txtModY.TextChanged += txtMod_TextChanged;
-            txtModYRot.TextChanged += txtMod_TextChanged;
+            txtModZ.TextChanged += txtMod_TextChanged;
+            txtModZRot.TextChanged += txtMod_TextChanged;
 
         }
 
@@ -611,6 +616,11 @@ namespace NewSF64Toolkit
                 obj.Z = Convert.ToInt16(txtModZ.Text);
                 obj.ZRot = Convert.ToInt16(txtModZRot.Text);
                 _levelLoader.GameObjects[SFGfx.SelectedGameObject] = obj;
+
+
+                //int levelDMAIndex = GetLevelDMAIndex();
+
+                _levelLoader.SaveGameObject(cbLevelSelect.SelectedIndex, SFGfx.SelectedGameObject);
 
                 _levelLoader.ExecuteDisplayLists(SFGfx.SelectedGameObject);
                 _glControl.ReDraww();

@@ -263,7 +263,7 @@
             // 
             this.splitContainer.Panel2.Controls.Add(this.infoPanel);
             this.splitContainer.Size = new System.Drawing.Size(766, 451);
-            this.splitContainer.SplitterDistance = 506;
+            this.splitContainer.SplitterDistance = 516;
             this.splitContainer.SplitterWidth = 2;
             this.splitContainer.TabIndex = 3;
             // 
@@ -273,7 +273,7 @@
             this.viewerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.viewerPanel.Location = new System.Drawing.Point(0, 0);
             this.viewerPanel.Name = "viewerPanel";
-            this.viewerPanel.Size = new System.Drawing.Size(506, 451);
+            this.viewerPanel.Size = new System.Drawing.Size(516, 451);
             this.viewerPanel.TabIndex = 0;
             // 
             // glPanel
@@ -283,7 +283,7 @@
             this.glPanel.Location = new System.Drawing.Point(0, 0);
             this.glPanel.Name = "glPanel";
             this.glPanel.Padding = new System.Windows.Forms.Padding(6);
-            this.glPanel.Size = new System.Drawing.Size(506, 451);
+            this.glPanel.Size = new System.Drawing.Size(516, 451);
             this.glPanel.TabIndex = 0;
             // 
             // _aboutControl
@@ -293,7 +293,7 @@
             this._aboutControl.Location = new System.Drawing.Point(6, 6);
             this._aboutControl.Margin = new System.Windows.Forms.Padding(4);
             this._aboutControl.Name = "_aboutControl";
-            this._aboutControl.Size = new System.Drawing.Size(494, 439);
+            this._aboutControl.Size = new System.Drawing.Size(504, 439);
             this._aboutControl.TabIndex = 0;
             // 
             // infoPanel
@@ -303,7 +303,7 @@
             this.infoPanel.Location = new System.Drawing.Point(0, 0);
             this.infoPanel.Name = "infoPanel";
             this.infoPanel.Padding = new System.Windows.Forms.Padding(5);
-            this.infoPanel.Size = new System.Drawing.Size(258, 451);
+            this.infoPanel.Size = new System.Drawing.Size(248, 451);
             this.infoPanel.TabIndex = 0;
             // 
             // tabControl
@@ -315,7 +315,7 @@
             this.tabControl.Location = new System.Drawing.Point(5, 5);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(248, 441);
+            this.tabControl.Size = new System.Drawing.Size(238, 441);
             this.tabControl.TabIndex = 1;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
             // 
@@ -339,7 +339,7 @@
             this.romInfoPage.Location = new System.Drawing.Point(4, 22);
             this.romInfoPage.Name = "romInfoPage";
             this.romInfoPage.Padding = new System.Windows.Forms.Padding(3);
-            this.romInfoPage.Size = new System.Drawing.Size(240, 415);
+            this.romInfoPage.Size = new System.Drawing.Size(230, 415);
             this.romInfoPage.TabIndex = 0;
             this.romInfoPage.Text = "ROM Info";
             // 
@@ -351,7 +351,7 @@
             this.txtCRC2.Location = new System.Drawing.Point(90, 238);
             this.txtCRC2.Name = "txtCRC2";
             this.txtCRC2.ReadOnly = true;
-            this.txtCRC2.Size = new System.Drawing.Size(144, 23);
+            this.txtCRC2.Size = new System.Drawing.Size(134, 23);
             this.txtCRC2.TabIndex = 13;
             // 
             // txtCRC1
@@ -362,7 +362,7 @@
             this.txtCRC1.Location = new System.Drawing.Point(90, 204);
             this.txtCRC1.Name = "txtCRC1";
             this.txtCRC1.ReadOnly = true;
-            this.txtCRC1.Size = new System.Drawing.Size(144, 23);
+            this.txtCRC1.Size = new System.Drawing.Size(134, 23);
             this.txtCRC1.TabIndex = 12;
             // 
             // txtVersion
@@ -373,7 +373,7 @@
             this.txtVersion.Location = new System.Drawing.Point(90, 171);
             this.txtVersion.Name = "txtVersion";
             this.txtVersion.ReadOnly = true;
-            this.txtVersion.Size = new System.Drawing.Size(144, 23);
+            this.txtVersion.Size = new System.Drawing.Size(134, 23);
             this.txtVersion.TabIndex = 11;
             // 
             // txtGameID
@@ -384,7 +384,7 @@
             this.txtGameID.Location = new System.Drawing.Point(90, 139);
             this.txtGameID.Name = "txtGameID";
             this.txtGameID.ReadOnly = true;
-            this.txtGameID.Size = new System.Drawing.Size(144, 23);
+            this.txtGameID.Size = new System.Drawing.Size(134, 23);
             this.txtGameID.TabIndex = 10;
             // 
             // txtSize
@@ -395,7 +395,7 @@
             this.txtSize.Location = new System.Drawing.Point(90, 76);
             this.txtSize.Name = "txtSize";
             this.txtSize.ReadOnly = true;
-            this.txtSize.Size = new System.Drawing.Size(144, 23);
+            this.txtSize.Size = new System.Drawing.Size(134, 23);
             this.txtSize.TabIndex = 9;
             // 
             // txtTitle
@@ -406,7 +406,7 @@
             this.txtTitle.Location = new System.Drawing.Point(90, 104);
             this.txtTitle.Name = "txtTitle";
             this.txtTitle.ReadOnly = true;
-            this.txtTitle.Size = new System.Drawing.Size(144, 23);
+            this.txtTitle.Size = new System.Drawing.Size(134, 23);
             this.txtTitle.TabIndex = 8;
             // 
             // txtFilename
@@ -417,7 +417,7 @@
             this.txtFilename.Location = new System.Drawing.Point(90, 44);
             this.txtFilename.Name = "txtFilename";
             this.txtFilename.ReadOnly = true;
-            this.txtFilename.Size = new System.Drawing.Size(144, 23);
+            this.txtFilename.Size = new System.Drawing.Size(134, 23);
             this.txtFilename.TabIndex = 7;
             // 
             // lblCRC2
@@ -497,7 +497,7 @@
             this.dmaTablesPage.Location = new System.Drawing.Point(4, 22);
             this.dmaTablesPage.Name = "dmaTablesPage";
             this.dmaTablesPage.Padding = new System.Windows.Forms.Padding(3);
-            this.dmaTablesPage.Size = new System.Drawing.Size(242, 415);
+            this.dmaTablesPage.Size = new System.Drawing.Size(232, 415);
             this.dmaTablesPage.TabIndex = 1;
             this.dmaTablesPage.Text = "DMA Tables";
             // 
@@ -587,7 +587,7 @@
             this.levelViewerPage.Location = new System.Drawing.Point(4, 22);
             this.levelViewerPage.Name = "levelViewerPage";
             this.levelViewerPage.Padding = new System.Windows.Forms.Padding(3);
-            this.levelViewerPage.Size = new System.Drawing.Size(240, 415);
+            this.levelViewerPage.Size = new System.Drawing.Size(232, 415);
             this.levelViewerPage.TabIndex = 2;
             this.levelViewerPage.Text = "Level Viewer";
             // 

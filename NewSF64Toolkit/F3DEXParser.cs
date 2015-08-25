@@ -9,195 +9,19 @@ namespace NewSF64Toolkit
 {
     public class F3DEXParser
     {
-        public struct BankData
-        {
-            public uint VirtualStart;
-            public uint VirtualEnd;
-            public byte[] Data;
-
-            public BankData(uint vStart, uint vEnd, byte[] data)
-            {
-                VirtualStart = vStart;
-                VirtualEnd = vEnd;
-                Data = data;
-            }
-
-            public bool IsValid()
-            {
-                return Data != null;
-            }
-        }
-
-        private Dictionary<byte, List<BankData>> _dataBanks;
         private OpenGLControl _viewer;
 
         public F3DEXParser(OpenGLControl viewer)
         {
             _viewer = viewer;
-            _dataBanks = new Dictionary<byte, List<BankData>>();
         }
-
-        #region Data Bank Functions
-
-        public void AddBank(byte bankNo, byte[] bankData, uint startPos)
-        {
-            //Check that the bank won't interfere with others
-            if(_dataBanks.ContainsKey(bankNo))
-            {
-                foreach (BankData b in _dataBanks[bankNo])
-                {
-                    if (Overlaps(b.VirtualStart, b.VirtualEnd, startPos, startPos + (uint)bankData.Length))
-                    {
-                        //Throw error
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                //Add in the bank
-                _dataBanks.Add(bankNo, new List<BankData>());
-            }
-
-            _dataBanks[bankNo].Add(new BankData(startPos, startPos + (uint)bankData.Length, bankData));
-        }
-
-        public void RemoveBank(byte bankNo, uint startPos)
-        {
-            int bankIndex;
-
-            if (_dataBanks.ContainsKey(bankNo) && (bankIndex = _dataBanks[bankNo].FindIndex(b => b.VirtualStart == startPos)) >= 0)
-            {
-                _dataBanks[bankNo].RemoveAt(bankIndex);
-            }
-        }
-
-        public void ClearBanks()
-        {
-            _dataBanks.Clear();
-        }
-
-        private bool Overlaps(uint start1, uint end1, uint start2, uint end2) //exclusive end
-        {
-            if (start2 <= start1 && start1 < end2)
-                return true;
-
-            if (start2 < end1 && end1 <= end2)
-                return true;
-
-            if (start1 <= start2 && start2 < end1)
-                return true;
-
-            if (start1 < end2 && end2 <= end1)
-                return true;
-
-            return false;
-        }
-
-        public BankData LocateBank(byte bankNo, uint offset)
-        {
-            if (_dataBanks.ContainsKey(bankNo))
-            {
-                if (_dataBanks[bankNo].Count(b => b.VirtualStart <= offset && offset < b.VirtualEnd) > 0)
-                {
-                    return _dataBanks[bankNo].First(b => b.VirtualStart <= offset && offset < b.VirtualEnd);
-                }
-            }
-
-            return new BankData();
-        }
-
-        public uint ReadUInt(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadUInt(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return uint.MaxValue;
-        }
-
-        public int ReadInt(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadInt(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return int.MaxValue;
-        }
-
-        public ushort ReadUShort(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadUShort(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return ushort.MaxValue;
-        }
-
-        public short ReadShort(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadShort(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return short.MaxValue;
-        }
-
-        public byte ReadByte(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadByte(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return byte.MaxValue;
-        }
-
-        public float ReadFloat(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadFloat(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return float.MaxValue;
-        }
-
-        public bool HasBank(byte bankNo)
-        {
-            return _dataBanks.ContainsKey(bankNo);
-        }
-
-#endregion
 
         public void ReadGameObject(StarFoxLevelLoader.GameObject gameObject)
         {
             byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
             uint offset = gameObject.DListOffset & 0x00FFFFFF;
 
-            if (offset == 0 || !HasBank(bankNo) || !LocateBank(bankNo, offset).IsValid())
+            if (offset == 0 || !MemoryManager.Instance.HasBank(bankNo) || !MemoryManager.Instance.LocateBank(bankNo, offset).IsValid())
             {
                 //Draw the invalid model
                 GL.Disable(EnableCap.Lighting);
@@ -455,7 +279,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(Address, out TempSegment, out TempOffset);
 
-            if (!LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
             DListAddress = Address;
 
@@ -469,14 +293,14 @@ namespace NewSF64Toolkit
             {
                 SplitAddress(DListAddress, out Segment, out Offset);
 
-                w0 = ReadUInt((byte)Segment, Offset);//Read32(RAM[Segment].Data, Offset);
-                w1 = ReadUInt((byte)Segment, Offset + 4);//RRead32(RAM[Segment].Data, Offset + 4);
+                w0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset);//Read32(RAM[Segment].Data, Offset);
+                w1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 4);//RRead32(RAM[Segment].Data, Offset + 4);
 
-                wp0 = ReadUInt((byte)Segment, Offset - 8);//Read32(RAM[Segment].Data, Offset - 8);
-                wp1 = ReadUInt((byte)Segment, Offset - 4);//Read32(RAM[Segment].Data, Offset - 4);
+                wp0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset - 8);//Read32(RAM[Segment].Data, Offset - 8);
+                wp1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset - 4);//Read32(RAM[Segment].Data, Offset - 4);
 
-                wn0 = ReadUInt((byte)Segment, Offset + 8);//Read32(RAM[Segment].Data, Offset + 8);
-                wn1 = ReadUInt((byte)Segment, Offset + 12);//Read32(RAM[Segment].Data, Offset + 12);
+                wn0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 8);//Read32(RAM[Segment].Data, Offset + 8);
+                wn1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 12);//Read32(RAM[Segment].Data, Offset + 12);
 
                 UcodeCmd((byte)(w0 >> 24));//UcodeCmd[(byte)(w0 >> 24)]();
 
@@ -515,8 +339,8 @@ namespace NewSF64Toolkit
 
 	        for(i = 0; i < 4; i++) {
 		        for(j = 0; j < 4; j++) {
-                    MtxTemp1 = ReadShort((byte)TempSegment, TempOffset);//((RAM[Segment].Data[Offset		] * 0x100) + RAM[Segment].Data[Offset + 1		]);
-                    MtxTemp2 = ReadShort((byte)TempSegment, TempOffset + 32);//((RAM[Segment].Data[Offset + 32	] * 0x100) + RAM[Segment].Data[Offset + 33	]);
+                    MtxTemp1 = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset);//((RAM[Segment].Data[Offset		] * 0x100) + RAM[Segment].Data[Offset + 1		]);
+                    MtxTemp2 = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + 32);//((RAM[Segment].Data[Offset + 32	] * 0x100) + RAM[Segment].Data[Offset + 33	]);
 			        Matrix[i * 4 + j] = ((MtxTemp1 << 16) | MtxTemp2) * fRecip;
 
 			        Offset += 2;
@@ -555,7 +379,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(w1, out TempSegment, out TempOffset);
 
-	        if(!LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 	        uint V = _SHIFTR( w0, 17, 7 );
 	        uint N = _SHIFTR( w0, 10, 6 );
@@ -564,15 +388,15 @@ namespace NewSF64Toolkit
 
 	        int i = 0;
 	        for(i = 0; i < (N << 4); i += 16) {
-                SFGfx.Vertices[V].X = ReadShort((byte)TempSegment, TempOffset + (uint)i);//((RAM[TempSegment].Data[TempOffset + i] << 8) | RAM[TempSegment].Data[TempOffset + i + 1]);
-                SFGfx.Vertices[V].Y = ReadShort((byte)TempSegment, TempOffset + (uint)i + 2);//((RAM[TempSegment].Data[TempOffset + i + 2] << 8) | RAM[TempSegment].Data[TempOffset + i + 3]);
-                SFGfx.Vertices[V].Z = ReadShort((byte)TempSegment, TempOffset + (uint)i + 4);//((RAM[TempSegment].Data[TempOffset + i + 4] << 8) | RAM[TempSegment].Data[TempOffset + i + 5]);
-                SFGfx.Vertices[V].S = ReadShort((byte)TempSegment, TempOffset + (uint)i + 8);//((RAM[TempSegment].Data[TempOffset + i + 8] << 8) | RAM[TempSegment].Data[TempOffset + i + 9]);
-                SFGfx.Vertices[V].T = ReadShort((byte)TempSegment, TempOffset + (uint)i + 10);//((RAM[TempSegment].Data[TempOffset + i + 10] << 8) | RAM[TempSegment].Data[TempOffset + i + 11]);
-                SFGfx.Vertices[V].R = (char)ReadByte((byte)TempSegment, TempOffset + (uint)i + 12);//RAM[TempSegment].Data[TempOffset + i + 12];
-                SFGfx.Vertices[V].G = (char)ReadByte((byte)TempSegment, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
-                SFGfx.Vertices[V].B = (char)ReadByte((byte)TempSegment, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
-                SFGfx.Vertices[V].A = (char)ReadByte((byte)TempSegment, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
+                SFGfx.Vertices[V].X = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i);//((RAM[TempSegment].Data[TempOffset + i] << 8) | RAM[TempSegment].Data[TempOffset + i + 1]);
+                SFGfx.Vertices[V].Y = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 2);//((RAM[TempSegment].Data[TempOffset + i + 2] << 8) | RAM[TempSegment].Data[TempOffset + i + 3]);
+                SFGfx.Vertices[V].Z = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 4);//((RAM[TempSegment].Data[TempOffset + i + 4] << 8) | RAM[TempSegment].Data[TempOffset + i + 5]);
+                SFGfx.Vertices[V].S = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 8);//((RAM[TempSegment].Data[TempOffset + i + 8] << 8) | RAM[TempSegment].Data[TempOffset + i + 9]);
+                SFGfx.Vertices[V].T = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 10);//((RAM[TempSegment].Data[TempOffset + i + 10] << 8) | RAM[TempSegment].Data[TempOffset + i + 11]);
+                SFGfx.Vertices[V].R = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 12);//RAM[TempSegment].Data[TempOffset + i + 12];
+                SFGfx.Vertices[V].G = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
+                SFGfx.Vertices[V].B = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
+                SFGfx.Vertices[V].A = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
 
 		        V++;
 	        }
@@ -588,7 +412,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(w1, out TempSegment, out TempOffset);
 
-            if (!LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 	        SFGfx.DLStack[SFGfx.DLStackPos] = DListAddress;
 	        SFGfx.DLStackPos++;
@@ -609,7 +433,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(SFGfx.Store_RDPHalf1, out TempSegment, out TempOffset);
 
-            if (!LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 
 
@@ -813,7 +637,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(SFGfx.Textures[SFGfx.CurrentTexture].PalOffset, out PalSegment, out PalOffset);
 
-            if (!LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
             
 	        uint PalSize = ((w1 & 0x00FFF000) >> 14) + 1;
 
@@ -823,7 +647,7 @@ namespace NewSF64Toolkit
 	        uint PalLoop;
 
 	        for(PalLoop = 0; PalLoop < PalSize; PalLoop++) {
-                Raw = ReadUShort((byte)PalSegment, PalOffset);//(RAM[PalSegment].Data[PalOffset] << 8) | RAM[PalSegment].Data[PalOffset + 1];
+                Raw = MemoryManager.Instance.ReadUShort((byte)PalSegment, PalOffset);//(RAM[PalSegment].Data[PalOffset] << 8) | RAM[PalSegment].Data[PalOffset + 1];
 
 		        R = (char)((Raw & 0xF800) >> 8);
                 G = (char)(((Raw & 0x07C0) << 5) >> 8);
@@ -838,7 +662,7 @@ namespace NewSF64Toolkit
 
 		        PalOffset += 2;
 
-                if (!LocateBank((byte)PalSegment, PalOffset).IsValid()) break;
+                if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) break;
 	        }
         }
 
@@ -1830,7 +1654,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(SFGfx.Textures[TextureID].Offset, out TempSegment, out TempOffset);
 
-            if (!LocateBank((byte)TempSegment, TempOffset).IsValid())
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid())
             {
                 //memset(TextureData, 0xFF, BufferSize);
             }
@@ -1849,7 +1673,7 @@ namespace NewSF64Toolkit
                             {
                                 for (i = 0; i < SFGfx.Textures[TextureID].Width; i++)
                                 {
-                                    Raw = ReadUShort((byte)TexSegment, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
+                                    Raw = MemoryManager.Instance.ReadUShort((byte)TexSegment, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
 
                                     RGBA = (((uint)Raw & 0xF800) >> 8) << 24;
                                     RGBA |= ((((uint)Raw & 0x07C0) << 5) >> 8) << 16;
@@ -1860,7 +1684,7 @@ namespace NewSF64Toolkit
                                     TexOffset += 2;
                                     GLTexPosition += 4;
 
-                                    if (!LocateBank((byte)TexSegment, TexOffset).IsValid()) break;//(TexOffset > RAM[TexSegment].Size) break;
+                                    if (!MemoryManager.Instance.LocateBank((byte)TexSegment, TexOffset).IsValid()) break;//(TexOffset > RAM[TexSegment].Size) break;
                                 }
                                 TexOffset += SFGfx.Textures[TextureID].LineSize * 4 - SFGfx.Textures[TextureID].Width;
                             }
@@ -1871,7 +1695,7 @@ namespace NewSF64Toolkit
                         {
                             uint totalSize = (SFGfx.Textures[TextureID].Height * SFGfx.Textures[TextureID].Width);
                             for(uint k = 0; k < totalSize; k++)
-                                Write32(TextureData, k * 4, ReadUInt((byte)TexSegment, TexOffset + 4 * k));
+                                Write32(TextureData, k * 4, MemoryManager.Instance.ReadUInt((byte)TexSegment, TexOffset + 4 * k));
                             //memcpy(TextureData, &RAM[TexSegment].Data[TexOffset], (SFGfx.Textures[TextureID].Height * SFGfx.Textures[TextureID].Width * 4));
                             break;
                         }

@@ -40,11 +40,13 @@ namespace NewSF64Toolkit
         {
             if (offset == 0) return false;
 
-	        if(!_parser.HasBank(bankNo)) {
+            if (!MemoryManager.Instance.HasBank(bankNo))
+            {
 		        ErrorLog.Add(string.Format("- Warning: Segment 0x{0:X2} was not initialized, cannot access offset 0x{0:X6}!\n", bankNo, offset));
 		        return false;
 	        }
-            else if(!_parser.LocateBank(bankNo, offset).IsValid()) {
+            else if (!MemoryManager.Instance.LocateBank(bankNo, offset).IsValid())
+            {
                 ErrorLog.Add(string.Format("- Warning: Offset 0x{0:X6} is out of bounds for segment 0x{0:X2}!\n", offset, bankNo));
 		        return false;
 	        }
@@ -71,15 +73,15 @@ namespace NewSF64Toolkit
                 GameObject newObj = new GameObject();
 
 
-                newObj.LvlPos = _parser.ReadFloat(bankNo, index);
-                newObj.Z = _parser.ReadShort(bankNo, index + 0x4);
-                newObj.X = _parser.ReadShort(bankNo, index + 0x6);
-                newObj.Y = _parser.ReadShort(bankNo, index + 0x8);
-                newObj.XRot = _parser.ReadShort(bankNo, index + 0xA);
-                newObj.YRot = _parser.ReadShort(bankNo, index + 0xC);
-                newObj.ZRot = _parser.ReadShort(bankNo, index + 0xE);
-                newObj.ID = _parser.ReadUShort(bankNo, index + 0x10);
-                newObj.Unk = _parser.ReadUShort(bankNo, index + 0x10);
+                newObj.LvlPos = MemoryManager.Instance.ReadFloat(bankNo, index);
+                newObj.Z = MemoryManager.Instance.ReadShort(bankNo, index + 0x4);
+                newObj.X = MemoryManager.Instance.ReadShort(bankNo, index + 0x6);
+                newObj.Y = MemoryManager.Instance.ReadShort(bankNo, index + 0x8);
+                newObj.XRot = MemoryManager.Instance.ReadShort(bankNo, index + 0xA);
+                newObj.YRot = MemoryManager.Instance.ReadShort(bankNo, index + 0xC);
+                newObj.ZRot = MemoryManager.Instance.ReadShort(bankNo, index + 0xE);
+                newObj.ID = MemoryManager.Instance.ReadUShort(bankNo, index + 0x10);
+                newObj.Unk = MemoryManager.Instance.ReadUShort(bankNo, index + 0x12);
 
                 // default dlist offset to 0
                 newObj.DListOffset = 0x00;
@@ -91,7 +93,7 @@ namespace NewSF64Toolkit
                 if (newObj.ID < 0x190)
                 {
                     //NOTE: SET -2 TO DMA 1
-                    newObj.DListOffset = _parser.ReadUInt((byte)0xFF, (0xC72E4 + ((uint)newObj.ID * 0x24)));
+                    newObj.DListOffset = MemoryManager.Instance.ReadUInt((byte)0xFF, (0xC72E4 + ((uint)newObj.ID * 0x24)));
                 }
 
                 // dlist offset sanity checks
@@ -144,6 +146,32 @@ namespace NewSF64Toolkit
                 
                 GL.EndList();
             }
+        }
+
+        public void SaveGameObject(int levelIndex, int gameObjectIndex)
+        {
+            //Need to get better linkage between the rom file info and the loader. Maybe make the ROM container a Singleton?
+            if (!CheckAddressValidity((byte)0xFF, (uint)0xCE158 + (uint)levelIndex * 0x04)) return;
+
+            uint offset = MemoryManager.Instance.ReadUInt(0xFF, (uint)0xCE158 + (uint)levelIndex * 0x04);
+            byte segment = (byte)((offset & 0xFF000000) >> 24);
+            offset &= 0x00FFFFFF;
+
+
+            offset += 0x44 + 0x14 * (uint)gameObjectIndex;
+
+            if (!CheckAddressValidity(segment, offset)) return;
+
+            MemoryManager.Instance.WriteFloat(segment, offset, GameObjects[gameObjectIndex].LvlPos);
+            MemoryManager.Instance.WriteShort(segment, offset + 0x4, GameObjects[gameObjectIndex].Z);
+            MemoryManager.Instance.WriteShort(segment, offset + 0x6, GameObjects[gameObjectIndex].X);
+            MemoryManager.Instance.WriteShort(segment, offset + 0x8, GameObjects[gameObjectIndex].Y);
+            MemoryManager.Instance.WriteShort(segment, offset + 0xA, GameObjects[gameObjectIndex].XRot);
+            MemoryManager.Instance.WriteShort(segment, offset + 0xC, GameObjects[gameObjectIndex].YRot);
+            MemoryManager.Instance.WriteShort(segment, offset + 0xE, GameObjects[gameObjectIndex].ZRot);
+            MemoryManager.Instance.WriteUShort(segment, offset + 0x10, GameObjects[gameObjectIndex].ID);
+            MemoryManager.Instance.WriteUShort(segment, offset + 0x12, GameObjects[gameObjectIndex].Unk);
+
         }
     }
 }
