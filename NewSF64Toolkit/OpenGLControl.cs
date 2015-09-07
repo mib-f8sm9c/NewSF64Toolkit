@@ -282,22 +282,73 @@ namespace NewSF64Toolkit
 		        GL.Vertex3( 12.0f, -0.01f,-1000.0f);
 	        GL.End();
 
-            GL.Color3(0.9f, 0.9f, 0.9f);
+            GL.Color3(1.0f, 1.0f, 1.0f);
             GL.Scale(0.004f, 0.004f, 0.004f);
 
 	        int ObjectNo = 0;
             while (ObjectNo < SFGfx.GameObjCount)
             {
-                if (ObjectNo == SFGfx.SelectedGameObject + 1)
+                SFGfx.GameObject gameObject = SFGfx.GameObjects[ObjectNo];
+
+                if (Math.Abs(SFCamera.Z * 250 - (gameObject.Z - gameObject.LvlPos)) > 30000)
                 {
-                    GL.PushAttrib(AttribMask.AllAttribBits);
-                    GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Add);
-                    GL.CallList((uint)ObjectNo);
-                    GL.PopAttrib();
+                    ObjectNo++;
+                    continue;
+                }
+
+                if (SFGfx.DisplayWireframe)
+                {
+                    GL.PushMatrix();
+                    if (ObjectNo == SFGfx.SelectedGameObject)
+                    {
+                        GL.Color3(0.0f, 1.0f, 0.0f);
+                    }
+                    else
+                    {
+                        GL.Color3(1.0f, 1.0f, 1.0f);
+                    }
+
+                    GL.Disable(EnableCap.Lighting);
+
+                    GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
+                    GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
+                    GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
+                    GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+
+                    GL.CallList(SFGfx.WireframeGameObjectDListIndices[gameObject.DListOffset]);
+
+                    GL.Enable(EnableCap.Lighting);
+
+                    GL.PopMatrix();
                 }
                 else
                 {
-                    GL.CallList((uint)ObjectNo);
+                    if (ObjectNo == SFGfx.SelectedGameObject)
+                    {
+                        GL.PushMatrix();
+
+                        GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
+                        GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
+                        GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
+                        GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+
+                        GL.CallList(SFGfx.SelectedGameObjectDListIndices[gameObject.DListOffset]);
+
+                        GL.PopMatrix();
+                    }
+                    else
+                    {
+                        GL.PushMatrix();
+
+                        GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
+                        GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
+                        GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
+                        GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+
+                        GL.CallList(SFGfx.GameObjectDListIndices[gameObject.DListOffset]);
+
+                        GL.PopMatrix();
+                    }
                 }
 
                 ObjectNo++;

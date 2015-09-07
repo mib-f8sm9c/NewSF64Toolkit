@@ -145,6 +145,28 @@ namespace NewSF64Toolkit
         public static int GLTextureCount;
 
 
+        public struct GameObject
+        {
+            public float LvlPos;
+            public short X;
+            public short Y;
+            public short Z;
+            public short XRot;
+            public short YRot;
+            public short ZRot;
+            public ushort ID;
+            public ushort Unk;
+
+            public uint DListOffset;
+        }
+
+        public static List<GameObject> GameObjects = new List<GameObject>();
+        public static Dictionary<uint, uint> GameObjectDListIndices = new Dictionary<uint, uint>();
+        public static Dictionary<uint, uint> SelectedGameObjectDListIndices = new Dictionary<uint, uint>();
+        public static Dictionary<uint, uint> WireframeGameObjectDListIndices = new Dictionary<uint, uint>();
+
+        public static bool DisplayWireframe;
+
         public static void gl_ClearRenderer(bool Full)
         {
             if (Full)
@@ -298,7 +320,7 @@ namespace NewSF64Toolkit
             public const byte CHANGED_RENDERMODE = 0x02;
             public const byte CHANGED_ALPHACOMPARE = 0x04;
         }
-
+        
     }
 
 }

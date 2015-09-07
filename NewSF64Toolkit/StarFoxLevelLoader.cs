@@ -8,22 +8,6 @@ namespace NewSF64Toolkit
 {
     public class StarFoxLevelLoader
     {
-        public struct GameObject
-        {
-	        public float LvlPos;
-            public short X;
-            public short Y;
-            public short Z;
-            public short XRot;
-            public short YRot;
-            public short ZRot;
-            public ushort ID;
-            public ushort Unk;
-
-            public uint DListOffset;
-        }
-
-        public List<GameObject> GameObjects;
         public List<string> ErrorLog;
 
         F3DEXParser _parser;
@@ -32,7 +16,6 @@ namespace NewSF64Toolkit
         {
             _parser = parser;
 
-            GameObjects = new List<GameObject>();
             ErrorLog = new List<string>();
         }
 
@@ -60,7 +43,7 @@ namespace NewSF64Toolkit
             //This will need to parse the commands from the level data and pick off the F3DEX
             SFGfx.sv_ClearStructures(false);
             SFGfx.gl_ClearRenderer(true);
-            GameObjects.Clear();
+            SFGfx.GameObjects.Clear();
             SFGfx.GameObjCount = 0;
 
             index += 0x44; //Skip over header
@@ -70,7 +53,7 @@ namespace NewSF64Toolkit
             {
                 if (!CheckAddressValidity(bankNo, index)) break;
 
-                GameObject newObj = new GameObject();
+                SFGfx.GameObject newObj = new SFGfx.GameObject();
 
 
                 newObj.LvlPos = MemoryManager.Instance.ReadFloat(bankNo, index);
@@ -102,7 +85,7 @@ namespace NewSF64Toolkit
                     newObj.DListOffset = 0x00;
 
                 index += 0x14;
-                GameObjects.Add(newObj);
+                SFGfx.GameObjects.Add(newObj);
 
                 SFGfx.GameObjCount++;
             }
@@ -118,33 +101,76 @@ namespace NewSF64Toolkit
 
             if (index == -1)
             {
-                GL.DeleteLists(SFGfx.GLListBase, SFGfx.GameObjCount);
+                GL.DeleteLists(SFGfx.GLListBase, SFGfx.GameObjCount * 3);
 
-                SFGfx.GLListBase = (uint)GL.GenLists(GameObjects.Count);
+                SFGfx.GLListBase = (uint)GL.GenLists(SFGfx.GameObjects.Select(x => x.DListOffset).Distinct().Count() * 3);
                 GL.ListBase(SFGfx.GLListBase);
+                SFGfx.GameObjectDListIndices.Clear();
+                SFGfx.SelectedGameObjectDListIndices.Clear();
+                SFGfx.WireframeGameObjectDListIndices.Clear();
             }
 
-            for(int ObjectNo = 0; ObjectNo < GameObjects.Count; ObjectNo++)
+            uint glListCount = 0;
+
+            for (int ObjectNo = 0; ObjectNo < SFGfx.GameObjects.Count; ObjectNo++)
             {
                 if (index != -1 && ObjectNo != index)
                     continue;
 
-                GameObject gameObject = GameObjects[ObjectNo];
+                SFGfx.GameObject gameObject = SFGfx.GameObjects[ObjectNo];
 
-                GL.NewList(SFGfx.GLListBase + (uint)ObjectNo, ListMode.Compile);
+                if (SFGfx.GameObjectDListIndices.ContainsKey(gameObject.DListOffset))
+                    continue;
+
+                GL.NewList(SFGfx.GLListBase + glListCount, ListMode.Compile);
                 
                 GL.PushMatrix();
 
-                GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
-                GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
-                GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
-                GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+                _parser.DrawingMode = F3DEXParser.DrawingModeType.Texture;
 
                 _parser.ReadGameObject(gameObject);
 
                 GL.PopMatrix();
                 
                 GL.EndList();
+
+                SFGfx.GameObjectDListIndices.Add(gameObject.DListOffset, SFGfx.GLListBase + glListCount);
+
+                glListCount++;
+
+                //Highlighted
+                GL.NewList(SFGfx.GLListBase + glListCount, ListMode.Compile);
+
+                GL.PushMatrix();
+
+                _parser.DrawingMode = F3DEXParser.DrawingModeType.TextureSelected;
+
+                _parser.ReadGameObject(gameObject);
+
+                GL.PopMatrix();
+
+                GL.EndList();
+
+                SFGfx.SelectedGameObjectDListIndices.Add(gameObject.DListOffset, SFGfx.GLListBase + glListCount);
+
+                glListCount++;
+
+                //Wireframe
+                GL.NewList(SFGfx.GLListBase + glListCount, ListMode.Compile);
+
+                GL.PushMatrix();
+
+                _parser.DrawingMode = F3DEXParser.DrawingModeType.Wireframe;
+
+                _parser.ReadGameObject(gameObject);
+
+                GL.PopMatrix();
+
+                GL.EndList();
+
+                SFGfx.WireframeGameObjectDListIndices.Add(gameObject.DListOffset, SFGfx.GLListBase + glListCount);
+
+                glListCount++;
             }
         }
 
@@ -162,15 +188,15 @@ namespace NewSF64Toolkit
 
             if (!CheckAddressValidity(segment, offset)) return;
 
-            MemoryManager.Instance.WriteFloat(segment, offset, GameObjects[gameObjectIndex].LvlPos);
-            MemoryManager.Instance.WriteShort(segment, offset + 0x4, GameObjects[gameObjectIndex].Z);
-            MemoryManager.Instance.WriteShort(segment, offset + 0x6, GameObjects[gameObjectIndex].X);
-            MemoryManager.Instance.WriteShort(segment, offset + 0x8, GameObjects[gameObjectIndex].Y);
-            MemoryManager.Instance.WriteShort(segment, offset + 0xA, GameObjects[gameObjectIndex].XRot);
-            MemoryManager.Instance.WriteShort(segment, offset + 0xC, GameObjects[gameObjectIndex].YRot);
-            MemoryManager.Instance.WriteShort(segment, offset + 0xE, GameObjects[gameObjectIndex].ZRot);
-            MemoryManager.Instance.WriteUShort(segment, offset + 0x10, GameObjects[gameObjectIndex].ID);
-            MemoryManager.Instance.WriteUShort(segment, offset + 0x12, GameObjects[gameObjectIndex].Unk);
+            MemoryManager.Instance.WriteFloat(segment, offset, SFGfx.GameObjects[gameObjectIndex].LvlPos);
+            MemoryManager.Instance.WriteShort(segment, offset + 0x4, SFGfx.GameObjects[gameObjectIndex].Z);
+            MemoryManager.Instance.WriteShort(segment, offset + 0x6, SFGfx.GameObjects[gameObjectIndex].X);
+            MemoryManager.Instance.WriteShort(segment, offset + 0x8, SFGfx.GameObjects[gameObjectIndex].Y);
+            MemoryManager.Instance.WriteShort(segment, offset + 0xA, SFGfx.GameObjects[gameObjectIndex].XRot);
+            MemoryManager.Instance.WriteShort(segment, offset + 0xC, SFGfx.GameObjects[gameObjectIndex].YRot);
+            MemoryManager.Instance.WriteShort(segment, offset + 0xE, SFGfx.GameObjects[gameObjectIndex].ZRot);
+            MemoryManager.Instance.WriteUShort(segment, offset + 0x10, SFGfx.GameObjects[gameObjectIndex].ID);
+            MemoryManager.Instance.WriteUShort(segment, offset + 0x12, SFGfx.GameObjects[gameObjectIndex].Unk);
 
         }
     }

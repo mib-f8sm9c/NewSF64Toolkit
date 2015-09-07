@@ -421,6 +421,7 @@ namespace NewSF64Toolkit
             _levelLoader.StartReadingLevelDataAt(segment, offset);
 
             InitDListNavigEnabled(true);
+            SetupDList();
 
             _glControl.ReDraww();
         }
@@ -428,6 +429,17 @@ namespace NewSF64Toolkit
         #endregion
 
         #region Private methods
+
+        private void SetupDList()
+        {
+            tvLevelInfo.Nodes.Clear();
+            
+            //Load the level loader's game objects into the dlist thing
+            for (int i = 0; i < SFGfx.GameObjCount; i++)
+            {
+                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, SFGfx.GameObjects[i].LvlPos, ToolSettings.DisplayValue(SFGfx.GameObjects[i].DListOffset))));
+            }
+        }
 
         private bool HasRomExtension(string fileName)
         {
@@ -518,15 +530,12 @@ namespace NewSF64Toolkit
 
         private void InitDListNavigEnabled(bool enable)
         {
-            btnModLeft.Enabled = enable;
-            btnModRight.Enabled = enable;
             btnModSnapTo.Enabled = enable;
 
             if (!enable)
             {
                 txtModDList.Clear();
                 txtModID.Clear();
-                txtModNum.Clear();
                 txtModPos.Clear();
                 txtModUnk.Clear();
                 txtModX.Clear();
@@ -545,9 +554,7 @@ namespace NewSF64Toolkit
 
         private void LoadModelNavigInfo()
         {
-            txtModNum.Text = SFGfx.SelectedGameObject.ToString();
-
-            StarFoxLevelLoader.GameObject obj = _levelLoader.GameObjects[SFGfx.SelectedGameObject];
+            SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
 
             txtModX.TextChanged -= txtMod_TextChanged;
             txtModXRot.TextChanged -= txtMod_TextChanged;
@@ -599,7 +606,7 @@ namespace NewSF64Toolkit
         private void btnModSnapTo_Click(object sender, EventArgs e)
         {
             //Move the camera to the object
-            StarFoxLevelLoader.GameObject obj = _levelLoader.GameObjects[SFGfx.SelectedGameObject];
+            SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
 
             SFCamera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
         }
@@ -608,24 +615,48 @@ namespace NewSF64Toolkit
         {
             try
             {
-                StarFoxLevelLoader.GameObject obj = _levelLoader.GameObjects[SFGfx.SelectedGameObject];
+                SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
                 obj.X = Convert.ToInt16(txtModX.Text);
                 obj.XRot = Convert.ToInt16(txtModXRot.Text);
                 obj.Y = Convert.ToInt16(txtModY.Text);
                 obj.YRot = Convert.ToInt16(txtModYRot.Text);
                 obj.Z = Convert.ToInt16(txtModZ.Text);
                 obj.ZRot = Convert.ToInt16(txtModZRot.Text);
-                _levelLoader.GameObjects[SFGfx.SelectedGameObject] = obj;
+                SFGfx.GameObjects[SFGfx.SelectedGameObject] = obj;
 
 
                 //int levelDMAIndex = GetLevelDMAIndex();
 
                 _levelLoader.SaveGameObject(cbLevelSelect.SelectedIndex, SFGfx.SelectedGameObject);
 
-                _levelLoader.ExecuteDisplayLists(SFGfx.SelectedGameObject);
+                //_levelLoader.ExecuteDisplayLists(SFGfx.SelectedGameObject);
                 _glControl.ReDraww();
             }
             catch(Exception ee) {};
         }
+        
+        private void tvLevelInfo_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            int objIndex = e.Node.Index;
+
+            if (objIndex < SFGfx.GameObjCount)
+            {
+                SFGfx.SelectedGameObject = objIndex;
+                LoadModelNavigInfo();
+                _glControl.ReDraww();
+            }
+        }
+
+        private void tvLevelInfo_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            btnModSnapTo_Click(sender, e);
+        }
+
+        private void menuStripViewWireframe_Click(object sender, EventArgs e)
+        {
+            SFGfx.DisplayWireframe = menuStripViewWireframe.Checked;
+            _glControl.ReDraww();
+        }
+
     }
 }

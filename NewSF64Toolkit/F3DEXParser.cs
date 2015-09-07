@@ -11,12 +11,22 @@ namespace NewSF64Toolkit
     {
         private OpenGLControl _viewer;
 
+        public enum DrawingModeType
+        {
+            Texture,
+            TextureSelected,
+            Wireframe
+        }
+
+        public DrawingModeType DrawingMode;
+
         public F3DEXParser(OpenGLControl viewer)
         {
             _viewer = viewer;
+            DrawingMode = DrawingModeType.Texture;
         }
 
-        public void ReadGameObject(StarFoxLevelLoader.GameObject gameObject)
+        public void ReadGameObject(SFGfx.GameObject gameObject)
         {
             byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
             uint offset = gameObject.DListOffset & 0x00FFFFFF;
@@ -28,7 +38,13 @@ namespace NewSF64Toolkit
                 GL.Disable(EnableCap.Texture2D);
 
                 GL.Begin(PrimitiveType.Quads);
-                GL.Color3(1.0f, 0.0f, 0.0f);
+                if (DrawingMode != DrawingModeType.Wireframe)
+                {
+                    if (DrawingMode == DrawingModeType.TextureSelected)
+                        GL.Color3(0.0f, 1.0f, 0.0f);
+                    else
+                        GL.Color3(1.0f, 0.0f, 0.0f);
+                }
 
                 GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
                 GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
@@ -56,7 +72,10 @@ namespace NewSF64Toolkit
                 GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
 
                 //front
-                GL.Color3(1.0f, 1.0f, 1.0f);
+                if (DrawingMode != DrawingModeType.Wireframe)
+                {
+                    GL.Color3(1.0f, 1.0f, 1.0f);
+                }
 
                 GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
                 GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
@@ -69,8 +88,35 @@ namespace NewSF64Toolkit
             }
             else
             {
+                if (DrawingMode == DrawingModeType.TextureSelected)
+                {
+                    GL.PushAttrib(AttribMask.AllAttribBits);
+                    GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Add);
+                }
+
+                if (DrawingMode == DrawingModeType.Wireframe)
+                {
+                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+                }
+
+                GL.Disable(EnableCap.Texture2D);
+                GL.Disable(EnableCap.Lighting);
+
                 SFGfx.DLStackPos = 0;
                 ParseDisplayList(gameObject.DListOffset);
+
+                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(EnableCap.Lighting);
+
+                if (DrawingMode == DrawingModeType.Wireframe)
+                {
+                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+                }
+
+                if (DrawingMode == DrawingModeType.TextureSelected)
+                {
+                    GL.PopAttrib();
+                }
             }
         }
 
@@ -121,7 +167,8 @@ namespace NewSF64Toolkit
                     F3DEX_SETOTHERMODE_H();
                     break;
                 case 0xBB: //dl_F3DEX_TEXTURE
-                    F3DEX_TEXTURE();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        F3DEX_TEXTURE();
                     break;
                 case 0xBC: //dl_F3DEX_MOVEWORD
                     F3DEX_MOVEWORD();
@@ -136,10 +183,12 @@ namespace NewSF64Toolkit
                     F3DEX_TRI1();
                     break;
                 case 0xE4: //dl_G_TEXRECT
-                    G_TEXRECT();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_TEXRECT();
                     break;
                 case 0xE5: //dl_G_TEXRECTFLIP
-                    G_TEXRECTFLIP();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_TEXRECTFLIP();
                     break;
                 case 0xE6: //dl_G_RDPLOADSYNC
                     G_RDPLOADSYNC();
@@ -175,22 +224,27 @@ namespace NewSF64Toolkit
                     G_LOADTLUT();
                     break;
                 case 0xF2: //dl_G_SETTILESIZE
-                    G_SETTILESIZE();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETTILESIZE();
                     break;
                 case 0xF3: //dl_G_LOADBLOCK
                     G_LOADBLOCK();
                     break;
                 case 0xF4: //dl_G_LOADTILE
-                    G_LOADTILE();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_LOADTILE();
                     break;
                 case 0xF5: //dl_G_SETTILE
-                    G_SETTILE();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETTILE();
                     break;
                 case 0xF6: //dl_G_FILLRECT
-                    G_FILLRECT();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_FILLRECT();
                     break;
                 case 0xF7: //dl_G_SETFILLCOLOR
-                    G_SETFILLCOLOR();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETFILLCOLOR();
                     break;
                 case 0xF8: //dl_G_SETFOGCOLOR
                     G_SETFOGCOLOR();
@@ -199,7 +253,8 @@ namespace NewSF64Toolkit
                     G_SETBLENDCOLOR();
                     break;
                 case 0xFA: //dl_G_SETPRIMCOLOR
-                    G_SETPRIMCOLOR();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETPRIMCOLOR();
                     break;
                 case 0xFB: //dl_G_SETENVCOLOR
                     G_SETENVCOLOR();
@@ -208,7 +263,8 @@ namespace NewSF64Toolkit
                     G_SETCOMBINE();
                     break;
                 case 0xFD: //dl_G_SETTIMG
-                    G_SETTIMG();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETTIMG();
                     break;
                 case 0xFE: //dl_G_SETZIMG
                     G_SETZIMG();
@@ -400,9 +456,9 @@ namespace NewSF64Toolkit
 
 		        V++;
 	        }
-
-            //Bring back in after textures are working
-	        InitLoadTexture();
+            
+            if(DrawingMode != DrawingModeType.Wireframe)
+	            InitLoadTexture();
         }
         
         void F3DEX_DL()
