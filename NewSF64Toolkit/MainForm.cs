@@ -437,7 +437,7 @@ namespace NewSF64Toolkit
             //Load the level loader's game objects into the dlist thing
             for (int i = 0; i < SFGfx.GameObjCount; i++)
             {
-                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, SFGfx.GameObjects[i].LvlPos, ToolSettings.DisplayValue(SFGfx.GameObjects[i].DListOffset))));
+                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, SFGfx.GameObjects[i].LvlPos, ToolSettings.DisplayValue(SFGfx.GameObjects[i].ID))));
             }
         }
 

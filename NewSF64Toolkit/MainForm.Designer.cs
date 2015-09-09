@@ -44,11 +44,13 @@
             this.menuStripROMDecompress = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStripView = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStripViewHex = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStripViewWireframe = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.viewerPanel = new System.Windows.Forms.Panel();
             this.glPanel = new System.Windows.Forms.Panel();
+            this._aboutControl = new NewSF64Toolkit.AboutControl();
             this.infoPanel = new System.Windows.Forms.Panel();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.romInfoPage = new System.Windows.Forms.TabPage();
@@ -101,8 +103,6 @@
             this.txtModXRot = new System.Windows.Forms.TextBox();
             this.lblModY = new System.Windows.Forms.Label();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.menuStripViewWireframe = new System.Windows.Forms.ToolStripMenuItem();
-            this._aboutControl = new NewSF64Toolkit.AboutControl();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
@@ -218,14 +218,14 @@
             // menuStripROMFixCRCs
             // 
             this.menuStripROMFixCRCs.Name = "menuStripROMFixCRCs";
-            this.menuStripROMFixCRCs.Size = new System.Drawing.Size(152, 22);
+            this.menuStripROMFixCRCs.Size = new System.Drawing.Size(139, 22);
             this.menuStripROMFixCRCs.Text = "Fix CRCs";
             this.menuStripROMFixCRCs.Click += new System.EventHandler(this.menuStripROMFixCRCs_Click);
             // 
             // menuStripROMDecompress
             // 
             this.menuStripROMDecompress.Name = "menuStripROMDecompress";
-            this.menuStripROMDecompress.Size = new System.Drawing.Size(152, 22);
+            this.menuStripROMDecompress.Size = new System.Drawing.Size(139, 22);
             this.menuStripROMDecompress.Text = "Decompress";
             this.menuStripROMDecompress.Click += new System.EventHandler(this.menuStripROMDecompress_Click);
             // 
@@ -248,6 +248,14 @@
             this.menuStripViewHex.Text = "Display in Hex";
             this.menuStripViewHex.Click += new System.EventHandler(this.menuStripViewHex_Click);
             // 
+            // menuStripViewWireframe
+            // 
+            this.menuStripViewWireframe.CheckOnClick = true;
+            this.menuStripViewWireframe.Name = "menuStripViewWireframe";
+            this.menuStripViewWireframe.Size = new System.Drawing.Size(163, 22);
+            this.menuStripViewWireframe.Text = "Wireframe Mode";
+            this.menuStripViewWireframe.Click += new System.EventHandler(this.menuStripViewWireframe_Click);
+            // 
             // openFileDialog
             // 
             this.openFileDialog.FileName = "sf64.z64";
@@ -267,7 +275,7 @@
             // 
             this.splitContainer.Panel2.Controls.Add(this.infoPanel);
             this.splitContainer.Size = new System.Drawing.Size(1121, 582);
-            this.splitContainer.SplitterDistance = 810;
+            this.splitContainer.SplitterDistance = 816;
             this.splitContainer.SplitterWidth = 2;
             this.splitContainer.TabIndex = 3;
             // 
@@ -277,7 +285,7 @@
             this.viewerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.viewerPanel.Location = new System.Drawing.Point(0, 0);
             this.viewerPanel.Name = "viewerPanel";
-            this.viewerPanel.Size = new System.Drawing.Size(810, 582);
+            this.viewerPanel.Size = new System.Drawing.Size(816, 582);
             this.viewerPanel.TabIndex = 0;
             // 
             // glPanel
@@ -287,8 +295,18 @@
             this.glPanel.Location = new System.Drawing.Point(0, 0);
             this.glPanel.Name = "glPanel";
             this.glPanel.Padding = new System.Windows.Forms.Padding(6);
-            this.glPanel.Size = new System.Drawing.Size(810, 582);
+            this.glPanel.Size = new System.Drawing.Size(816, 582);
             this.glPanel.TabIndex = 0;
+            // 
+            // _aboutControl
+            // 
+            this._aboutControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._aboutControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this._aboutControl.Location = new System.Drawing.Point(6, 6);
+            this._aboutControl.Margin = new System.Windows.Forms.Padding(4);
+            this._aboutControl.Name = "_aboutControl";
+            this._aboutControl.Size = new System.Drawing.Size(804, 570);
+            this._aboutControl.TabIndex = 0;
             // 
             // infoPanel
             // 
@@ -297,7 +315,7 @@
             this.infoPanel.Location = new System.Drawing.Point(0, 0);
             this.infoPanel.Name = "infoPanel";
             this.infoPanel.Padding = new System.Windows.Forms.Padding(5);
-            this.infoPanel.Size = new System.Drawing.Size(309, 582);
+            this.infoPanel.Size = new System.Drawing.Size(303, 582);
             this.infoPanel.TabIndex = 0;
             // 
             // tabControl
@@ -309,7 +327,7 @@
             this.tabControl.Location = new System.Drawing.Point(5, 5);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(299, 572);
+            this.tabControl.Size = new System.Drawing.Size(293, 572);
             this.tabControl.TabIndex = 1;
             this.tabControl.SelectedIndexChanged += new System.EventHandler(this.tabControl_SelectedIndexChanged);
             // 
@@ -333,7 +351,7 @@
             this.romInfoPage.Location = new System.Drawing.Point(4, 22);
             this.romInfoPage.Name = "romInfoPage";
             this.romInfoPage.Padding = new System.Windows.Forms.Padding(3);
-            this.romInfoPage.Size = new System.Drawing.Size(291, 546);
+            this.romInfoPage.Size = new System.Drawing.Size(285, 546);
             this.romInfoPage.TabIndex = 0;
             this.romInfoPage.Text = "ROM Info";
             // 
@@ -345,7 +363,7 @@
             this.txtCRC2.Location = new System.Drawing.Point(90, 238);
             this.txtCRC2.Name = "txtCRC2";
             this.txtCRC2.ReadOnly = true;
-            this.txtCRC2.Size = new System.Drawing.Size(195, 23);
+            this.txtCRC2.Size = new System.Drawing.Size(189, 23);
             this.txtCRC2.TabIndex = 13;
             // 
             // txtCRC1
@@ -356,7 +374,7 @@
             this.txtCRC1.Location = new System.Drawing.Point(90, 204);
             this.txtCRC1.Name = "txtCRC1";
             this.txtCRC1.ReadOnly = true;
-            this.txtCRC1.Size = new System.Drawing.Size(195, 23);
+            this.txtCRC1.Size = new System.Drawing.Size(189, 23);
             this.txtCRC1.TabIndex = 12;
             // 
             // txtVersion
@@ -367,7 +385,7 @@
             this.txtVersion.Location = new System.Drawing.Point(90, 171);
             this.txtVersion.Name = "txtVersion";
             this.txtVersion.ReadOnly = true;
-            this.txtVersion.Size = new System.Drawing.Size(195, 23);
+            this.txtVersion.Size = new System.Drawing.Size(189, 23);
             this.txtVersion.TabIndex = 11;
             // 
             // txtGameID
@@ -378,7 +396,7 @@
             this.txtGameID.Location = new System.Drawing.Point(90, 139);
             this.txtGameID.Name = "txtGameID";
             this.txtGameID.ReadOnly = true;
-            this.txtGameID.Size = new System.Drawing.Size(195, 23);
+            this.txtGameID.Size = new System.Drawing.Size(189, 23);
             this.txtGameID.TabIndex = 10;
             // 
             // txtSize
@@ -389,7 +407,7 @@
             this.txtSize.Location = new System.Drawing.Point(90, 76);
             this.txtSize.Name = "txtSize";
             this.txtSize.ReadOnly = true;
-            this.txtSize.Size = new System.Drawing.Size(195, 23);
+            this.txtSize.Size = new System.Drawing.Size(189, 23);
             this.txtSize.TabIndex = 9;
             // 
             // txtTitle
@@ -400,7 +418,7 @@
             this.txtTitle.Location = new System.Drawing.Point(90, 104);
             this.txtTitle.Name = "txtTitle";
             this.txtTitle.ReadOnly = true;
-            this.txtTitle.Size = new System.Drawing.Size(195, 23);
+            this.txtTitle.Size = new System.Drawing.Size(189, 23);
             this.txtTitle.TabIndex = 8;
             // 
             // txtFilename
@@ -411,7 +429,7 @@
             this.txtFilename.Location = new System.Drawing.Point(90, 44);
             this.txtFilename.Name = "txtFilename";
             this.txtFilename.ReadOnly = true;
-            this.txtFilename.Size = new System.Drawing.Size(195, 23);
+            this.txtFilename.Size = new System.Drawing.Size(189, 23);
             this.txtFilename.TabIndex = 7;
             // 
             // lblCRC2
@@ -491,7 +509,7 @@
             this.dmaTablesPage.Location = new System.Drawing.Point(4, 22);
             this.dmaTablesPage.Name = "dmaTablesPage";
             this.dmaTablesPage.Padding = new System.Windows.Forms.Padding(3);
-            this.dmaTablesPage.Size = new System.Drawing.Size(291, 546);
+            this.dmaTablesPage.Size = new System.Drawing.Size(287, 546);
             this.dmaTablesPage.TabIndex = 1;
             this.dmaTablesPage.Text = "DMA Tables";
             // 
@@ -555,7 +573,7 @@
             this.levelViewerPage.Location = new System.Drawing.Point(4, 22);
             this.levelViewerPage.Name = "levelViewerPage";
             this.levelViewerPage.Padding = new System.Windows.Forms.Padding(3);
-            this.levelViewerPage.Size = new System.Drawing.Size(291, 546);
+            this.levelViewerPage.Size = new System.Drawing.Size(287, 546);
             this.levelViewerPage.TabIndex = 2;
             this.levelViewerPage.Text = "Level Viewer";
             // 
@@ -856,24 +874,6 @@
             this.lblModY.Size = new System.Drawing.Size(21, 17);
             this.lblModY.TabIndex = 12;
             this.lblModY.Text = "Y:";
-            // 
-            // menuStripViewWireframe
-            // 
-            this.menuStripViewWireframe.CheckOnClick = true;
-            this.menuStripViewWireframe.Name = "menuStripViewWireframe";
-            this.menuStripViewWireframe.Size = new System.Drawing.Size(163, 22);
-            this.menuStripViewWireframe.Text = "Wireframe Mode";
-            this.menuStripViewWireframe.Click += new System.EventHandler(this.menuStripViewWireframe_Click);
-            // 
-            // _aboutControl
-            // 
-            this._aboutControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            this._aboutControl.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this._aboutControl.Location = new System.Drawing.Point(6, 6);
-            this._aboutControl.Margin = new System.Windows.Forms.Padding(4);
-            this._aboutControl.Name = "_aboutControl";
-            this._aboutControl.Size = new System.Drawing.Size(798, 570);
-            this._aboutControl.TabIndex = 0;
             // 
             // MainForm
             // 
