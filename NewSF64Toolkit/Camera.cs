@@ -62,5 +62,15 @@ namespace NewSF64Toolkit
             UpdateCamera();
         }
 
+        public static void MoveCameraTo(float x, float y, float z)
+        {
+            X = x * 0.004f;
+            Y = y * 0.004f;
+            Z = z * 0.004f;
+
+            //Step backwards
+            Movement(false, -200);
+        }
+
     }
 }

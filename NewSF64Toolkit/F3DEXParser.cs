@@ -9,202 +9,42 @@ namespace NewSF64Toolkit
 {
     public class F3DEXParser
     {
-        public struct BankData
+        private OpenGLControl _viewer;
+
+        public enum DrawingModeType
         {
-            public uint VirtualStart;
-            public uint VirtualEnd;
-            public byte[] Data;
-
-            public BankData(uint vStart, uint vEnd, byte[] data)
-            {
-                VirtualStart = vStart;
-                VirtualEnd = vEnd;
-                Data = data;
-            }
-
-            public bool IsValid()
-            {
-                return Data != null;
-            }
+            Texture,
+            TextureSelected,
+            Wireframe
         }
 
-        private Dictionary<byte, List<BankData>> _dataBanks;
-        private OpenGLControl _viewer;
+        public DrawingModeType DrawingMode;
 
         public F3DEXParser(OpenGLControl viewer)
         {
             _viewer = viewer;
-            _dataBanks = new Dictionary<byte, List<BankData>>();
+            DrawingMode = DrawingModeType.Texture;
         }
 
-        #region Data Bank Functions
-
-        public void AddBank(byte bankNo, byte[] bankData, uint startPos)
-        {
-            //Check that the bank won't interfere with others
-            if(_dataBanks.ContainsKey(bankNo))
-            {
-                foreach (BankData b in _dataBanks[bankNo])
-                {
-                    if (Overlaps(b.VirtualStart, b.VirtualEnd, startPos, startPos + (uint)bankData.Length))
-                    {
-                        //Throw error
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                //Add in the bank
-                _dataBanks.Add(bankNo, new List<BankData>());
-            }
-
-            _dataBanks[bankNo].Add(new BankData(startPos, startPos + (uint)bankData.Length, bankData));
-        }
-
-        public void RemoveBank(byte bankNo, uint startPos)
-        {
-            int bankIndex;
-
-            if (_dataBanks.ContainsKey(bankNo) && (bankIndex = _dataBanks[bankNo].FindIndex(b => b.VirtualStart == startPos)) >= 0)
-            {
-                _dataBanks[bankNo].RemoveAt(bankIndex);
-            }
-        }
-
-        public void ClearBanks()
-        {
-            _dataBanks.Clear();
-        }
-
-        private bool Overlaps(uint start1, uint end1, uint start2, uint end2) //exclusive end
-        {
-            if (start2 <= start1 && start1 < end2)
-                return true;
-
-            if (start2 < end1 && end1 <= end2)
-                return true;
-
-            if (start1 <= start2 && start2 < end1)
-                return true;
-
-            if (start1 < end2 && end2 <= end1)
-                return true;
-
-            return false;
-        }
-
-        public BankData LocateBank(byte bankNo, uint offset)
-        {
-            if (_dataBanks.ContainsKey(bankNo))
-            {
-                if (_dataBanks[bankNo].Count(b => b.VirtualStart <= offset && offset < b.VirtualEnd) > 0)
-                {
-                    return _dataBanks[bankNo].First(b => b.VirtualStart <= offset && offset < b.VirtualEnd);
-                }
-            }
-
-            return new BankData();
-        }
-
-        public uint ReadUInt(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadUInt(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return uint.MaxValue;
-        }
-
-        public int ReadInt(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadInt(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return int.MaxValue;
-        }
-
-        public ushort ReadUShort(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadUShort(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return ushort.MaxValue;
-        }
-
-        public short ReadShort(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadShort(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return short.MaxValue;
-        }
-
-        public byte ReadByte(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadByte(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return byte.MaxValue;
-        }
-
-        public float ReadFloat(byte bankNo, uint offset)
-        {
-            BankData bank = LocateBank(bankNo, offset);
-
-            if (bank.IsValid())
-            {
-                return ToolSettings.ReadFloat(bank.Data, offset - bank.VirtualStart);
-            }
-
-            //Bad value
-            return float.MaxValue;
-        }
-
-        public bool HasBank(byte bankNo)
-        {
-            return _dataBanks.ContainsKey(bankNo);
-        }
-
-#endregion
-
-        public void ReadGameObject(StarFoxLevelLoader.GameObject gameObject)
+        public void ReadGameObject(SFGfx.GameObject gameObject)
         {
             byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
             uint offset = gameObject.DListOffset & 0x00FFFFFF;
 
-            if (offset == 0 || !HasBank(bankNo) || !LocateBank(bankNo, offset).IsValid())
+            if (offset == 0 || !MemoryManager.Instance.HasBank(bankNo) || !MemoryManager.Instance.LocateBank(bankNo, offset).IsValid())
             {
                 //Draw the invalid model
                 GL.Disable(EnableCap.Lighting);
                 GL.Disable(EnableCap.Texture2D);
 
                 GL.Begin(PrimitiveType.Quads);
-                GL.Color3(1.0f, 0.0f, 0.0f);
+                if (DrawingMode != DrawingModeType.Wireframe)
+                {
+                    if (DrawingMode == DrawingModeType.TextureSelected)
+                        GL.Color3(0.0f, 1.0f, 0.0f);
+                    else
+                        GL.Color3(1.0f, 0.0f, 0.0f);
+                }
 
                 GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
                 GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
@@ -232,7 +72,10 @@ namespace NewSF64Toolkit
                 GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
 
                 //front
-                GL.Color3(1.0f, 1.0f, 1.0f);
+                if (DrawingMode != DrawingModeType.Wireframe)
+                {
+                    GL.Color3(1.0f, 1.0f, 1.0f);
+                }
 
                 GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
                 GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
@@ -245,8 +88,35 @@ namespace NewSF64Toolkit
             }
             else
             {
+                if (DrawingMode == DrawingModeType.TextureSelected)
+                {
+                    GL.PushAttrib(AttribMask.AllAttribBits);
+                    GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Add);
+                }
+
+                if (DrawingMode == DrawingModeType.Wireframe)
+                {
+                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+                }
+
+                GL.Disable(EnableCap.Texture2D);
+                GL.Disable(EnableCap.Lighting);
+
                 SFGfx.DLStackPos = 0;
                 ParseDisplayList(gameObject.DListOffset);
+
+                GL.Enable(EnableCap.Texture2D);
+                GL.Enable(EnableCap.Lighting);
+
+                if (DrawingMode == DrawingModeType.Wireframe)
+                {
+                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+                }
+
+                if (DrawingMode == DrawingModeType.TextureSelected)
+                {
+                    GL.PopAttrib();
+                }
             }
         }
 
@@ -297,7 +167,8 @@ namespace NewSF64Toolkit
                     F3DEX_SETOTHERMODE_H();
                     break;
                 case 0xBB: //dl_F3DEX_TEXTURE
-                    F3DEX_TEXTURE();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        F3DEX_TEXTURE();
                     break;
                 case 0xBC: //dl_F3DEX_MOVEWORD
                     F3DEX_MOVEWORD();
@@ -312,10 +183,12 @@ namespace NewSF64Toolkit
                     F3DEX_TRI1();
                     break;
                 case 0xE4: //dl_G_TEXRECT
-                    G_TEXRECT();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_TEXRECT();
                     break;
                 case 0xE5: //dl_G_TEXRECTFLIP
-                    G_TEXRECTFLIP();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_TEXRECTFLIP();
                     break;
                 case 0xE6: //dl_G_RDPLOADSYNC
                     G_RDPLOADSYNC();
@@ -351,22 +224,27 @@ namespace NewSF64Toolkit
                     G_LOADTLUT();
                     break;
                 case 0xF2: //dl_G_SETTILESIZE
-                    G_SETTILESIZE();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETTILESIZE();
                     break;
                 case 0xF3: //dl_G_LOADBLOCK
                     G_LOADBLOCK();
                     break;
                 case 0xF4: //dl_G_LOADTILE
-                    G_LOADTILE();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_LOADTILE();
                     break;
                 case 0xF5: //dl_G_SETTILE
-                    G_SETTILE();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETTILE();
                     break;
                 case 0xF6: //dl_G_FILLRECT
-                    G_FILLRECT();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_FILLRECT();
                     break;
                 case 0xF7: //dl_G_SETFILLCOLOR
-                    G_SETFILLCOLOR();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETFILLCOLOR();
                     break;
                 case 0xF8: //dl_G_SETFOGCOLOR
                     G_SETFOGCOLOR();
@@ -375,7 +253,8 @@ namespace NewSF64Toolkit
                     G_SETBLENDCOLOR();
                     break;
                 case 0xFA: //dl_G_SETPRIMCOLOR
-                    G_SETPRIMCOLOR();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETPRIMCOLOR();
                     break;
                 case 0xFB: //dl_G_SETENVCOLOR
                     G_SETENVCOLOR();
@@ -384,7 +263,8 @@ namespace NewSF64Toolkit
                     G_SETCOMBINE();
                     break;
                 case 0xFD: //dl_G_SETTIMG
-                    G_SETTIMG();
+                    if (DrawingMode != DrawingModeType.Wireframe)
+                        G_SETTIMG();
                     break;
                 case 0xFE: //dl_G_SETZIMG
                     G_SETZIMG();
@@ -455,7 +335,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(Address, out TempSegment, out TempOffset);
 
-            if (!LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
             DListAddress = Address;
 
@@ -469,14 +349,14 @@ namespace NewSF64Toolkit
             {
                 SplitAddress(DListAddress, out Segment, out Offset);
 
-                w0 = ReadUInt((byte)Segment, Offset);//Read32(RAM[Segment].Data, Offset);
-                w1 = ReadUInt((byte)Segment, Offset + 4);//RRead32(RAM[Segment].Data, Offset + 4);
+                w0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset);//Read32(RAM[Segment].Data, Offset);
+                w1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 4);//RRead32(RAM[Segment].Data, Offset + 4);
 
-                wp0 = ReadUInt((byte)Segment, Offset - 8);//Read32(RAM[Segment].Data, Offset - 8);
-                wp1 = ReadUInt((byte)Segment, Offset - 4);//Read32(RAM[Segment].Data, Offset - 4);
+                wp0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset - 8);//Read32(RAM[Segment].Data, Offset - 8);
+                wp1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset - 4);//Read32(RAM[Segment].Data, Offset - 4);
 
-                wn0 = ReadUInt((byte)Segment, Offset + 8);//Read32(RAM[Segment].Data, Offset + 8);
-                wn1 = ReadUInt((byte)Segment, Offset + 12);//Read32(RAM[Segment].Data, Offset + 12);
+                wn0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 8);//Read32(RAM[Segment].Data, Offset + 8);
+                wn1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 12);//Read32(RAM[Segment].Data, Offset + 12);
 
                 UcodeCmd((byte)(w0 >> 24));//UcodeCmd[(byte)(w0 >> 24)]();
 
@@ -515,8 +395,8 @@ namespace NewSF64Toolkit
 
 	        for(i = 0; i < 4; i++) {
 		        for(j = 0; j < 4; j++) {
-                    MtxTemp1 = ReadShort((byte)TempSegment, TempOffset);//((RAM[Segment].Data[Offset		] * 0x100) + RAM[Segment].Data[Offset + 1		]);
-                    MtxTemp2 = ReadShort((byte)TempSegment, TempOffset + 32);//((RAM[Segment].Data[Offset + 32	] * 0x100) + RAM[Segment].Data[Offset + 33	]);
+                    MtxTemp1 = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset);//((RAM[Segment].Data[Offset		] * 0x100) + RAM[Segment].Data[Offset + 1		]);
+                    MtxTemp2 = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + 32);//((RAM[Segment].Data[Offset + 32	] * 0x100) + RAM[Segment].Data[Offset + 33	]);
 			        Matrix[i * 4 + j] = ((MtxTemp1 << 16) | MtxTemp2) * fRecip;
 
 			        Offset += 2;
@@ -555,7 +435,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(w1, out TempSegment, out TempOffset);
 
-	        if(!LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 	        uint V = _SHIFTR( w0, 17, 7 );
 	        uint N = _SHIFTR( w0, 10, 6 );
@@ -564,21 +444,21 @@ namespace NewSF64Toolkit
 
 	        int i = 0;
 	        for(i = 0; i < (N << 4); i += 16) {
-                SFGfx.Vertices[V].X = ReadShort((byte)TempSegment, TempOffset + (uint)i);//((RAM[TempSegment].Data[TempOffset + i] << 8) | RAM[TempSegment].Data[TempOffset + i + 1]);
-                SFGfx.Vertices[V].Y = ReadShort((byte)TempSegment, TempOffset + (uint)i + 2);//((RAM[TempSegment].Data[TempOffset + i + 2] << 8) | RAM[TempSegment].Data[TempOffset + i + 3]);
-                SFGfx.Vertices[V].Z = ReadShort((byte)TempSegment, TempOffset + (uint)i + 4);//((RAM[TempSegment].Data[TempOffset + i + 4] << 8) | RAM[TempSegment].Data[TempOffset + i + 5]);
-                SFGfx.Vertices[V].S = ReadShort((byte)TempSegment, TempOffset + (uint)i + 8);//((RAM[TempSegment].Data[TempOffset + i + 8] << 8) | RAM[TempSegment].Data[TempOffset + i + 9]);
-                SFGfx.Vertices[V].T = ReadShort((byte)TempSegment, TempOffset + (uint)i + 10);//((RAM[TempSegment].Data[TempOffset + i + 10] << 8) | RAM[TempSegment].Data[TempOffset + i + 11]);
-                SFGfx.Vertices[V].R = (char)ReadByte((byte)TempSegment, TempOffset + (uint)i + 12);//RAM[TempSegment].Data[TempOffset + i + 12];
-                SFGfx.Vertices[V].G = (char)ReadByte((byte)TempSegment, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
-                SFGfx.Vertices[V].B = (char)ReadByte((byte)TempSegment, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
-                SFGfx.Vertices[V].A = (char)ReadByte((byte)TempSegment, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
+                SFGfx.Vertices[V].X = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i);//((RAM[TempSegment].Data[TempOffset + i] << 8) | RAM[TempSegment].Data[TempOffset + i + 1]);
+                SFGfx.Vertices[V].Y = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 2);//((RAM[TempSegment].Data[TempOffset + i + 2] << 8) | RAM[TempSegment].Data[TempOffset + i + 3]);
+                SFGfx.Vertices[V].Z = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 4);//((RAM[TempSegment].Data[TempOffset + i + 4] << 8) | RAM[TempSegment].Data[TempOffset + i + 5]);
+                SFGfx.Vertices[V].S = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 8);//((RAM[TempSegment].Data[TempOffset + i + 8] << 8) | RAM[TempSegment].Data[TempOffset + i + 9]);
+                SFGfx.Vertices[V].T = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 10);//((RAM[TempSegment].Data[TempOffset + i + 10] << 8) | RAM[TempSegment].Data[TempOffset + i + 11]);
+                SFGfx.Vertices[V].R = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 12);//RAM[TempSegment].Data[TempOffset + i + 12];
+                SFGfx.Vertices[V].G = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
+                SFGfx.Vertices[V].B = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
+                SFGfx.Vertices[V].A = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
 
 		        V++;
 	        }
-
-            //Bring back in after textures are working
-	        InitLoadTexture();
+            
+            if(DrawingMode != DrawingModeType.Wireframe)
+	            InitLoadTexture();
         }
         
         void F3DEX_DL()
@@ -588,7 +468,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(w1, out TempSegment, out TempOffset);
 
-            if (!LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 	        SFGfx.DLStack[SFGfx.DLStackPos] = DListAddress;
 	        SFGfx.DLStackPos++;
@@ -609,7 +489,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(SFGfx.Store_RDPHalf1, out TempSegment, out TempOffset);
 
-            if (!LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 
 
@@ -813,7 +693,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(SFGfx.Textures[SFGfx.CurrentTexture].PalOffset, out PalSegment, out PalOffset);
 
-            if (!LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
+            if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
             
 	        uint PalSize = ((w1 & 0x00FFF000) >> 14) + 1;
 
@@ -823,7 +703,7 @@ namespace NewSF64Toolkit
 	        uint PalLoop;
 
 	        for(PalLoop = 0; PalLoop < PalSize; PalLoop++) {
-                Raw = ReadUShort((byte)PalSegment, PalOffset);//(RAM[PalSegment].Data[PalOffset] << 8) | RAM[PalSegment].Data[PalOffset + 1];
+                Raw = MemoryManager.Instance.ReadUShort((byte)PalSegment, PalOffset);//(RAM[PalSegment].Data[PalOffset] << 8) | RAM[PalSegment].Data[PalOffset + 1];
 
 		        R = (char)((Raw & 0xF800) >> 8);
                 G = (char)(((Raw & 0x07C0) << 5) >> 8);
@@ -838,7 +718,7 @@ namespace NewSF64Toolkit
 
 		        PalOffset += 2;
 
-                if (!LocateBank((byte)PalSegment, PalOffset).IsValid()) break;
+                if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) break;
 	        }
         }
 
@@ -1830,7 +1710,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(SFGfx.Textures[TextureID].Offset, out TempSegment, out TempOffset);
 
-            if (!LocateBank((byte)TempSegment, TempOffset).IsValid())
+            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid())
             {
                 //memset(TextureData, 0xFF, BufferSize);
             }
@@ -1849,7 +1729,7 @@ namespace NewSF64Toolkit
                             {
                                 for (i = 0; i < SFGfx.Textures[TextureID].Width; i++)
                                 {
-                                    Raw = ReadUShort((byte)TexSegment, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
+                                    Raw = MemoryManager.Instance.ReadUShort((byte)TexSegment, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
 
                                     RGBA = (((uint)Raw & 0xF800) >> 8) << 24;
                                     RGBA |= ((((uint)Raw & 0x07C0) << 5) >> 8) << 16;
@@ -1860,7 +1740,7 @@ namespace NewSF64Toolkit
                                     TexOffset += 2;
                                     GLTexPosition += 4;
 
-                                    if (!LocateBank((byte)TexSegment, TexOffset).IsValid()) break;//(TexOffset > RAM[TexSegment].Size) break;
+                                    if (!MemoryManager.Instance.LocateBank((byte)TexSegment, TexOffset).IsValid()) break;//(TexOffset > RAM[TexSegment].Size) break;
                                 }
                                 TexOffset += SFGfx.Textures[TextureID].LineSize * 4 - SFGfx.Textures[TextureID].Width;
                             }
@@ -1871,7 +1751,7 @@ namespace NewSF64Toolkit
                         {
                             uint totalSize = (SFGfx.Textures[TextureID].Height * SFGfx.Textures[TextureID].Width);
                             for(uint k = 0; k < totalSize; k++)
-                                Write32(TextureData, k * 4, ReadUInt((byte)TexSegment, TexOffset + 4 * k));
+                                Write32(TextureData, k * 4, MemoryManager.Instance.ReadUInt((byte)TexSegment, TexOffset + 4 * k));
                             //memcpy(TextureData, &RAM[TexSegment].Data[TexOffset], (SFGfx.Textures[TextureID].Height * SFGfx.Textures[TextureID].Width * 4));
                             break;
                         }

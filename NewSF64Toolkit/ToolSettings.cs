@@ -361,6 +361,191 @@ namespace NewSF64Toolkit
             return;
         }
 
+        public static void WriteInt(int value, byte[] data, uint position, Endianness endian = Endianness.BigEndian)
+        {
+            WriteInt(value, data, (int)position, endian);
+        }
+
+        //THIS IS UNFINISHED BECAUSE I CAN'T TEST IT. TRY IT LATER
+        public static void WriteInt(int value, byte[] data, int position, Endianness endian = Endianness.BigEndian)
+        {
+            if (data == null || data.Length <= position + 4)
+                throw new Exception();
+
+
+            data[position] = (byte)(value >> 24 & 0xFF);
+            data[position + 1] = (byte)(value >> 16 & 0xFF);
+            data[position + 2] = (byte)(value >> 8 & 0xFF);
+            data[position + 3] = (byte)(value & 0xFF);
+
+            return;
+
+            switch (endian)
+            {
+                case Endianness.BigEndian:
+                    //Do nothing
+                    break;
+                case Endianness.LittleEndian:
+                    //Reverse
+                    break;
+                case Endianness.ByteSwap:
+
+                    break;
+                case Endianness.WordSwap:
+
+                    break;
+            }
+
+            return;
+        }
+
+        public static void WriteUShort(ushort value, byte[] data, uint position, Endianness endian = Endianness.BigEndian)
+        {
+            WriteUShort(value, data, (int)position, endian);
+        }
+
+        //THIS IS UNFINISHED BECAUSE I CAN'T TEST IT. TRY IT LATER
+        public static void WriteUShort(ushort value, byte[] data, int position, Endianness endian = Endianness.BigEndian)
+        {
+            if (data == null || data.Length <= position + 2)
+                throw new Exception();
+
+
+            data[position] = (byte)(value >> 8 & 0xFF);
+            data[position + 1] = (byte)(value & 0xFF);
+
+            return;
+
+            switch (endian)
+            {
+                case Endianness.BigEndian:
+                    //Do nothing
+                    break;
+                case Endianness.LittleEndian:
+                    //Reverse
+                    break;
+                case Endianness.ByteSwap:
+
+                    break;
+                case Endianness.WordSwap:
+
+                    break;
+            }
+
+            return;
+        }
+
+        public static void WriteShort(short value, byte[] data, uint position, Endianness endian = Endianness.BigEndian)
+        {
+            WriteShort(value, data, (int)position, endian);
+        }
+
+        //THIS IS UNFINISHED BECAUSE I CAN'T TEST IT. TRY IT LATER
+        public static void WriteShort(short value, byte[] data, int position, Endianness endian = Endianness.BigEndian)
+        {
+            if (data == null || data.Length <= position + 2)
+                throw new Exception();
+
+
+            data[position] = (byte)(value >> 8 & 0xFF);
+            data[position + 1] = (byte)(value & 0xFF);
+
+            return;
+
+            switch (endian)
+            {
+                case Endianness.BigEndian:
+                    //Do nothing
+                    break;
+                case Endianness.LittleEndian:
+                    //Reverse
+                    break;
+                case Endianness.ByteSwap:
+
+                    break;
+                case Endianness.WordSwap:
+
+                    break;
+            }
+
+            return;
+        }
+
+        public static void WriteByte(byte value, byte[] data, uint position, Endianness endian = Endianness.BigEndian)
+        {
+            WriteByte(value, data, (int)position, endian);
+        }
+
+        //THIS IS UNFINISHED BECAUSE I CAN'T TEST IT. TRY IT LATER
+        public static void WriteByte(byte value, byte[] data, int position, Endianness endian = Endianness.BigEndian)
+        {
+            if (data == null || data.Length <= position)
+                throw new Exception();
+
+
+            data[position] = (byte)(value & 0xFF);
+
+            return;
+
+            switch (endian)
+            {
+                case Endianness.BigEndian:
+                    //Do nothing
+                    break;
+                case Endianness.LittleEndian:
+                    //Reverse
+                    break;
+                case Endianness.ByteSwap:
+
+                    break;
+                case Endianness.WordSwap:
+
+                    break;
+            }
+
+            return;
+        }
+
+        public static void WriteFloat(float value, byte[] data, uint position, Endianness endian = Endianness.BigEndian)
+        {
+            WriteFloat(value, data, (int)position, endian);
+        }
+
+        //THIS IS UNFINISHED BECAUSE I CAN'T TEST IT. TRY IT LATER
+        public static void WriteFloat(float value, byte[] data, int position, Endianness endian = Endianness.BigEndian)
+        {
+            if (data == null || data.Length <= position + 4)
+                throw new Exception();
+
+            byte[] bytes = BitConverter.GetBytes(value);
+            bytes = bytes.Reverse().ToArray();
+
+            data[position] = bytes[0];
+            data[position + 1] = bytes[1];
+            data[position + 2] = bytes[2];
+            data[position + 3] = bytes[3];
+
+            return;
+
+            switch (endian)
+            {
+                case Endianness.BigEndian:
+                    //Do nothing
+                    break;
+                case Endianness.LittleEndian:
+                    //Reverse
+                    break;
+                case Endianness.ByteSwap:
+
+                    break;
+                case Endianness.WordSwap:
+
+                    break;
+            }
+
+            return;
+        }
+
         #endregion
 
     }

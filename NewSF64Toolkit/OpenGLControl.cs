@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using OpenTK.Graphics.OpenGL;
+using OpenTK;
 
 namespace NewSF64Toolkit
 {
@@ -25,6 +26,14 @@ namespace NewSF64Toolkit
         }
 
         public bool GLLoaded { get; private set; }
+
+        public enum MouseType
+        {
+            Camera,
+            Select
+        }
+
+        private MouseType _mouseType;
 
         private void glDisplay_Load(object sender, EventArgs e)
         {
@@ -260,7 +269,8 @@ namespace NewSF64Toolkit
             gl_LookAt(SFCamera.X, SFCamera.Y, SFCamera.Z, SFCamera.X + SFCamera.LX, SFCamera.Y + SFCamera.LY, SFCamera.Z + SFCamera.LZ);
 
 	        GL.Disable(EnableCap.Texture2D);
-	        GL.Color3(0.9f, 0.9f, 0.9f);
+            GL.Disable(EnableCap.Lighting);
+	        GL.Color3(0.5f, 0.5f, 0.5f);
             //glEnable(GL_TEXTURE_2D);
             GL.Enable(EnableCap.Texture2D);
             GL.BindTexture(TextureTarget.Texture2D, 1);
@@ -271,15 +281,76 @@ namespace NewSF64Toolkit
 		        GL.Vertex3( 12.0f, -0.01f,   10.0f);
 		        GL.Vertex3( 12.0f, -0.01f,-1000.0f);
 	        GL.End();
-	        GL.Disable(EnableCap.Texture2D);
-	        GL.Enable(EnableCap.Texture2D);
 
+            GL.Color3(1.0f, 1.0f, 1.0f);
             GL.Scale(0.004f, 0.004f, 0.004f);
 
 	        int ObjectNo = 0;
             while (ObjectNo < SFGfx.GameObjCount)
             {
-                GL.CallList((uint)ObjectNo);
+                SFGfx.GameObject gameObject = SFGfx.GameObjects[ObjectNo];
+
+                if (Math.Abs(SFCamera.Z * 250 - (gameObject.Z - gameObject.LvlPos)) > 30000)
+                {
+                    ObjectNo++;
+                    continue;
+                }
+
+                if (SFGfx.DisplayWireframe)
+                {
+                    GL.PushMatrix();
+                    if (ObjectNo == SFGfx.SelectedGameObject)
+                    {
+                        GL.Color3(0.0f, 1.0f, 0.0f);
+                    }
+                    else
+                    {
+                        GL.Color3(1.0f, 1.0f, 1.0f);
+                    }
+
+                    GL.Disable(EnableCap.Lighting);
+
+                    GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
+                    GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
+                    GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
+                    GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+
+                    GL.CallList(SFGfx.WireframeGameObjectDListIndices[gameObject.DListOffset]);
+
+                    GL.Enable(EnableCap.Lighting);
+
+                    GL.PopMatrix();
+                }
+                else
+                {
+                    if (ObjectNo == SFGfx.SelectedGameObject)
+                    {
+                        GL.PushMatrix();
+
+                        GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
+                        GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
+                        GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
+                        GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+
+                        GL.CallList(SFGfx.SelectedGameObjectDListIndices[gameObject.DListOffset]);
+
+                        GL.PopMatrix();
+                    }
+                    else
+                    {
+                        GL.PushMatrix();
+
+                        GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
+                        GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
+                        GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
+                        GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+
+                        GL.CallList(SFGfx.GameObjectDListIndices[gameObject.DListOffset]);
+
+                        GL.PopMatrix();
+                    }
+                }
+
                 ObjectNo++;
             }
         }
@@ -460,7 +531,150 @@ namespace NewSF64Toolkit
             Mouse.IsClicked = true;
             Mouse.X = e.X;
             Mouse.Y = e.Y;
+
+            #region Sample code online for ray-selecting, not functional at all
+
+            //if (_mouseType == MouseType.Select)
+            //{
+            //    GL.
+            //    var inverseWorldViewProjection = Matrix4.Invert(worldViewProjection)
+            //    var rayStart = Vector3.Unproject(new Vector3(mouseX, mouseY, 0), viewportX, viewportY, viewportWidth, viewportHeight, viewportNearZ, viewportFarZ, inverseWorldViewProjection)
+            //    var rayEnd = Vector3.Unproject(new Vector3(mouseX, mouseY, 1), viewportX, viewportY, viewportWidth, viewportHeight, viewportNearZ, viewportFarZ, inverseWorldViewProjection)
+                
+            //}
+
+
+            //if (!GLLoaded) return; // Play nice   
+
+            //int[] viewport = new int[4];
+            //double[] modelViewMatrix = new double[16];
+            //double[] projectionMatrix = new double[16];
+
+            //if (true)//checkBoxSelectPoints.Checked == true)
+            //{
+            //    int mouseX = e.X;
+            //    int mouseY = e.Y;
+
+            //    //Get Matrix
+            //    OpenTK.Graphics.OpenGL.GL.GetInteger(OpenTK.Graphics.OpenGL.GetPName.Viewport, viewport);
+            //    OpenTK.Graphics.OpenGL.GL.GetDouble(OpenTK.Graphics.OpenGL.GetPName.ModelviewMatrix, modelViewMatrix);
+            //    OpenTK.Graphics.OpenGL.GL.GetDouble(OpenTK.Graphics.OpenGL.GetPName.ProjectionMatrix, projectionMatrix);
+
+            //    //Calculate NearPlane point and FarPlane point. One will get the two end points of a straight line
+            //    //that "almost" intersects the plotted point you "clicked".
+            //    Vector3 win = new Vector3(mouseX, viewport[3] - mouseY, -1.0f); //Set this to -1
+            //    Vector3 worldPositionNear;
+            //    OpenTK.Graphics.Glu.UnProject(win, modelViewMatrix, projectionMatrix, viewport, out worldPositionNear);
+            //    win.Z = 1.0f;
+            //    Vector3 worldPositionFar;
+            //    OpenTK.Graphics.Glu.UnProject(win, modelViewMatrix, projectionMatrix, viewport, out worldPositionFar);
+                
+
+            //    //Calculate the lenght of the straigh line (the distance between both points).
+            //    double distanceNF = Math.Sqrt(Math.Pow(worldPositionNear.X - worldPositionFar.X, 2) +
+            //                                  Math.Pow(worldPositionNear.Y - worldPositionFar.Y, 2) +
+            //                                  Math.Pow(worldPositionNear.Z - worldPositionFar.Z, 2));
+            //    double minDist = distanceNF;
+
+
+            //    //Calculate which of the plotted points is closest to the line. In other words,
+            //    // look for the point you tried to select. Calculate the distance between the 2 endpoints that passes through
+            //    // each plotted point. The one that is most similar with the straight line will be the selected point.
+            //    int selectedPoint = 0;
+            //    for (int i = 0; i < SFGfx.TestVertices.Length; i++)
+            //    {
+            //        double d1 = Math.Sqrt(Math.Pow(worldPositionNear.X - PointsInfo[i].Position.X, 2) +
+            //                              Math.Pow(worldPositionNear.Y - PointsInfo[i].Position.Y, 2) +
+            //                              Math.Pow(worldPositionNear.Z - PointsInfo[i].Position.Z, 2));
+
+            //        double d2 = Math.Sqrt(Math.Pow(PointsInfo[i].Position.X - worldPositionFar.X, 2) +
+            //                              Math.Pow(PointsInfo[i].Position.Y - worldPositionFar.Y, 2) +
+            //                              Math.Pow(PointsInfo[i].Position.Z - worldPositionFar.Z, 2));
+
+            //        if (((d1 + d2) - distanceNF) <= minDist)
+            //        {
+            //            minDist = (d1 + d2) - distanceNF;
+            //            selectedPoint = i;
+            //        }
+            //    }
+
+            //    //Just select/unselect points if the "click" was really close to a point. Not just by clicking anywhere in the screen
+            //    if (minDist < 0.000065)
+            //    {
+            //        //if (selectedPoints.Contains(selectedPoint))
+            //        //    selectedPoints.Remove(selectedPoint);
+            //        //else
+            //        //    selectedPoints.Add(selectedPoint);
+
+            //        glDisplay.Invalidate();  //paint again 
+            //    }
+            //}
+
+            #endregion
         }
+
+        #region Sample code online for ray-selecting, not functional at all
+
+        ////Projects a 3D vector from object space into screen space. Reference page contains links to related code samples.
+        ////Parameters
+        ////source
+        ////The vector to project.
+        ////projection
+        ////The projection matrix.
+        ////view
+        ////The view matrix.
+        ////world
+        ////The world matrix.
+ 
+        //public Vector3 Project(Vector3 source, Matrix3 projection, Matrix3 view, Matrix3 world)
+        //{
+        //    Quaternion matrix = Quaternion.Mult(Matrix3.Mult(world, view), projection);
+        //    Vector3 vector = Vector3.Transform(source, matrix);
+        //    float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
+        //    if (!WithinEpsilon(a, 1f))
+        //    {
+        //        vector = (Vector3) (vector / a);
+        //    }
+        //    vector.X = (((vector.X + 1f) * 0.5f) * this.Width) + this.X;
+        //    vector.Y = (((-vector.Y + 1f) * 0.5f) * this.Height) + this.Y;
+        //    vector.Z = (vector.Z * (this.MaxDepth - this.MinDepth)) + this.MinDepth;
+        //    return vector;
+        //}
+ 
+ 
+ 
+        ////Converts a screen space point into a corresponding point in world space.
+        ////Parameters
+        ////source
+        ////The vector to project.
+        ////projection
+        ////The projection matrix.
+        ////view
+        ////The view matrix.
+        ////world
+        ////The world matrix.
+        //public Vector3 Unproject(Vector3 source, Matrix projection, Matrix view, Matrix world)
+        //{
+        //    Matrix matrix = Matrix.Invert(Matrix.Multiply(Matrix.Multiply(world, view), projection));
+        //    source.X = (((source.X - this.X) / ((float) this.Width)) * 2f) - 1f;
+        //    source.Y = -((((source.Y - this.Y) / ((float) this.Height)) * 2f) - 1f);
+        //    source.Z = (source.Z - this.MinDepth) / (this.MaxDepth - this.MinDepth);
+        //    Vector3 vector = Vector3.Transform(source, matrix);
+        //    float a = (((source.X * matrix.M14) + (source.Y * matrix.M24)) + (source.Z * matrix.M34)) + matrix.M44;
+        //    if (!WithinEpsilon(a, 1f))
+        //    {
+        //        vector = (Vector3) (vector / a);
+        //    }
+        //    return vector;
+        //}
+ 
+        //private static bool WithinEpsilon(float a, float b)
+        //{
+        //    float num = a - b;
+        //    return ((-1.401298E-45f <= num) && (num <= float.Epsilon));
+        //}
+
+        #endregion
 
         private void glDisplay_MouseUp(object sender, MouseEventArgs e)
         {

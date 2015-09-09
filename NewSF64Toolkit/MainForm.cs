@@ -152,6 +152,9 @@ namespace NewSF64Toolkit
                 return;
             }
 
+            //Debug, need to ask about saving changes
+            _rom.SaveChanges();
+
             using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
             {
                 writer.BaseStream.Write(_rom.RomData, 0, _rom.RomData.Length);
@@ -402,23 +405,41 @@ namespace NewSF64Toolkit
                 return;
             }
 
+            MemoryManager.Instance.ClearBanks();
+
             //Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
             DMATableEntry offsetTableDMA = _rom.DMATable[1];
-            _parser.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
+            MemoryManager.Instance.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
 
             uint offset = ToolSettings.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
             byte segment = (byte)((offset & 0xFF000000) >> 24);
             offset &= 0x00FFFFFF;
 
             //_glControl.Clear();
-            _parser.AddBank(segment, _rom.DMATable[levelDMAIndex].DMAData, 0x00);
+            MemoryManager.Instance.AddBank(segment, _rom.DMATable[levelDMAIndex].DMAData, 0x00);
 
             _levelLoader.StartReadingLevelDataAt(segment, offset);
+
+            InitDListNavigEnabled(true);
+            SetupDList();
+
+            _glControl.ReDraww();
         }
 
         #endregion
 
         #region Private methods
+
+        private void SetupDList()
+        {
+            tvLevelInfo.Nodes.Clear();
+            
+            //Load the level loader's game objects into the dlist thing
+            for (int i = 0; i < SFGfx.GameObjCount; i++)
+            {
+                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, SFGfx.GameObjects[i].LvlPos, ToolSettings.DisplayValue(SFGfx.GameObjects[i].ID))));
+            }
+        }
 
         private bool HasRomExtension(string fileName)
         {
@@ -507,6 +528,135 @@ namespace NewSF64Toolkit
 
         #endregion
 
+        private void InitDListNavigEnabled(bool enable)
+        {
+            btnModSnapTo.Enabled = enable;
+
+            if (!enable)
+            {
+                txtModDList.Clear();
+                txtModID.Clear();
+                txtModPos.Clear();
+                txtModUnk.Clear();
+                txtModX.Clear();
+                txtModXRot.Clear();
+                txtModY.Clear();
+                txtModYRot.Clear();
+                txtModZ.Clear();
+                txtModZRot.Clear();
+            }
+            else
+            {
+                SFGfx.SelectedGameObject = 0;
+                LoadModelNavigInfo();
+            }
+        }
+
+        private void LoadModelNavigInfo()
+        {
+            SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
+
+            txtModX.TextChanged -= txtMod_TextChanged;
+            txtModXRot.TextChanged -= txtMod_TextChanged;
+            txtModY.TextChanged -= txtMod_TextChanged;
+            txtModYRot.TextChanged -= txtMod_TextChanged;
+            txtModZ.TextChanged -= txtMod_TextChanged;
+            txtModZRot.TextChanged -= txtMod_TextChanged;
+
+            txtModDList.Text = ToolSettings.DisplayValue(obj.DListOffset);
+            txtModID.Text = obj.ID.ToString();
+            txtModPos.Text = obj.LvlPos.ToString();
+            txtModUnk.Text = obj.Unk.ToString();
+            txtModX.Text = obj.X.ToString();
+            txtModXRot.Text = obj.XRot.ToString();
+            txtModY.Text = obj.Y.ToString();
+            txtModYRot.Text = obj.YRot.ToString();
+            txtModZ.Text = obj.Z.ToString();
+            txtModZRot.Text = obj.ZRot.ToString();
+
+            txtModX.TextChanged += txtMod_TextChanged;
+            txtModXRot.TextChanged += txtMod_TextChanged;
+            txtModY.TextChanged += txtMod_TextChanged;
+            txtModYRot.TextChanged += txtMod_TextChanged;
+            txtModZ.TextChanged += txtMod_TextChanged;
+            txtModZRot.TextChanged += txtMod_TextChanged;
+
+        }
+
+        private void btnModRight_Click(object sender, EventArgs e)
+        {
+            if (SFGfx.SelectedGameObject < SFGfx.GameObjCount - 1)
+            {
+                SFGfx.SelectedGameObject++;
+                LoadModelNavigInfo();
+                _glControl.ReDraww();
+            }
+        }
+
+        private void btnModLeft_Click(object sender, EventArgs e)
+        {
+            if (SFGfx.SelectedGameObject > 0)
+            {
+                SFGfx.SelectedGameObject--;
+                LoadModelNavigInfo();
+                _glControl.ReDraww();
+            }
+        }
+
+        private void btnModSnapTo_Click(object sender, EventArgs e)
+        {
+            //Move the camera to the object
+            SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
+
+            SFCamera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
+        }
+
+        private void txtMod_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
+                obj.X = Convert.ToInt16(txtModX.Text);
+                obj.XRot = Convert.ToInt16(txtModXRot.Text);
+                obj.Y = Convert.ToInt16(txtModY.Text);
+                obj.YRot = Convert.ToInt16(txtModYRot.Text);
+                obj.Z = Convert.ToInt16(txtModZ.Text);
+                obj.ZRot = Convert.ToInt16(txtModZRot.Text);
+                SFGfx.GameObjects[SFGfx.SelectedGameObject] = obj;
+
+
+                //int levelDMAIndex = GetLevelDMAIndex();
+
+                _levelLoader.SaveGameObject(cbLevelSelect.SelectedIndex, SFGfx.SelectedGameObject);
+
+                //_levelLoader.ExecuteDisplayLists(SFGfx.SelectedGameObject);
+                _glControl.ReDraww();
+            }
+            catch(Exception ee) {};
+        }
+        
+        private void tvLevelInfo_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            int objIndex = e.Node.Index;
+
+            if (objIndex < SFGfx.GameObjCount)
+            {
+                SFGfx.SelectedGameObject = objIndex;
+                LoadModelNavigInfo();
+                _glControl.ReDraww();
+            }
+        }
+
+        private void tvLevelInfo_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            btnModSnapTo_Click(sender, e);
+        }
+
+        private void menuStripViewWireframe_Click(object sender, EventArgs e)
+        {
+            SFGfx.DisplayWireframe = menuStripViewWireframe.Checked;
+            _glControl.ReDraww();
+        }
 
     }
 }
