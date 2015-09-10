@@ -58,7 +58,10 @@
       <DependentUpon>AboutControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Camera.cs" />
-    <Compile Include="DMATableEntry.cs" />
+    <Compile Include="DataStructures\DMATableDMAFile.cs" />
+    <Compile Include="DataStructures\HeaderDMAFile.cs" />
+    <Compile Include="DataStructures\IGameDataStructure.cs" />
+    <Compile Include="DataStructures\DMAFile.cs" />
     <Compile Include="F3DEXParser.cs" />
     <Compile Include="Gfx.cs" />
     <Compile Include="MainForm.cs">
@@ -78,7 +81,7 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ROMFile.cs" />
+    <Compile Include="DataStructures\SF64ROM.cs" />
     <Compile Include="StarFoxLevelLoader.cs" />
     <Compile Include="StarFoxModelLoader.cs" />
     <Compile Include="StarFoxRomInfo.cs" />
@@ -116,6 +119,7 @@
   <ItemGroup>
     <Content Include="devnotes.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -13,6 +13,7 @@ using OpenTK.Graphics;
 using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System.Design;
+using NewSF64Toolkit.DataStructures;
 
 namespace NewSF64Toolkit
 {
@@ -23,7 +24,7 @@ namespace NewSF64Toolkit
 
         private string[] VALID_ROM_EXTENSIONS = { ".ROM", ".Z64", ".N64" };
 
-        private ROMFile _rom;
+        private SF64ROM _rom;
 
         private OpenGLControl _glControl;
         private ByteViewer _byteViewer;
@@ -104,16 +105,13 @@ namespace NewSF64Toolkit
 
             if (data != null && data.Length > 64)
             {
-                if (_rom != null)
-                    _rom.ClearROMData();
-
-                _rom = new ROMFile(fileName, data);
+                _rom = new SF64ROM(fileName, data);
 
                 //This will happen if it did not find an appropriate GameID/Version match
                 if (!_rom.IsValidRom)
                 {
                     MessageBox.Show("Unable to identify the ROM, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    _rom.ClearROMData();
+                    _rom = null;
                     return;
                 }
 
@@ -147,17 +145,22 @@ namespace NewSF64Toolkit
                 return;
             }
 
+            //TEST THIS LATER PLEASE
+            if (!_rom.HasGoodChecksum)
+            {
+                if (MessageBox.Show("ROM has bad CRCs, fix?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
+                    _rom.FixCRC();
+            }
+
             if (saveFileDialog.ShowDialog() != DialogResult.OK)
             {
                 return;
             }
 
-            //Debug, need to ask about saving changes
-            _rom.SaveChanges();
-
             using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
             {
-                writer.BaseStream.Write(_rom.RomData, 0, _rom.RomData.Length);
+                byte[] bytes = _rom.GetAsBytes();
+                writer.BaseStream.Write(bytes, 0, bytes.Length);
             }
 
         }
@@ -230,13 +233,13 @@ namespace NewSF64Toolkit
                 }
             }
 
-            _rom = new ROMFile(fileName, dmaEntries);
+            _rom = new SF64ROM(fileName, dmaEntries);
 
             //This will happen if it did not find an appropriate GameID/Version match
             if (!_rom.IsValidRom)
             {
                 MessageBox.Show("Unable to identify the ROM, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                _rom.ClearROMData();
+                _rom = null;
                 return;
             }
 
@@ -258,7 +261,7 @@ namespace NewSF64Toolkit
                 return;
             }
 
-            if(!_rom.IsDMALoaded)
+            if(!_rom.IsROMLoaded)
             {
                 //Error message
                 MessageBox.Show("Error with DMA tables, try reloading the ROM.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -282,7 +285,7 @@ namespace NewSF64Toolkit
 
             for(int i = 0; i < _rom.DMATable.Count; i++)
             {
-                DMATableEntry dma = _rom.DMATable[i];
+                DMAFile dma = _rom.DMATable[i];
 
                 //Need to append filepath!!!!
                 string fileName = string.Format("{0:00}_{1:X8}-{2:X8}_vs{3:X8}.{4}", i, dma.PStart, dma.PEnd, dma.VStart, (dma.CompFlag == 0x1 ? "mio" : "bin"));
@@ -391,7 +394,7 @@ namespace NewSF64Toolkit
         {
             int levelDMAIndex = GetLevelDMAIndex();
 
-            if (!_rom.IsDMALoaded || _rom.DMATable.Count <= levelDMAIndex)
+            if (!_rom.IsROMLoaded || _rom.DMATable.Count <= levelDMAIndex)
             {
                 //Error message
                 MessageBox.Show("Rom file not loaded correctly, try reloading the ROM.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -408,7 +411,7 @@ namespace NewSF64Toolkit
             MemoryManager.Instance.ClearBanks();
 
             //Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
-            DMATableEntry offsetTableDMA = _rom.DMATable[1];
+            DMAFile offsetTableDMA = _rom.DMATable[1];
             MemoryManager.Instance.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
 
             uint offset = ToolSettings.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
@@ -465,7 +468,7 @@ namespace NewSF64Toolkit
 
             for (int i = 0; i < _rom.DMATable.Count; i++)
             {
-                DMATableEntry entry = _rom.DMATable[i];
+                DMAFile entry = _rom.DMATable[i];
 
                 dgvDMA.Rows.Add();
                 dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[0].Value = i + 1;

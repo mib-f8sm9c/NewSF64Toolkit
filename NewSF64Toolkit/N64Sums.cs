@@ -171,6 +171,29 @@ namespace NewSF64Toolkit
 	        return true;
         }
 
+        static public bool GetChecksum(uint[] crcs, byte[] ROMBuffer)
+        {
+            int cic;
+	        uint[] crc = new uint[2];
+	        byte[] buffer;
+
+	        //Init CRC algorithm
+	        gen_table();
+
+	        //Allocate memory
+            buffer = new byte[CHECKSUM_START + CHECKSUM_LENGTH];
+	        
+	        //Read data
+            Array.Copy(ROMBuffer, buffer, CHECKSUM_START + CHECKSUM_LENGTH);
+
+	        //Check CIC BootChip
+	        cic = N64GetCIC(buffer);
+            string CICText = string.Format("CIC-NUS-{0}", cic);
+
+	        //Calculate CRC
+            return N64CalcCRC(crcs, ROMBuffer);
+        }
+
         static public bool FixChecksum(byte[] ROMBuffer)
         {
 	        int cic;
