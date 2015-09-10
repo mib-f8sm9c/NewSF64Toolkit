@@ -57,7 +57,35 @@ namespace NewSF64Toolkit.DataStructures
 
         public List<DMAFile> DMATable { get; private set; }
 
-        public SF64ROM(string fileName, List<byte[]> DMAData)
+        //This might be bad design, but I love Singletons too much not to use one here.
+        private static SF64ROM _instance;
+
+        public static SF64ROM Instance { get { if (_instance == null) ResetRom(); return _instance; } }
+
+        public static void LoadFromROM(string fileName, byte[] romData)
+        {
+            _instance = new SF64ROM(fileName, romData);
+        }
+
+        public static void LoadFromDMATables(string fileName, List<byte[]> DMAData)
+        {
+            _instance = new SF64ROM(fileName, DMAData);
+        }
+
+        public static void ResetRom()
+        {
+            _instance = new SF64ROM();
+        }
+
+        //Empty constructor
+        private SF64ROM()
+        {
+            IsROMLoaded = false;
+            IsValidRom = false;
+            HasGoodChecksum = false;
+        }
+
+        private SF64ROM(string fileName, List<byte[]> DMAData)
         {
             //Convert byte[] to dma
             List<DMAFile> dmaEntries = new List<DMAFile>();
@@ -106,7 +134,7 @@ namespace NewSF64Toolkit.DataStructures
             HasGoodChecksum = CheckCRC();
         }
 
-        public SF64ROM(string fileName, byte[] data)
+        private SF64ROM(string fileName, byte[] data)
         {
             Filename = fileName;
 
