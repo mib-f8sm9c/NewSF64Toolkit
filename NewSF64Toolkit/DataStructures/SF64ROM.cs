@@ -53,7 +53,8 @@ namespace NewSF64Toolkit.DataStructures
 
         public bool IsValidRom { get; private set; }
 
-        public bool HasGoodChecksum { get { HasGoodChecksum = CheckCRC(); return HasGoodChecksum; } private set; }
+        private bool _hasGoodChecksum;
+        public bool HasGoodChecksum { get { _hasGoodChecksum = CheckCRC(); return _hasGoodChecksum; } private set { _hasGoodChecksum = value; } }
 
         public List<DMAFile> DMATable { get; private set; }
 

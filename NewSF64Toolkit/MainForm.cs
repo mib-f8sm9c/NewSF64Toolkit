@@ -14,6 +14,7 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System.Design;
 using NewSF64Toolkit.DataStructures;
+using NewSF64Toolkit.ProgramTools;
 
 namespace NewSF64Toolkit
 {
@@ -24,11 +25,8 @@ namespace NewSF64Toolkit
 
         private string[] VALID_ROM_EXTENSIONS = { ".ROM", ".Z64", ".N64" };
 
-        private OpenGLControl _glControl;
-        private ByteViewer _byteViewer;
-        private F3DEXParser _parser;
-        private StarFoxLevelLoader _levelLoader;
-        private StarFoxModelLoader _modelLoader;
+        //private StarFoxModelLoader _modelLoader;
+        private IToolkitTool _currentTool;
 
         public MainForm()
         {
@@ -36,24 +34,9 @@ namespace NewSF64Toolkit
 
             tsStatus.Text = STATUS_NO_FILE_LOADED;
 
-            _glControl = new OpenGLControl();
-            this.glPanel.Controls.Add(_glControl);
-            _glControl.Dock = DockStyle.Fill;
-            _glControl.Visible = false;
-
-            _byteViewer = new ByteViewer();
-            this.glPanel.Controls.Add(_byteViewer);
-            _byteViewer.Visible = false;
-            //_byteViewer.Anchor = AnchorStyles.Left | AnchorStyles.Top;
-            //_byteViewer.Location = new Point(0, 0);
-            //_byteViewer.Size = glPanel.Size;
-            _byteViewer.Dock = DockStyle.Fill;
-
-            _parser = new F3DEXParser(_glControl);
-            _levelLoader = new StarFoxLevelLoader(_parser);
-            _modelLoader = new StarFoxModelLoader(_parser);
-
-            cbLevelSelect.SelectedIndex = 0;
+            //_modelLoader = new StarFoxModelLoader(_parser);
+            SwitchToolkitMode(ToolTypes.RomInfo);
+            UpdateMenuStripToolCheckState(menuStripToolsInfo);
         }
 
         #region Event handlers
@@ -119,9 +102,9 @@ namespace NewSF64Toolkit
                 //We need a way to discriminate the endianess of the system, and keep the data
                 //    right side forward. EDIT: Endianness is described at header of ROM file, see
                 //    http://www.emutalk.net/archive/index.php/t-16045.html
-                RefreshROMInfo();
-
-                RefreshDMATable();
+                
+                //RefreshDMATable();
+                _currentTool.ROMUpdated();
             }
         }
 
@@ -129,9 +112,9 @@ namespace NewSF64Toolkit
         {
             ToolSettings.DisplayInHex = menuStripViewHex.Checked;
 
-            RefreshROMInfo();
-
-            RefreshDMATable();
+            //RefreshROMInfo();
+            //RefreshDMATable();
+            _currentTool.ROMUpdated();
         }
 
         private void menuStripFileSave_Click(object sender, EventArgs e)
@@ -243,9 +226,9 @@ namespace NewSF64Toolkit
 
             tsStatus.Text = STATUS_FILE_LOADED;
 
-            RefreshROMInfo();
-
-            RefreshDMATable();
+            //RefreshROMInfo();
+            //RefreshDMATable();
+            _currentTool.ROMUpdated();
         }
 
         private void menuStripFileSaveDMA_Click(object sender, EventArgs e)
@@ -328,112 +311,22 @@ namespace NewSF64Toolkit
         {
             SF64ROM.Instance.FixCRC();
 
-            RefreshROMInfo();
+            //RefreshROMInfo();
+            _currentTool.ROMUpdated();
         }
 
         private void menuStripROMDecompress_Click(object sender, EventArgs e)
         {
             SF64ROM.Instance.Decompress();
 
-            RefreshROMInfo();
-            RefreshDMATable();
-        }
-
-        private void dgvDMA_SelectionChanged(object sender, EventArgs e)
-        {
-            if (dgvDMA.SelectedCells.Count == 1)
-            {
-                _byteViewer.SetBytes(SF64ROM.Instance.DMATable[dgvDMA.SelectedCells[0].RowIndex].DMAData);
-            }
-        }
-
-        private void tabControl_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (tabControl.SelectedIndex == 0) //Rom info
-            {
-                _glControl.Visible = false;
-                _byteViewer.Visible = false;
-                _aboutControl.Visible = true;
-            }
-            else if (tabControl.SelectedIndex == 1) //DMA tables
-            {
-                _glControl.Visible = false;
-                _byteViewer.Visible = true;
-                _aboutControl.Visible = false;
-            }
-            else
-            {
-                _glControl.Visible = true;
-                _byteViewer.Visible = false;
-                _aboutControl.Visible = false;
-            }
-        }
-
-        private void cbLevelSelect_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            //Include index 4?
-            if (cbLevelSelect.SelectedIndex == 11 || cbLevelSelect.SelectedIndex == 12 ||
-                cbLevelSelect.SelectedIndex == 13 || cbLevelSelect.SelectedIndex == 15)
-            {
-                btnLoadLevel.Enabled = false;
-            }
-            else
-                btnLoadLevel.Enabled = true;
-        }
-
-        private void btnLoadLevel_Click(object sender, EventArgs e)
-        {
-            int levelDMAIndex = GetLevelDMAIndex();
-
-            if (!SF64ROM.Instance.IsROMLoaded || SF64ROM.Instance.DMATable.Count <= levelDMAIndex)
-            {
-                //Error message
-                MessageBox.Show("Rom file not loaded correctly, try reloading the ROM.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            if (SF64ROM.Instance.DMATable[levelDMAIndex].CompFlag == 0x01)
-            {
-                //Error message
-                MessageBox.Show("Specified level file is compressed, decompress before trying again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            MemoryManager.Instance.ClearBanks();
-
-            //Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
-            DMAFile offsetTableDMA = SF64ROM.Instance.DMATable[1];
-            MemoryManager.Instance.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
-
-            uint offset = ToolSettings.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
-            byte segment = (byte)((offset & 0xFF000000) >> 24);
-            offset &= 0x00FFFFFF;
-
-            //_glControl.Clear();
-            MemoryManager.Instance.AddBank(segment, SF64ROM.Instance.DMATable[levelDMAIndex].DMAData, 0x00);
-
-            _levelLoader.StartReadingLevelDataAt(segment, offset);
-
-            InitDListNavigEnabled(true);
-            SetupDList();
-
-            _glControl.ReDraww();
+            _currentTool.ROMUpdated();
+            //RefreshROMInfo();
+            //RefreshDMATable();
         }
 
         #endregion
 
         #region Private methods
-
-        private void SetupDList()
-        {
-            tvLevelInfo.Nodes.Clear();
-            
-            //Load the level loader's game objects into the dlist thing
-            for (int i = 0; i < SFGfx.GameObjCount; i++)
-            {
-                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, SFGfx.GameObjects[i].LvlPos, ToolSettings.DisplayValue(SFGfx.GameObjects[i].ID))));
-            }
-        }
 
         private bool HasRomExtension(string fileName)
         {
@@ -442,214 +335,59 @@ namespace NewSF64Toolkit
             return VALID_ROM_EXTENSIONS.Contains(ext);
         }
 
-        private void RefreshROMInfo()
-        {
-            txtFilename.Text = SF64ROM.Instance.Filename;
-            txtSize.Text = ToolSettings.DisplayValue(SF64ROM.Instance.Size);
-            txtTitle.Text = SF64ROM.Instance.Info.Title;
-            txtGameID.Text = SF64ROM.Instance.Info.GameID;
-            txtVersion.Text = SF64ROM.Instance.Info.Version.ToString();
-            txtCRC1.Text = ToolSettings.DisplayValue(SF64ROM.Instance.Info.CRC1);
-            txtCRC2.Text = ToolSettings.DisplayValue(SF64ROM.Instance.Info.CRC2);
-        }
-
-        private void RefreshDMATable()
-        {
-            dgvDMA.Rows.Clear();
-
-            for (int i = 0; i < SF64ROM.Instance.DMATable.Count; i++)
-            {
-                DMAFile entry = SF64ROM.Instance.DMATable[i];
-
-                dgvDMA.Rows.Add();
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[0].Value = i + 1;
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[1].Value = ToolSettings.DisplayValue(entry.VStart);
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[2].Value = ToolSettings.DisplayValue(entry.PStart);
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[3].Value = ToolSettings.DisplayValue(entry.PEnd);
-            }
-        }
-
-        private int GetLevelDMAIndex()
-        {
-            switch (cbLevelSelect.SelectedIndex)
-            {
-                case 0:
-                    return 18;
-                case 1:
-                    return 19;
-                case 2:
-                    return 26;
-                case 3:
-                    return 29;
-                case 4:
-                    return 29;
-                case 5:
-                    return 35;
-                case 6:
-                    return 30;
-                case 7:
-                    return 36;
-                case 8:
-                    return 37;
-                case 9:
-                    return 47;
-                case 10:
-                    return 53;
-                case 11:
-                    return -1;
-                case 12:
-                    return -1;
-                case 13:
-                    return -1;
-                case 14:
-                    return 34;
-                case 15:
-                    return -1;
-                case 16:
-                    return 38;
-                case 17:
-                    return 33;
-                case 18:
-                    return 27;
-                case 19:
-                    return 31;
-                case 20:
-                    return 12;
-                default:
-                    return -1;
-            }
-        }
-
         #endregion
-
-        private void InitDListNavigEnabled(bool enable)
-        {
-            btnModSnapTo.Enabled = enable;
-
-            if (!enable)
-            {
-                txtModDList.Clear();
-                txtModID.Clear();
-                txtModPos.Clear();
-                txtModUnk.Clear();
-                txtModX.Clear();
-                txtModXRot.Clear();
-                txtModY.Clear();
-                txtModYRot.Clear();
-                txtModZ.Clear();
-                txtModZRot.Clear();
-            }
-            else
-            {
-                SFGfx.SelectedGameObject = 0;
-                LoadModelNavigInfo();
-            }
-        }
-
-        private void LoadModelNavigInfo()
-        {
-            SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
-
-            txtModX.TextChanged -= txtMod_TextChanged;
-            txtModXRot.TextChanged -= txtMod_TextChanged;
-            txtModY.TextChanged -= txtMod_TextChanged;
-            txtModYRot.TextChanged -= txtMod_TextChanged;
-            txtModZ.TextChanged -= txtMod_TextChanged;
-            txtModZRot.TextChanged -= txtMod_TextChanged;
-
-            txtModDList.Text = ToolSettings.DisplayValue(obj.DListOffset);
-            txtModID.Text = obj.ID.ToString();
-            txtModPos.Text = obj.LvlPos.ToString();
-            txtModUnk.Text = obj.Unk.ToString();
-            txtModX.Text = obj.X.ToString();
-            txtModXRot.Text = obj.XRot.ToString();
-            txtModY.Text = obj.Y.ToString();
-            txtModYRot.Text = obj.YRot.ToString();
-            txtModZ.Text = obj.Z.ToString();
-            txtModZRot.Text = obj.ZRot.ToString();
-
-            txtModX.TextChanged += txtMod_TextChanged;
-            txtModXRot.TextChanged += txtMod_TextChanged;
-            txtModY.TextChanged += txtMod_TextChanged;
-            txtModYRot.TextChanged += txtMod_TextChanged;
-            txtModZ.TextChanged += txtMod_TextChanged;
-            txtModZRot.TextChanged += txtMod_TextChanged;
-
-        }
-
-        private void btnModRight_Click(object sender, EventArgs e)
-        {
-            if (SFGfx.SelectedGameObject < SFGfx.GameObjCount - 1)
-            {
-                SFGfx.SelectedGameObject++;
-                LoadModelNavigInfo();
-                _glControl.ReDraww();
-            }
-        }
-
-        private void btnModLeft_Click(object sender, EventArgs e)
-        {
-            if (SFGfx.SelectedGameObject > 0)
-            {
-                SFGfx.SelectedGameObject--;
-                LoadModelNavigInfo();
-                _glControl.ReDraww();
-            }
-        }
-
-        private void btnModSnapTo_Click(object sender, EventArgs e)
-        {
-            //Move the camera to the object
-            SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
-
-            SFCamera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
-        }
-
-        private void txtMod_TextChanged(object sender, EventArgs e)
-        {
-            try
-            {
-                SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
-                obj.X = Convert.ToInt16(txtModX.Text);
-                obj.XRot = Convert.ToInt16(txtModXRot.Text);
-                obj.Y = Convert.ToInt16(txtModY.Text);
-                obj.YRot = Convert.ToInt16(txtModYRot.Text);
-                obj.Z = Convert.ToInt16(txtModZ.Text);
-                obj.ZRot = Convert.ToInt16(txtModZRot.Text);
-                SFGfx.GameObjects[SFGfx.SelectedGameObject] = obj;
-
-
-                //int levelDMAIndex = GetLevelDMAIndex();
-
-                _levelLoader.SaveGameObject(cbLevelSelect.SelectedIndex, SFGfx.SelectedGameObject);
-
-                //_levelLoader.ExecuteDisplayLists(SFGfx.SelectedGameObject);
-                _glControl.ReDraww();
-            }
-            catch(Exception ee) {};
-        }
-        
-        private void tvLevelInfo_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            int objIndex = e.Node.Index;
-
-            if (objIndex < SFGfx.GameObjCount)
-            {
-                SFGfx.SelectedGameObject = objIndex;
-                LoadModelNavigInfo();
-                _glControl.ReDraww();
-            }
-        }
-
-        private void tvLevelInfo_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
-        {
-            btnModSnapTo_Click(sender, e);
-        }
 
         private void menuStripViewWireframe_Click(object sender, EventArgs e)
         {
             SFGfx.DisplayWireframe = menuStripViewWireframe.Checked;
-            _glControl.ReDraww();
+            _currentTool.ROMUpdated();
+            //_glControl.ReDraww();
+        }
+
+        private void menuStripToolsInfo_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.RomInfo);
+            UpdateMenuStripToolCheckState(menuStripToolsInfo);
+        }
+
+        private void menuStripToolsHex_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.HexEditor);
+            UpdateMenuStripToolCheckState(menuStripToolsHex);
+        }
+
+        private void menuStripToolsLevel_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.LevelViewer);
+            UpdateMenuStripToolCheckState(menuStripToolsLevel);
+        }
+
+        private void UpdateMenuStripToolCheckState(ToolStripMenuItem checkedItem)
+        {
+            foreach (ToolStripMenuItem m in menuStripTools.DropDownItems)
+            {
+                if (m == checkedItem)
+                    m.CheckState = CheckState.Indeterminate;
+                else
+                    m.CheckState = CheckState.Unchecked;
+            }
+        }
+
+        private void SwitchToolkitMode(ToolTypes type)
+        {
+            if (_currentTool != null)
+            {
+                //_currentTool.GetToolControl().Visible = false;
+                pnlCurrentTool.Controls.Remove(_currentTool.GetToolControl());
+                _currentTool.DeActivate();
+            }
+
+            _currentTool = ToolkitFactory.GetTool(type);
+
+            _currentTool.Activate();
+            //_currentTool.GetToolControl().Visible = true;
+            pnlCurrentTool.Controls.Add(_currentTool.GetToolControl());
+
         }
 
     }
