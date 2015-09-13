@@ -14,7 +14,8 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK.Input;
 using System.Design;
 using NewSF64Toolkit.DataStructures;
-using NewSF64Toolkit.ProgramTools;
+using NewSF64Toolkit.Tools;
+using NewSF64Toolkit.Settings;
 
 namespace NewSF64Toolkit
 {
@@ -25,16 +26,16 @@ namespace NewSF64Toolkit
 
         private string[] VALID_ROM_EXTENSIONS = { ".ROM", ".Z64", ".N64" };
 
-        //private StarFoxModelLoader _modelLoader;
-        private IToolkitTool _currentTool;
+        private BaseToolkitTool _currentTool;
 
         public MainForm()
         {
             InitializeComponent();
 
+            ToolSettings.Load();
+
             tsStatus.Text = STATUS_NO_FILE_LOADED;
 
-            //_modelLoader = new StarFoxModelLoader(_parser);
             SwitchToolkitMode(ToolTypes.RomInfo);
             UpdateMenuStripToolCheckState(menuStripToolsInfo);
         }
@@ -66,55 +67,37 @@ namespace NewSF64Toolkit
                 return;
             }
 
-            //Load it here
-            byte[] data = null;
-            try
+            if (!SF64ROM.LoadFromROM(romFile))
             {
-                data = File.ReadAllBytes(romFile);
-            }
-            catch
-            {
-                MessageBox.Show("Unable to load the file, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Unable to properly load the ROM, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                SF64ROM.ResetRom();
                 return;
             }
 
-            string fileName = Path.GetFileName(romFile);
+            //This will happen if it did not find an appropriate GameID/Version match
+            if (!SF64ROM.Instance.IsValidRom)
+            {
+                MessageBox.Show("Unable to identify the ROM, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                SF64ROM.ResetRom();
+                return;
+            }
 
+            tsStatus.Text = STATUS_FILE_LOADED;
+            string fileName = Path.GetFileName(romFile);
             saveFileDialog.DefaultExt = Path.GetExtension(romFile);
             saveFileDialog.FileName = fileName;
 
 
-            if (data != null && data.Length > 64)
-            {
-                SF64ROM.LoadFromROM(fileName, data);
+            //We need a way to discriminate the endianess of the system, and keep the data
+            //    right side forward. EDIT: Endianness is described at header of ROM file, see
+            //    http://www.emutalk.net/archive/index.php/t-16045.html
 
-                //This will happen if it did not find an appropriate GameID/Version match
-                if (!SF64ROM.Instance.IsValidRom)
-                {
-                    MessageBox.Show("Unable to identify the ROM, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    SF64ROM.ResetRom();
-                    return;
-                }
 
-                //Here we need to start loading the DMA table and giving feedback to the user about the success
-                tsStatus.Text = STATUS_FILE_LOADED;
-
-                //We need a way to discriminate the endianess of the system, and keep the data
-                //    right side forward. EDIT: Endianness is described at header of ROM file, see
-                //    http://www.emutalk.net/archive/index.php/t-16045.html
-                
-                //RefreshDMATable();
-                _currentTool.ROMUpdated();
-            }
         }
 
         private void menuStripViewHex_Click(object sender, EventArgs e)
         {
-            ToolSettings.DisplayInHex = menuStripViewHex.Checked;
-
-            //RefreshROMInfo();
-            //RefreshDMATable();
-            _currentTool.ROMUpdated();
+            ToolSettings.Instance.DisplayInHex = menuStripViewHex.Checked;
         }
 
         private void menuStripFileSave_Click(object sender, EventArgs e)
@@ -129,8 +112,11 @@ namespace NewSF64Toolkit
             //TEST THIS LATER PLEASE
             if (!SF64ROM.Instance.HasGoodChecksum)
             {
-                if (MessageBox.Show("ROM has bad CRCs, fix?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == System.Windows.Forms.DialogResult.Yes)
+                DialogResult result = MessageBox.Show("ROM has bad CRCs, fix?", "Warning", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                if (result == System.Windows.Forms.DialogResult.Yes)
                     SF64ROM.Instance.FixCRC();
+                else if (result == System.Windows.Forms.DialogResult.Cancel)
+                    return;
             }
 
             if (saveFileDialog.ShowDialog() != DialogResult.OK)
@@ -138,210 +124,185 @@ namespace NewSF64Toolkit
                 return;
             }
 
-            using (StreamWriter writer = new StreamWriter(saveFileDialog.FileName))
-            {
-                byte[] bytes = SF64ROM.Instance.GetAsBytes();
-                writer.BaseStream.Write(bytes, 0, bytes.Length);
-            }
-
+            SF64ROM.SaveRomTo(saveFileDialog.FileName);
         }
 
+        //Needs to be fixed, now that the system has been changed up
         private void menuStripFileLoadDMA_Click(object sender, EventArgs e)
         {
-            //Load up DMA tables directly
-            openFileDialog.FileName = "layout.txt";
-            openFileDialog.DefaultExt = ".txt";
+            throw new NotImplementedException();
 
-            if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-            {
-                return;
-            }
+            ////Load up DMA tables directly
+            //openFileDialog.FileName = "layout.txt";
+            //openFileDialog.DefaultExt = ".txt";
 
-            if(!File.Exists(openFileDialog.FileName))
-            {
-                //Error message
-                MessageBox.Show("File not found, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            //if(openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            //{
+            //    return;
+            //}
 
-            uint fileSize = 0;
-            List<string> dmaFileNames = new List<string>();
-            string fileName;
+            //if(!File.Exists(openFileDialog.FileName))
+            //{
+            //    //Error message
+            //    MessageBox.Show("File not found, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
 
-            using(StreamReader reader = new StreamReader(openFileDialog.FileName))
-            {
-                string firstLine = reader.ReadLine();
+            //uint fileSize = 0;
+            //List<string> dmaFileNames = new List<string>();
+            //string fileName;
 
-                string length = firstLine.Substring(0, 8);
-                fileSize = Convert.ToUInt32(length, 16);
-                fileName = firstLine.Split(' ')[1];
+            //using(StreamReader reader = new StreamReader(openFileDialog.FileName))
+            //{
+            //    string firstLine = reader.ReadLine();
 
-                while(!reader.EndOfStream)
-                {
-                    dmaFileNames.Add(reader.ReadLine());
-                }
-            }
+            //    string length = firstLine.Substring(0, 8);
+            //    fileSize = Convert.ToUInt32(length, 16);
+            //    fileName = firstLine.Split(' ')[1];
 
-            if(dmaFileNames.Count == 0 || fileSize == 0)
-            {
-                //Error message
-                MessageBox.Show("Incorrect layout format, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            //    while(!reader.EndOfStream)
+            //    {
+            //        dmaFileNames.Add(reader.ReadLine());
+            //    }
+            //}
 
-            List<byte[]> dmaEntries = new List<byte[]>();
+            //if(dmaFileNames.Count == 0 || fileSize == 0)
+            //{
+            //    //Error message
+            //    MessageBox.Show("Incorrect layout format, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
 
-            string directory = Path.GetDirectoryName(openFileDialog.FileName);
+            //List<byte[]> dmaEntries = new List<byte[]>();
 
-            foreach(string dmaFilename in dmaFileNames)
-            {
-                string fullDmaPath = Path.Combine(directory, dmaFilename);
+            //string directory = Path.GetDirectoryName(openFileDialog.FileName);
 
-                if(!File.Exists(fullDmaPath))
-                {
-                    //Error message
-                    MessageBox.Show("DMA entry not found, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
+            //foreach(string dmaFilename in dmaFileNames)
+            //{
+            //    string fullDmaPath = Path.Combine(directory, dmaFilename);
 
-                using(StreamReader reader = new StreamReader(fullDmaPath))
-                {
-                    byte[] bytes = new byte[reader.BaseStream.Length];
+            //    if(!File.Exists(fullDmaPath))
+            //    {
+            //        //Error message
+            //        MessageBox.Show("DMA entry not found, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //        return;
+            //    }
 
-                    reader.BaseStream.Read(bytes, 0, (int)reader.BaseStream.Length);
+            //    using(StreamReader reader = new StreamReader(fullDmaPath))
+            //    {
+            //        byte[] bytes = new byte[reader.BaseStream.Length];
 
-                    dmaEntries.Add(bytes);
-                }
-            }
+            //        reader.BaseStream.Read(bytes, 0, (int)reader.BaseStream.Length);
 
-            SF64ROM.LoadFromDMATables(fileName, dmaEntries);
+            //        dmaEntries.Add(bytes);
+            //    }
+            //}
 
-            //This will happen if it did not find an appropriate GameID/Version match
-            if (!SF64ROM.Instance.IsValidRom)
-            {
-                MessageBox.Show("Unable to identify the ROM, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                SF64ROM.ResetRom();
-                return;
-            }
+            //SF64ROM.LoadFromDMATables(fileName, dmaEntries);
 
-            tsStatus.Text = STATUS_FILE_LOADED;
+            ////This will happen if it did not find an appropriate GameID/Version match
+            //if (!SF64ROM.Instance.IsValidRom)
+            //{
+            //    MessageBox.Show("Unable to identify the ROM, please try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    SF64ROM.ResetRom();
+            //    return;
+            //}
 
-            //RefreshROMInfo();
-            //RefreshDMATable();
-            _currentTool.ROMUpdated();
+            //tsStatus.Text = STATUS_FILE_LOADED;
         }
 
+        //Needs to be fixed, now that the system has been changed up
         private void menuStripFileSaveDMA_Click(object sender, EventArgs e)
         {
-            //Save DMA tables directly
+            throw new NotImplementedException();
 
-            if (!SF64ROM.Instance.IsROMLoaded || !SF64ROM.Instance.IsValidRom)
-            {
-                //Error message
-                MessageBox.Show("No valid ROM file loaded currently, please load a ROM and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+            ////Save DMA tables directly
 
-            if(folderBrowserDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
-                return;
+            //if (!SF64ROM.Instance.IsROMLoaded || !SF64ROM.Instance.IsValidRom)
+            //{
+            //    //Error message
+            //    MessageBox.Show("No valid ROM file loaded currently, please load a ROM and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            //    return;
+            //}
 
-            string outputFolderPath = folderBrowserDialog.SelectedPath;
+            //if(folderBrowserDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+            //    return;
 
-            if(!Directory.Exists(outputFolderPath))
-                Directory.CreateDirectory(outputFolderPath);
+            //string outputFolderPath = folderBrowserDialog.SelectedPath;
 
-            string layoutFilePath = Path.Combine(outputFolderPath, "layout.txt");
+            //if(!Directory.Exists(outputFolderPath))
+            //    Directory.CreateDirectory(outputFolderPath);
 
-            List<string> layoutText = new List<string>();
-            int totalDMALength = 0x0;
+            //string layoutFilePath = Path.Combine(outputFolderPath, "layout.txt");
 
-            layoutText.Add("00000000 rebuilt.z64");
+            //List<string> layoutText = new List<string>();
+            //int totalDMALength = 0x0;
 
-            for (int i = 0; i < SF64ROM.Instance.DMATable.Count; i++)
-            {
-                DMAFile dma = SF64ROM.Instance.DMATable[i];
+            //layoutText.Add("00000000 rebuilt.z64");
 
-                //Need to append filepath!!!!
-                string fileName = string.Format("{0:00}_{1:X8}-{2:X8}_vs{3:X8}.{4}", i, dma.PStart, dma.PEnd, dma.VStart, (dma.CompFlag == 0x1 ? "mio" : "bin"));
+            //for (int i = 0; i < SF64ROM.Instance.DMATable.Count; i++)
+            //{
+            //    DMAFile dma = SF64ROM.Instance.DMATable[i];
 
-                layoutText.Add(string.Format("{0:00}_{1:X8}-{2:X8}_vs{3:X8}.bin", i, dma.PStart, dma.PEnd, dma.VStart));
+            //    //Need to append filepath!!!!
+            //    string fileName = string.Format("{0:00}_{1:X8}-{2:X8}_vs{3:X8}.{4}", i, dma.PStart, dma.PEnd, dma.VStart, (dma.CompFlag == 0x1 ? "mio" : "bin"));
 
-                //Write file
-                string outputFile = Path.Combine(outputFolderPath, fileName);
-                using(StreamWriter writer = new StreamWriter(outputFile))
-                {
-                    writer.BaseStream.Write(dma.DMAData, 0, dma.DMAData.Length);
-                }
+            //    layoutText.Add(string.Format("{0:00}_{1:X8}-{2:X8}_vs{3:X8}.bin", i, dma.PStart, dma.PEnd, dma.VStart));
+
+            //    //Write file
+            //    string outputFile = Path.Combine(outputFolderPath, fileName);
+            //    using(StreamWriter writer = new StreamWriter(outputFile))
+            //    {
+            //        writer.BaseStream.Write(dma.DMAData, 0, dma.DMAData.Length);
+            //    }
                 
-                //if compressed, decompress and make new file
-                if(dma.CompFlag == 0x1)
-                {
-                    byte[] decompressedData = null;
-                    if(ToolSettings.DecompressMIO0(dma.DMAData, out decompressedData))
-                    {
-                        fileName = Path.ChangeExtension(fileName, "bin");
-                        outputFile = Path.Combine(outputFolderPath, fileName);
-                        using(StreamWriter writer = new StreamWriter(outputFile))
-                        {
-                            writer.BaseStream.Write(decompressedData, 0, decompressedData.Length);
-                        }
+            //    //if compressed, decompress and make new file
+            //    if(dma.CompFlag == 0x1)
+            //    {
+            //        byte[] decompressedData = null;
+            //        if(StarFoxRomInfo.DecompressMIO0(dma.DMAData, out decompressedData))
+            //        {
+            //            fileName = Path.ChangeExtension(fileName, "bin");
+            //            outputFile = Path.Combine(outputFolderPath, fileName);
+            //            using(StreamWriter writer = new StreamWriter(outputFile))
+            //            {
+            //                writer.BaseStream.Write(decompressedData, 0, decompressedData.Length);
+            //            }
 
-                        totalDMALength += decompressedData.Length;
-                    }
-                }
-                else
-                {
-                    totalDMALength += dma.DMAData.Length;
-                }
-            }
+            //            totalDMALength += decompressedData.Length;
+            //        }
+            //    }
+            //    else
+            //    {
+            //        totalDMALength += dma.DMAData.Length;
+            //    }
+            //}
 
-            totalDMALength = (totalDMALength / 0x400000 + 1) * 0x400000;
+            //totalDMALength = (totalDMALength / 0x400000 + 1) * 0x400000;
 
-            layoutText[0] = string.Format("{0:X8} rebuilt.z64", totalDMALength);
+            //layoutText[0] = string.Format("{0:X8} rebuilt.z64", totalDMALength);
 
-            using(StreamWriter writer = new StreamWriter(layoutFilePath))
-            {
-                foreach(string text in layoutText)
-                    writer.WriteLine(text);
-            }
+            //using(StreamWriter writer = new StreamWriter(layoutFilePath))
+            //{
+            //    foreach(string text in layoutText)
+            //        writer.WriteLine(text);
+            //}
 
         }
 
         private void menuStripROMFixCRCs_Click(object sender, EventArgs e)
         {
             SF64ROM.Instance.FixCRC();
-
-            //RefreshROMInfo();
-            _currentTool.ROMUpdated();
         }
 
         private void menuStripROMDecompress_Click(object sender, EventArgs e)
         {
             SF64ROM.Instance.Decompress();
-
-            _currentTool.ROMUpdated();
-            //RefreshROMInfo();
-            //RefreshDMATable();
         }
-
-        #endregion
-
-        #region Private methods
-
-        private bool HasRomExtension(string fileName)
-        {
-            string ext = Path.GetExtension(fileName.ToUpper());
-
-            return VALID_ROM_EXTENSIONS.Contains(ext);
-        }
-
-        #endregion
 
         private void menuStripViewWireframe_Click(object sender, EventArgs e)
         {
             SFGfx.DisplayWireframe = menuStripViewWireframe.Checked;
-            _currentTool.ROMUpdated();
-            //_glControl.ReDraww();
         }
 
         private void menuStripToolsInfo_Click(object sender, EventArgs e)
@@ -362,6 +323,17 @@ namespace NewSF64Toolkit
             UpdateMenuStripToolCheckState(menuStripToolsLevel);
         }
 
+        #endregion
+
+        #region Private methods
+
+        private bool HasRomExtension(string fileName)
+        {
+            string ext = Path.GetExtension(fileName.ToUpper());
+
+            return VALID_ROM_EXTENSIONS.Contains(ext);
+        }
+
         private void UpdateMenuStripToolCheckState(ToolStripMenuItem checkedItem)
         {
             foreach (ToolStripMenuItem m in menuStripTools.DropDownItems)
@@ -377,7 +349,6 @@ namespace NewSF64Toolkit
         {
             if (_currentTool != null)
             {
-                //_currentTool.GetToolControl().Visible = false;
                 pnlCurrentTool.Controls.Remove(_currentTool.GetToolControl());
                 _currentTool.DeActivate();
             }
@@ -385,10 +356,11 @@ namespace NewSF64Toolkit
             _currentTool = ToolkitFactory.GetTool(type);
 
             _currentTool.Activate();
-            //_currentTool.GetToolControl().Visible = true;
             pnlCurrentTool.Controls.Add(_currentTool.GetToolControl());
 
         }
+
+        #endregion
 
     }
 }

@@ -9,7 +9,7 @@ using System.Windows.Forms;
 using System.ComponentModel.Design;
 using NewSF64Toolkit.DataStructures;
 
-namespace NewSF64Toolkit.ProgramTools.Controls
+namespace NewSF64Toolkit.Tools.Controls
 {
     public partial class HexEditorControl : UserControl
     {
@@ -31,23 +31,42 @@ namespace NewSF64Toolkit.ProgramTools.Controls
         {
             if (dgvDMA.SelectedCells.Count == 1)
             {
-                _byteViewer.SetBytes(SF64ROM.Instance.DMATable[dgvDMA.SelectedCells[0].RowIndex].DMAData);
+                _byteViewer.SetBytes(SF64ROM.Instance.DMATable[dgvDMA.SelectedCells[0].RowIndex].GetAsBytes());
+            }
+            else
+            {
+                _byteViewer.SetBytes(new byte[0]);
             }
         }
-        
-        private void RefreshDMATable()
+
+        public void ResetDMATable()
         {
             dgvDMA.Rows.Clear();
+
+            if (!SF64ROM.Instance.IsROMLoaded)
+                return;
+
+            for (int i = 0; i < SF64ROM.Instance.DMATable.Count; i++)
+            {
+                dgvDMA.Rows.Add();
+            }
+
+            RefreshDMATable();
+        }
+
+        public void RefreshDMATable()
+        {
+            if (!SF64ROM.Instance.IsROMLoaded)
+                return;
 
             for (int i = 0; i < SF64ROM.Instance.DMATable.Count; i++)
             {
                 DMAFile entry = SF64ROM.Instance.DMATable[i];
 
-                dgvDMA.Rows.Add();
                 dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[0].Value = i + 1;
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[1].Value = ToolSettings.DisplayValue(entry.VStart);
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[2].Value = ToolSettings.DisplayValue(entry.PStart);
-                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[3].Value = ToolSettings.DisplayValue(entry.PEnd);
+                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[1].Value = ByteHelper.DisplayValue(entry.DMAInfo.VStart);
+                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[2].Value = ByteHelper.DisplayValue(entry.DMAInfo.PStart);
+                dgvDMA.Rows[dgvDMA.Rows.Count - 1].Cells[3].Value = ByteHelper.DisplayValue(entry.DMAInfo.PEnd);
             }
         }
 

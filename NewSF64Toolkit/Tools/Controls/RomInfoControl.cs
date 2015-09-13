@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using NewSF64Toolkit.DataStructures;
 
-namespace NewSF64Toolkit.ProgramTools.Controls
+namespace NewSF64Toolkit.Tools.Controls
 {
     public partial class RomInfoControl : UserControl
     {
@@ -19,17 +19,17 @@ namespace NewSF64Toolkit.ProgramTools.Controls
             RefreshROMInfo();
         }
 
-        private void RefreshROMInfo()
+        public void RefreshROMInfo()
         {
             if (SF64ROM.Instance.IsROMLoaded)
             {
                 txtFilename.Text = SF64ROM.Instance.Filename;
-                txtSize.Text = ToolSettings.DisplayValue(SF64ROM.Instance.Size);
-                txtTitle.Text = SF64ROM.Instance.Info.Title;
-                txtGameID.Text = SF64ROM.Instance.Info.GameID;
-                txtVersion.Text = SF64ROM.Instance.Info.Version.ToString();
-                txtCRC1.Text = ToolSettings.DisplayValue(SF64ROM.Instance.Info.CRC1);
-                txtCRC2.Text = ToolSettings.DisplayValue(SF64ROM.Instance.Info.CRC2);
+                txtSize.Text = ByteHelper.DisplayValue(SF64ROM.Instance.Size);
+                txtTitle.Text = SF64ROM.Instance.HeaderInfo.Title;
+                txtGameID.Text = SF64ROM.Instance.HeaderInfo.GameID;
+                txtVersion.Text = SF64ROM.Instance.HeaderInfo.Version.ToString();
+                txtCRC1.Text = ByteHelper.DisplayValue(SF64ROM.Instance.HeaderInfo.CRC1);
+                txtCRC2.Text = ByteHelper.DisplayValue(SF64ROM.Instance.HeaderInfo.CRC2);
             }
             else
             {
@@ -37,7 +37,7 @@ namespace NewSF64Toolkit.ProgramTools.Controls
             }
         }
 
-        private void ClearROMInfo()
+        public void ClearROMInfo()
         {
             txtFilename.Text = string.Empty;
             txtSize.Text = string.Empty;

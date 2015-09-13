@@ -2,50 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
+using NewSF64Toolkit.Settings;
 
 namespace NewSF64Toolkit.DataStructures
 {
-    public struct ROMInfo
-    {
-        public string Title;
-
-        public string GameID;
-
-        public byte Version;
-
-        public uint CRC1;
-
-        public uint CRC2;
-
-        public uint DMATableOffset;
-
-        public ROMInfo(string title, string gameID, byte version, uint crc1, uint crc2, uint dmaTableOffset)
-        {
-            Title = title;
-            GameID = gameID;
-            Version = version;
-            CRC1 = crc1;
-            CRC2 = crc2;
-            DMATableOffset = dmaTableOffset;
-
-            //Double check the DMA if it's invalid
-            if (dmaTableOffset == 0x0)
-                DMATableOffset = StarFoxRomInfo.GetDMATableOffset(GameID, Version);
-                
-        }
-    }
-
     public class SF64ROM : IGameDataStructure
     {
-        public Endianness ROMEndianness;
-        private HeaderDMAFile headerDMA;
-        private DMATableDMAFile dmaTableDMA;
+        #region Properties & Variables
+
+        private HeaderDMAFile _headerDMA;
+        public HeaderDMAFile HeaderInfo { get { return _headerDMA; } }
+
+        private DMATableDMAFile _dmaTableDMA;
 
         public string Filename { get; private set; }
 
         public uint Size { get; private set; }
 
-        public ROMInfo Info { get; private set; }
+        public uint DMATableOffset { get; private set; }
 
         public bool IsCompressed { get; private set; }
 
@@ -58,25 +33,89 @@ namespace NewSF64Toolkit.DataStructures
 
         public List<DMAFile> DMATable { get; private set; }
 
+        #endregion
+
+        #region Enums, Structs & Events
+
+        public enum RomUpdateType
+        {
+            RomLoaded,
+            RomUnloaded,
+            RomSaved,
+            RomEdited,
+            CRCFixed,
+            Decompressed
+        }
+
+        public delegate void RomUpdatedEvent(RomUpdateType type);
+
+        public static event RomUpdatedEvent RomUpdated = delegate { };
+
+        #endregion
+
+        #region SF64ROM Static Functions
+
         //This might be bad design, but I love Singletons too much not to use one here.
         private static SF64ROM _instance;
 
         public static SF64ROM Instance { get { if (_instance == null) ResetRom(); return _instance; } }
 
-        public static void LoadFromROM(string fileName, byte[] romData)
+        public static bool LoadFromROM(string romFile)
         {
-            _instance = new SF64ROM(fileName, romData);
+            string fileName = Path.GetFileName(romFile);
+            try
+            {
+                _instance = new SF64ROM(fileName, File.ReadAllBytes(romFile));
+            }
+            catch
+            {
+                return false;
+            }
+
+            RomUpdated(RomUpdateType.RomLoaded);
+
+            return true;
         }
 
+        //Needs to be fixed, now that the system has been changed up
         public static void LoadFromDMATables(string fileName, List<byte[]> DMAData)
         {
             _instance = new SF64ROM(fileName, DMAData);
+
+            RomUpdated(RomUpdateType.RomLoaded);
+        }
+
+        public static bool SaveRomTo(string filePath)
+        {
+            if (!_instance.IsROMLoaded)
+                return false;
+
+            try
+            {
+                using (StreamWriter writer = new StreamWriter(filePath))
+                {
+                    byte[] bytes = _instance.GetAsBytes();
+                    writer.BaseStream.Write(bytes, 0, bytes.Length);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            RomUpdated(RomUpdateType.RomSaved);
+
+            return true;
         }
 
         public static void ResetRom()
         {
             _instance = new SF64ROM();
+
+            RomUpdated(RomUpdateType.RomUnloaded);
         }
+
+        #endregion
 
         //Empty constructor
         private SF64ROM()
@@ -86,101 +125,88 @@ namespace NewSF64Toolkit.DataStructures
             HasGoodChecksum = false;
         }
 
-        private SF64ROM(string fileName, List<byte[]> DMAData)
-        {
-            //Convert byte[] to dma
-            List<DMAFile> dmaEntries = new List<DMAFile>();
-
-            uint start = 0;
-
-            for (int i = 0; i < DMAData.Count; i++)
-            {
-                byte[] data = DMAData[i];
-                uint end = start + (uint)data.Length;
-                DMAFile dma;
-                switch(i)
-                {
-                    case 0: //Header DMA
-                        dma = new HeaderDMAFile(start, start, end, 0x0, data);
-                        headerDMA = (HeaderDMAFile)dma;
-                        break;
-                    case 2: //DMA Table DMA
-                        dma = new DMATableDMAFile(start, start, end, 0x0, data);
-                        dmaTableDMA = (DMATableDMAFile)dma;
-                        break;
-                    default: //Others
-                        dma = new DMAFile(start, start, end, 0x0, data);
-                        break;
-                }
-                dmaEntries.Add(dma);
-                start = end;
-            }
-
-            DMATable = dmaEntries;
-
-            //Verify that it's correct?
-
-            IsROMLoaded = true;
-
-            this.Filename = fileName;
-            Size = DMATable.Last().PEnd;
-
-            //DmaToRom
-            SetRomInfo();
-
-            //When loading in as dma tables, just adjust the table a bit
-            FixDMATable();
-
-            //Recheck the CRC
-            HasGoodChecksum = CheckCRC();
-        }
-
         private SF64ROM(string fileName, byte[] data)
         {
             Filename = fileName;
 
-            DMATable = new List<DMAFile>();
+            if(DMATable == null)
+                DMATable = new List<DMAFile>();
 
-            //For now, we'll load in a dummy ROMInfo file and actually get
-            // the rest of it later
             string gameID = System.Text.Encoding.UTF8.GetString(data, 59, 4);
             byte version = data[63];
-            Info = new ROMInfo("","",0,0,0,StarFoxRomInfo.GetDMATableOffset(gameID, version));
+            DMATableOffset = StarFoxRomInfo.GetDMATableOffset(gameID, version);
+            Endianness endianness = StarFoxRomInfo.GetEndianness(ByteHelper.ReadUInt(data, 0));
 
-            IsROMLoaded = BytesToDMATable(data);
+            IsROMLoaded = BytesToDMATable(data, endianness);
 
-            SetRomInfo();
+            CheckValidity();
         }
 
-        private void SetRomInfo()
+        //Needs to be fixed, now that the system has been changed up
+        private SF64ROM(string fileName, List<byte[]> DMAData)
+        {
+            throw new NotImplementedException();
+
+            ////Convert byte[] to dma
+            //List<DMAFile> dmaEntries = new List<DMAFile>();
+
+            //uint start = 0;
+
+            //for (int i = 0; i < DMAData.Count; i++)
+            //{
+            //    byte[] data = DMAData[i];
+            //    uint end = start + (uint)data.Length;
+            //    DMAFile dma;
+            //    switch(i)
+            //    {
+            //        case 0: //Header DMA
+            //            dma = new HeaderDMAFile(start, start, end, 0x0, data);
+            //            _headerDMA = (HeaderDMAFile)dma;
+            //            break;
+            //        case 2: //DMA Table DMA
+            //            dma = new DMATableDMAFile(start, start, end, 0x0, data);
+            //            _dmaTableDMA = (DMATableDMAFile)dma;
+            //            break;
+            //        default: //Others
+            //            dma = new DMAFile(start, start, end, 0x0, data);
+            //            break;
+            //    }
+            //    dmaEntries.Add(dma);
+            //    start = end;
+            //}
+
+            //DMATable = dmaEntries;
+
+            ////Verify that it's correct?
+
+            //IsROMLoaded = true;
+
+            //this.Filename = fileName;
+            //Size = DMATable.Last().DMAInfo.PEnd;
+
+            ////DmaToRom
+            //SetRomInfo();
+
+            ////When loading in as dma tables, just adjust the table a bit
+            //FixDMATable();
+
+            ////Recheck the CRC
+            //HasGoodChecksum = CheckCRC();
+        }
+
+        private void CheckValidity()
         {
             if (!IsROMLoaded)
                 return;
             
-            string title = System.Text.Encoding.UTF8.GetString(headerDMA.DMAData, 32, 20);
-            string gameID = System.Text.Encoding.UTF8.GetString(headerDMA.DMAData, 59, 4);
-            byte version = headerDMA.DMAData[63];
-
-            uint endian = ToolSettings.ReadUInt(headerDMA.DMAData, 0);
-            ROMEndianness = StarFoxRomInfo.GetEndianness(endian);
-
-            uint crc1 = ToolSettings.ReadUInt(headerDMA.DMAData, 16, ROMEndianness);
-            uint crc2 = ToolSettings.ReadUInt(headerDMA.DMAData, 20, ROMEndianness);
-
-            uint dmaTableOffset = StarFoxRomInfo.GetDMATableOffset(gameID, version);
-
-            //To be discovered: will this need to be changed to also change the CRC values??? Or can I leave them untouched?
-            Info = new ROMInfo(title, gameID, version, crc1, crc2, dmaTableOffset);
-            Size = (uint)headerDMA.DMAData.Length;
-
-            IsValidRom = StarFoxRomInfo.IsValidVersion(Info);
+            IsValidRom = StarFoxRomInfo.IsValidVersion(_headerDMA.GameID, _headerDMA.Version);
             HasGoodChecksum = CheckCRC();
         }
 
-        private bool BytesToDMATable(byte[] data)
+        private bool BytesToDMATable(byte[] data, Endianness RomEndianness)
         {
-            //Transfer data from ROM to DMA Tables
-            if (Info.DMATableOffset == 0x0)
+            //Using the DMA Table offset, break up the file into its constituent DMA blocks.
+            if (DMATableOffset == 0x0)
             {
                 return false;
             }
@@ -188,17 +214,22 @@ namespace NewSF64Toolkit.DataStructures
             IsCompressed = false;
 
             DMATable.Clear();
+            _headerDMA = null;
+            _dmaTableDMA = null;
 
-            int CurrentPos = (int)Info.DMATableOffset;
+            int CurrentPos = (int)DMATableOffset;
 
             try
             {
                 while (CurrentPos < data.Length - 16)
                 {
-                    uint VStart = ToolSettings.ReadUInt(data, CurrentPos, ROMEndianness);
-                    uint PStart = ToolSettings.ReadUInt(data, CurrentPos + 4, ROMEndianness);
-                    uint PEnd = ToolSettings.ReadUInt(data, CurrentPos + 8, ROMEndianness);
-                    uint CompFlag = ToolSettings.ReadUInt(data, CurrentPos + 12, ROMEndianness);
+                    uint VStart = ByteHelper.ReadUInt(data, CurrentPos, RomEndianness);
+                    uint PStart = ByteHelper.ReadUInt(data, CurrentPos + 4, RomEndianness);
+                    uint PEnd = ByteHelper.ReadUInt(data, CurrentPos + 8, RomEndianness);
+                    uint CompFlag = ByteHelper.ReadUInt(data, CurrentPos + 12, RomEndianness);
+
+                    //End of the DMA Header
+                    if ((PStart == 0x00) && (PEnd == 0x00)) break;
 
                     //Create the actual data
                     byte[] dmaBytes = new byte[PEnd - PStart];
@@ -208,25 +239,33 @@ namespace NewSF64Toolkit.DataStructures
                     switch(DMATable.Count) //Should act as an index for the current dma file
                     {
                         case 0: //Header DMA
-                            entry = new HeaderDMAFile(VStart, PStart, PEnd, 0x0, dmaBytes);
-                            headerDMA = (HeaderDMAFile)entry;
+                            entry = new HeaderDMAFile(dmaBytes);
+                            _headerDMA = (HeaderDMAFile)entry;
                             break;
                         case 2: //DMA Table DMA
-                            entry = new DMATableDMAFile(VStart, PStart, PEnd, 0x0, dmaBytes);
-                            dmaTableDMA = (DMATableDMAFile)entry;
+                            entry = new DMATableDMAFile(dmaBytes);
+                            _dmaTableDMA = (DMATableDMAFile)entry;
                             break;
                         default: //Others
-                            entry = new DMAFile(VStart, PStart, PEnd, 0x0, dmaBytes);
+                            entry = new DMAFile(dmaBytes);
                             break;
                     }
-
-                    if ((entry.PStart == 0x00) && (entry.PEnd == 0x00)) break;
-
-                    if (entry.CompFlag == 1) IsCompressed = true;
 
                     DMATable.Add(entry);
 
                     CurrentPos += 16;
+                }
+
+                //Now set the DMA Headers
+                if (_dmaTableDMA != null)
+                {
+                    for (int i = 0; i < DMATable.Count; i++)
+                    {
+                        DMATable[i].DMAInfo = _dmaTableDMA.DMATableEntries[i];
+
+                        if (DMATable[i].DMAInfo.CFlag == 1)
+                            IsCompressed = true;
+                    }
                 }
             }
             catch
@@ -249,7 +288,12 @@ namespace NewSF64Toolkit.DataStructures
 
         public bool Decompress()
         {
-            return DecompressDMA();
+            bool success = DecompressDMA();
+
+            if(success)
+                RomUpdated(RomUpdateType.Decompressed);
+
+            return success;
         }
 
         private bool DecompressDMA()
@@ -262,19 +306,21 @@ namespace NewSF64Toolkit.DataStructures
             for (int i = 0; i < DMATable.Count; i++)
             {
                 DMAFile dma = DMATable[i];
-                if(dma.CompFlag == 0x1)
+                if(dma.DMAInfo.CFlag == 0x1)
                 {
                     //compressed
 
                     //Decompress here
                     byte[] newDMAData;
-                    if(ToolSettings.DecompressMIO0(dma.DMAData, out newDMAData))
+                    if(StarFoxRomInfo.DecompressMIO0(dma.GetAsBytes(), out newDMAData))
                     {
-                        dma.DMAData = newDMAData;
+                        dma.LoadFromBytes(newDMAData);
 
-                        dma.PEnd = dma.VStart + (uint)newDMAData.Length;
-                        dma.PStart = dma.VStart;
-                        dma.CompFlag = 0x0;
+                        dma.DMAInfo.PEnd = dma.DMAInfo.VStart + (uint)newDMAData.Length;
+                        dma.DMAInfo.PStart = dma.DMAInfo.VStart;
+                        dma.DMAInfo.CFlag = 0x0;
+
+                        _dmaTableDMA.DMATableEntries[i].CFlag = dma.DMAInfo.CFlag;
                     }
                     else
                     {
@@ -286,12 +332,12 @@ namespace NewSF64Toolkit.DataStructures
                 else
                 {
                     //uncompressed
-                    dma.PEnd = dma.VStart + (dma.PEnd - dma.PStart);
-                    dma.PStart = dma.VStart;
+                    dma.DMAInfo.PEnd = dma.DMAInfo.VStart + (dma.DMAInfo.PEnd - dma.DMAInfo.PStart);
+                    dma.DMAInfo.PStart = dma.DMAInfo.VStart;
                 }
             }
 
-            Size = DMATable.Last().PEnd;
+            Size = DMATable.Last().DMAInfo.PEnd;
             FixDMATable();
 
             return true;
@@ -301,7 +347,7 @@ namespace NewSF64Toolkit.DataStructures
         {
             uint[] crcs = new uint[2];
             if (N64Sums.GetChecksum(crcs, GetAsBytes()))
-                return (crcs[0] == headerDMA.CRC1) && (crcs[1] == headerDMA.CRC2);
+                return (crcs[0] == _headerDMA.CRC1) && (crcs[1] == _headerDMA.CRC2);
 
             return false;
         }
@@ -316,25 +362,32 @@ namespace NewSF64Toolkit.DataStructures
 
             if (N64Sums.GetChecksum(crcs, GetAsBytes()))
             {
-                headerDMA.CRC1 = crcs[0];
-                headerDMA.CRC2 = crcs[1];
-
-                Info = new ROMInfo(Info.Title, Info.GameID, Info.Version, crcs[0], crcs[1], Info.DMATableOffset);
+                _headerDMA.CRC1 = crcs[0];
+                _headerDMA.CRC2 = crcs[1];
 
                 HasGoodChecksum = true;
+
+                RomUpdated(RomUpdateType.CRCFixed);
 
                 return true;
             }
             return false;
         }
 
-        private void FixDMATable()
+        private bool FixDMATable()
         {
+            if (!IsROMLoaded)
+                return false;
+
             for (int i = 0; i < DMATable.Count; i++)
             {
-                dmaTableDMA.SetDMAEntry(i, DMATable[i].VStart, DMATable[i].PStart, DMATable[i].PEnd, DMATable[i].CompFlag, ROMEndianness);
+                _dmaTableDMA.DMATableEntries[i].VStart = DMATable[i].DMAInfo.VStart;
+                _dmaTableDMA.DMATableEntries[i].PStart = DMATable[i].DMAInfo.PStart;
+                _dmaTableDMA.DMATableEntries[i].PEnd = DMATable[i].DMAInfo.PEnd;
+                _dmaTableDMA.DMATableEntries[i].CFlag = DMATable[i].DMAInfo.CFlag;
             }
 
+            return true;
         }
 
         public byte[] GetAsBytes()
@@ -342,19 +395,19 @@ namespace NewSF64Toolkit.DataStructures
             if (!IsROMLoaded)
                 return null;
 
-            uint fullLength = DMATable.Last().PEnd;
+            uint fullLength = DMATable.Last().DMAInfo.PEnd;
 
             //Rom length must be multiple of 0x400000
             if(fullLength % 0x400000 != 0)
                 fullLength = (uint)Math.Ceiling((double)fullLength / 0x400000) * 0x400000;
 
-            Size = fullLength;
+            //Size = fullLength;
 
             byte[] newRomData = new byte[fullLength];
 
             foreach (DMAFile dma in DMATable)
             {
-                Array.Copy(dma.DMAData, 0, newRomData, dma.PStart, dma.PEnd - dma.PStart);
+                Array.Copy(dma.GetAsBytes(), 0, newRomData, dma.DMAInfo.PStart, dma.DMAInfo.PEnd - dma.DMAInfo.PStart);
             }
 
             return newRomData;

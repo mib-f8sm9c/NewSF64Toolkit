@@ -8,7 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using NewSF64Toolkit.DataStructures;
 
-namespace NewSF64Toolkit.ProgramTools.Controls
+namespace NewSF64Toolkit.Tools.Controls
 {
     public partial class LevelViewerControl : UserControl
     {
@@ -54,32 +54,33 @@ namespace NewSF64Toolkit.ProgramTools.Controls
                 return;
             }
 
-            if (SF64ROM.Instance.DMATable[levelDMAIndex].CompFlag == 0x01)
+            if (SF64ROM.Instance.DMATable[levelDMAIndex].DMAInfo.CFlag == 0x01)
             {
                 //Error message
                 MessageBox.Show("Specified level file is compressed, decompress before trying again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            MemoryManager.Instance.ClearBanks();
+            ////To be fixed in the future
+            //MemoryManager.Instance.ClearBanks();
 
-            //Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
-            DMAFile offsetTableDMA = SF64ROM.Instance.DMATable[1];
-            MemoryManager.Instance.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
+            ////Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
+            //DMAFile offsetTableDMA = SF64ROM.Instance.DMATable[1];
+            //MemoryManager.Instance.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
 
-            uint offset = ToolSettings.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
-            byte segment = (byte)((offset & 0xFF000000) >> 24);
-            offset &= 0x00FFFFFF;
+            //uint offset = ByteHelper.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
+            //byte segment = (byte)((offset & 0xFF000000) >> 24);
+            //offset &= 0x00FFFFFF;
 
-            //_glControl.Clear();
-            MemoryManager.Instance.AddBank(segment, SF64ROM.Instance.DMATable[levelDMAIndex].DMAData, 0x00);
+            ////_glControl.Clear();
+            //MemoryManager.Instance.AddBank(segment, SF64ROM.Instance.DMATable[levelDMAIndex].DMAData, 0x00);
 
-            _levelLoader.StartReadingLevelDataAt(segment, offset);
+            //_levelLoader.StartReadingLevelDataAt(segment, offset);
 
-            InitDListNavigEnabled(true);
-            SetupDList();
+            //InitDListNavigEnabled(true);
+            //SetupDList();
 
-            _glControl.ReDraww();
+            //_glControl.ReDraww();
         }
 
         private void SetupDList()
@@ -89,7 +90,7 @@ namespace NewSF64Toolkit.ProgramTools.Controls
             //Load the level loader's game objects into the dlist thing
             for (int i = 0; i < SFGfx.GameObjCount; i++)
             {
-                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, SFGfx.GameObjects[i].LvlPos, ToolSettings.DisplayValue(SFGfx.GameObjects[i].ID))));
+                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, SFGfx.GameObjects[i].LvlPos, ByteHelper.DisplayValue(SFGfx.GameObjects[i].ID))));
             }
         }
 
@@ -192,7 +193,7 @@ namespace NewSF64Toolkit.ProgramTools.Controls
             txtModZ.TextChanged -= txtMod_TextChanged;
             txtModZRot.TextChanged -= txtMod_TextChanged;
 
-            txtModDList.Text = ToolSettings.DisplayValue(obj.DListOffset);
+            txtModDList.Text = ByteHelper.DisplayValue(obj.DListOffset);
             txtModID.Text = obj.ID.ToString();
             txtModPos.Text = obj.LvlPos.ToString();
             txtModUnk.Text = obj.Unk.ToString();

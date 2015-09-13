@@ -1,4 +1,4 @@
-﻿namespace NewSF64Toolkit.ProgramTools.Controls
+﻿namespace NewSF64Toolkit.Tools.Controls
 {
     partial class HexEditorControl
     {
@@ -34,19 +34,19 @@
             this.colVStart = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPStart = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPEnd = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.viewerPanel = new System.Windows.Forms.Panel();
             this.pnlHexViewer = new System.Windows.Forms.Panel();
             this.pnlDMATables.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDMA)).BeginInit();
-            this.viewerPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlDMATables
             // 
+            this.pnlDMATables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlDMATables.Controls.Add(this.dgvDMA);
-            this.pnlDMATables.Location = new System.Drawing.Point(506, 18);
+            this.pnlDMATables.Location = new System.Drawing.Point(519, 3);
             this.pnlDMATables.Name = "pnlDMATables";
-            this.pnlDMATables.Size = new System.Drawing.Size(242, 296);
+            this.pnlDMATables.Size = new System.Drawing.Size(243, 445);
             this.pnlDMATables.TabIndex = 1;
             // 
             // dgvDMA
@@ -64,7 +64,7 @@
             this.dgvDMA.Location = new System.Drawing.Point(0, 0);
             this.dgvDMA.Name = "dgvDMA";
             this.dgvDMA.ReadOnly = true;
-            this.dgvDMA.Size = new System.Drawing.Size(242, 296);
+            this.dgvDMA.Size = new System.Drawing.Size(243, 445);
             this.dgvDMA.TabIndex = 0;
             this.dgvDMA.SelectionChanged += new System.EventHandler(this.dgvDMA_SelectionChanged);
             // 
@@ -92,34 +92,27 @@
             this.colPEnd.Name = "colPEnd";
             this.colPEnd.ReadOnly = true;
             // 
-            // viewerPanel
-            // 
-            this.viewerPanel.Controls.Add(this.pnlHexViewer);
-            this.viewerPanel.Location = new System.Drawing.Point(13, 67);
-            this.viewerPanel.Name = "viewerPanel";
-            this.viewerPanel.Size = new System.Drawing.Size(510, 303);
-            this.viewerPanel.TabIndex = 2;
-            // 
             // pnlHexViewer
             // 
-            this.pnlHexViewer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pnlHexViewer.Location = new System.Drawing.Point(0, 0);
+            this.pnlHexViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlHexViewer.Location = new System.Drawing.Point(3, 3);
             this.pnlHexViewer.Name = "pnlHexViewer";
             this.pnlHexViewer.Padding = new System.Windows.Forms.Padding(6);
-            this.pnlHexViewer.Size = new System.Drawing.Size(510, 303);
-            this.pnlHexViewer.TabIndex = 0;
+            this.pnlHexViewer.Size = new System.Drawing.Size(510, 445);
+            this.pnlHexViewer.TabIndex = 1;
             // 
-            // HexViewControl
+            // HexEditorControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.viewerPanel);
+            this.Controls.Add(this.pnlHexViewer);
             this.Controls.Add(this.pnlDMATables);
-            this.Name = "HexViewControl";
+            this.Name = "HexEditorControl";
             this.Size = new System.Drawing.Size(765, 451);
             this.pnlDMATables.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvDMA)).EndInit();
-            this.viewerPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -132,7 +125,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colVStart;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPStart;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPEnd;
-        private System.Windows.Forms.Panel viewerPanel;
         private System.Windows.Forms.Panel pnlHexViewer;
     }
 }

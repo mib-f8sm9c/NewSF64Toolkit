@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NewSF64Toolkit.ProgramTools
+namespace NewSF64Toolkit.Tools
 {
     public enum ToolTypes
     {
@@ -15,14 +15,14 @@ namespace NewSF64Toolkit.ProgramTools
 
     public static class ToolkitFactory
     {
-        private static Dictionary<ToolTypes, IToolkitTool> _tools = new Dictionary<ToolTypes,IToolkitTool>();
+        private static Dictionary<ToolTypes, BaseToolkitTool> _tools = new Dictionary<ToolTypes, BaseToolkitTool>();
 
-        public static IToolkitTool GetTool(ToolTypes type)
+        public static BaseToolkitTool GetTool(ToolTypes type)
         {
             if (_tools.ContainsKey(type))
                 return _tools[type];
 
-            IToolkitTool newTool;
+            BaseToolkitTool newTool;
             switch (type)
             {
                 case ToolTypes.RomInfo:

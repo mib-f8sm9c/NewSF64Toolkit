@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NewSF64Toolkit.DataStructures.DataObjects;
 
 namespace NewSF64Toolkit.DataStructures
 {
@@ -10,32 +11,27 @@ namespace NewSF64Toolkit.DataStructures
     // those classes,  make sure to override GetAsBytes().
     public class DMAFile : IGameDataStructure
     {
-        public uint VStart;
-        public uint PStart;
-        public uint PEnd;
-        public uint CompFlag;
+        public DMATableEntry DMAInfo;
 
-        public byte[] DMAData;
+        protected DynamicMemoryMapping _dmaData;
 
-        public DMAFile(uint vstart, uint pstart, uint pend, uint compFlag)
+        public DMAFile(byte[] data)
         {
-            VStart = vstart;
-            PStart = pstart;
-            PEnd = pend;
-            CompFlag = compFlag;
+            _dmaData = new DynamicMemoryMapping();
 
-            DMAData = null;
-        }
-
-        public DMAFile(uint vstart, uint pstart, uint pend, uint compFlag, byte[] data)
-            : this(vstart, pstart, pend, compFlag)
-        {
-            DMAData = data;
+            LoadFromBytes(data);
         }
 
         public virtual byte[] GetAsBytes()
         {
-            return DMAData;
+            return _dmaData.GetAsBytes();
+        }
+
+        public virtual void LoadFromBytes(byte[] bytes)
+        {
+            _dmaData.ClearMaps();
+
+            _dmaData.AddMemory(0, bytes);
         }
     }
 }

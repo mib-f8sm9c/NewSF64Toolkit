@@ -1,4 +1,4 @@
-﻿namespace NewSF64Toolkit.ProgramTools.Controls
+﻿namespace NewSF64Toolkit.Tools.Controls
 {
     partial class RomInfoControl
     {
@@ -42,7 +42,7 @@
             this.lblTitle = new System.Windows.Forms.Label();
             this.lblSize = new System.Windows.Forms.Label();
             this.lblFilename = new System.Windows.Forms.Label();
-            this.aboutControl = new NewSF64Toolkit.AboutControl();
+            this.aboutControl = new NewSF64Toolkit.Tools.Controls.AboutControl();
             this.SuspendLayout();
             // 
             // txtCRC2

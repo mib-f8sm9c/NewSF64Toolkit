@@ -101,45 +101,47 @@
             // menuStripFileLoad
             // 
             this.menuStripFileLoad.Name = "menuStripFileLoad";
-            this.menuStripFileLoad.Size = new System.Drawing.Size(139, 22);
+            this.menuStripFileLoad.Size = new System.Drawing.Size(152, 22);
             this.menuStripFileLoad.Text = "Load ROM...";
             this.menuStripFileLoad.Click += new System.EventHandler(this.menuStripFileLoad_Click);
             // 
             // menuStripFileSave
             // 
             this.menuStripFileSave.Name = "menuStripFileSave";
-            this.menuStripFileSave.Size = new System.Drawing.Size(139, 22);
+            this.menuStripFileSave.Size = new System.Drawing.Size(152, 22);
             this.menuStripFileSave.Text = "Save ROM...";
             this.menuStripFileSave.Click += new System.EventHandler(this.menuStripFileSave_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(136, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
             // 
             // menuStripFileLoadDMA
             // 
+            this.menuStripFileLoadDMA.Enabled = false;
             this.menuStripFileLoadDMA.Name = "menuStripFileLoadDMA";
-            this.menuStripFileLoadDMA.Size = new System.Drawing.Size(139, 22);
+            this.menuStripFileLoadDMA.Size = new System.Drawing.Size(152, 22);
             this.menuStripFileLoadDMA.Text = "Load DMA...";
             this.menuStripFileLoadDMA.Click += new System.EventHandler(this.menuStripFileLoadDMA_Click);
             // 
             // menuStripFileSaveDMA
             // 
+            this.menuStripFileSaveDMA.Enabled = false;
             this.menuStripFileSaveDMA.Name = "menuStripFileSaveDMA";
-            this.menuStripFileSaveDMA.Size = new System.Drawing.Size(139, 22);
+            this.menuStripFileSaveDMA.Size = new System.Drawing.Size(152, 22);
             this.menuStripFileSaveDMA.Text = "Save DMA...";
             this.menuStripFileSaveDMA.Click += new System.EventHandler(this.menuStripFileSaveDMA_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(136, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
             // 
             // menuStripFileExit
             // 
             this.menuStripFileExit.Name = "menuStripFileExit";
-            this.menuStripFileExit.Size = new System.Drawing.Size(139, 22);
+            this.menuStripFileExit.Size = new System.Drawing.Size(152, 22);
             this.menuStripFileExit.Text = "Exit";
             // 
             // menuStripROM
@@ -205,21 +207,21 @@
             // menuStripToolsInfo
             // 
             this.menuStripToolsInfo.Name = "menuStripToolsInfo";
-            this.menuStripToolsInfo.Size = new System.Drawing.Size(152, 22);
+            this.menuStripToolsInfo.Size = new System.Drawing.Size(139, 22);
             this.menuStripToolsInfo.Text = "Rom Info";
             this.menuStripToolsInfo.Click += new System.EventHandler(this.menuStripToolsInfo_Click);
             // 
             // menuStripToolsHex
             // 
             this.menuStripToolsHex.Name = "menuStripToolsHex";
-            this.menuStripToolsHex.Size = new System.Drawing.Size(152, 22);
+            this.menuStripToolsHex.Size = new System.Drawing.Size(139, 22);
             this.menuStripToolsHex.Text = "Hex Editor";
             this.menuStripToolsHex.Click += new System.EventHandler(this.menuStripToolsHex_Click);
             // 
             // menuStripToolsLevel
             // 
             this.menuStripToolsLevel.Name = "menuStripToolsLevel";
-            this.menuStripToolsLevel.Size = new System.Drawing.Size(152, 22);
+            this.menuStripToolsLevel.Size = new System.Drawing.Size(139, 22);
             this.menuStripToolsLevel.Text = "Level Viewer";
             this.menuStripToolsLevel.Click += new System.EventHandler(this.menuStripToolsLevel_Click);
             // 
