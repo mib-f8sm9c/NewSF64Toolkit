@@ -51,7 +51,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStructures\DataObjects\LevelHeader.cs" />
+    <Compile Include="DataStructures\DataObjects\RAMTableEntry.cs" />
+    <Compile Include="DataStructures\DataObjects\RefSimpleObject.cs" />
+    <Compile Include="DataStructures\DataObjects\SFLevelObject.cs" />
+    <Compile Include="DataStructures\DMA\DialogueDMAFile.cs" />
+    <Compile Include="DataStructures\DMA\ReferenceDMAFile.cs" />
+    <Compile Include="DataStructures\DMA\LevelDMAFile.cs" />
     <Compile Include="DataStructures\DataObjects\DMATableEntry.cs" />
+    <Compile Include="OpenGL\GLRenderable.cs" />
     <Compile Include="Tools\Controls\AboutControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -59,14 +67,14 @@
       <DependentUpon>AboutControl.cs</DependentUpon>
     </Compile>
     <Compile Include="ByteHelper.cs" />
-    <Compile Include="Camera.cs" />
-    <Compile Include="DataStructures\DMATableDMAFile.cs" />
-    <Compile Include="DataStructures\DynamicMemoryMapping.cs" />
-    <Compile Include="DataStructures\HeaderDMAFile.cs" />
+    <Compile Include="OpenGL\Camera.cs" />
+    <Compile Include="DataStructures\DMA\DMATableDMAFile.cs" />
+    <Compile Include="DataStructures\DataObjects\DynamicMemoryMapping.cs" />
+    <Compile Include="DataStructures\DMA\HeaderDMAFile.cs" />
     <Compile Include="DataStructures\IGameDataStructure.cs" />
-    <Compile Include="DataStructures\DMAFile.cs" />
-    <Compile Include="F3DEXParser.cs" />
-    <Compile Include="Gfx.cs" />
+    <Compile Include="DataStructures\DMA\DMAFile.cs" />
+    <Compile Include="OpenGL\F3DEX\F3DEXParser.cs" />
+    <Compile Include="OpenGL\F3DEX\Gfx.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -74,12 +82,12 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MemoryManager.cs" />
-    <Compile Include="Mouse.cs" />
+    <Compile Include="OpenGL\Mouse.cs" />
     <Compile Include="N64Sums.cs" />
-    <Compile Include="OpenGLControl.cs">
+    <Compile Include="OpenGL\OpenGLControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="OpenGLControl.Designer.cs">
+    <Compile Include="OpenGL\OpenGLControl.Designer.cs">
       <DependentUpon>OpenGLControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
@@ -118,7 +126,7 @@
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="OpenGLControl.resx">
+    <EmbeddedResource Include="OpenGL\OpenGLControl.resx">
       <DependentUpon>OpenGLControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\Controls\HexEditorControl.resx">

@@ -7,11 +7,11 @@ namespace NewSF64Toolkit
 {
     public class StarFoxModelLoader
     {
-        F3DEXParser _parser;
+        //F3DEXParser _parser;
 
-        public StarFoxModelLoader(F3DEXParser parser)
+        public StarFoxModelLoader()//F3DEXParser parser)
         {
-            _parser = parser;
+            //_parser = parser;
         }
     }
 }

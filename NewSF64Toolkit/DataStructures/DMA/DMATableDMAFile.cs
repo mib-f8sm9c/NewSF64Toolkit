@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using NewSF64Toolkit.DataStructures.DataObjects;
 
-namespace NewSF64Toolkit.DataStructures
+namespace NewSF64Toolkit.DataStructures.DMA
 {
     public class DMATableDMAFile : DMAFile
     {
@@ -15,7 +15,7 @@ namespace NewSF64Toolkit.DataStructures
         {
         }
 
-        public override void  LoadFromBytes(byte[] bytes)
+        public override bool  LoadFromBytes(byte[] bytes)
         {
  	        base.LoadFromBytes(bytes);
 
@@ -29,20 +29,17 @@ namespace NewSF64Toolkit.DataStructures
             //pull out the DMA info
             for (int i = 0; i < bytes.Length; i += 0x10)
             {
-                if (_dmaData.TakeMemory(i, 0x10, out tempData))
+                if (_dmaData.TakeMemory(i, DMATableEntry.Size, out tempData))
                 {
-                    uint vstart = ByteHelper.ReadUInt(tempData, 0);
-                    uint pstart = ByteHelper.ReadUInt(tempData, 4);
-                    uint pend = ByteHelper.ReadUInt(tempData, 8);
-                    uint cflag = ByteHelper.ReadUInt(tempData, 12);
-
-                    DMATableEntries.Add(new DMATableEntry(i, vstart, pstart, pend, cflag));
+                    DMATableEntries.Add(new DMATableEntry(i, tempData));
                 }
                 else
                 {
                     break;
                 }
             }
+
+            return true;
         }
 
         public override byte[] GetAsBytes()

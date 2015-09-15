@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using OpenTK.Graphics.OpenGL;
 
-namespace NewSF64Toolkit
+namespace NewSF64Toolkit.OpenGL.F3DEX
 {
     public struct RGBA
     {
@@ -125,10 +125,6 @@ namespace NewSF64Toolkit
         public static uint GeometryMode;
         public static uint OtherModeL;
         public static uint OtherModeH;
-        public static float[] LightAmbient = new float[4]; //4
-        public static float[] LightDiffuse = new float[4]; //4
-        public static float[] LightSpecular = new float[4]; //4
-        public static float[] LightPosition = new float[4]; //4
         public static uint Store_RDPHalf1, Store_RDPHalf2;
         public static uint Combiner0, Combiner1;
 

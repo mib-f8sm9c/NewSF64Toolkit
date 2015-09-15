@@ -16,6 +16,7 @@ using System.Design;
 using NewSF64Toolkit.DataStructures;
 using NewSF64Toolkit.Tools;
 using NewSF64Toolkit.Settings;
+using NewSF64Toolkit.OpenGL.F3DEX;
 
 namespace NewSF64Toolkit
 {

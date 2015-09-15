@@ -31,30 +31,30 @@
             this.glPanel = new System.Windows.Forms.Panel();
             this.tvLevelInfo = new System.Windows.Forms.TreeView();
             this.pnlLevelControl = new System.Windows.Forms.Panel();
-            this.lblModY = new System.Windows.Forms.Label();
-            this.txtModXRot = new System.Windows.Forms.TextBox();
-            this.txtModY = new System.Windows.Forms.TextBox();
-            this.lblModXRot = new System.Windows.Forms.Label();
-            this.lblModYRot = new System.Windows.Forms.Label();
-            this.lblModX = new System.Windows.Forms.Label();
-            this.txtModYRot = new System.Windows.Forms.TextBox();
-            this.txtModX = new System.Windows.Forms.TextBox();
-            this.lblModZ = new System.Windows.Forms.Label();
-            this.lblModUnk = new System.Windows.Forms.Label();
-            this.txtModZ = new System.Windows.Forms.TextBox();
-            this.txtModUnk = new System.Windows.Forms.TextBox();
-            this.lblModZRot = new System.Windows.Forms.Label();
-            this.txtModPos = new System.Windows.Forms.TextBox();
-            this.btnLoadLevel = new System.Windows.Forms.Button();
-            this.txtModZRot = new System.Windows.Forms.TextBox();
-            this.cbLevelSelect = new System.Windows.Forms.ComboBox();
-            this.lblModDList = new System.Windows.Forms.Label();
-            this.lblModPos = new System.Windows.Forms.Label();
-            this.txtModDList = new System.Windows.Forms.TextBox();
-            this.lblModID = new System.Windows.Forms.Label();
-            this.btnModSnapTo = new System.Windows.Forms.Button();
-            this.txtModID = new System.Windows.Forms.TextBox();
             this.pnlObjectInfo = new System.Windows.Forms.Panel();
+            this.txtModID = new System.Windows.Forms.TextBox();
+            this.btnModSnapTo = new System.Windows.Forms.Button();
+            this.lblModID = new System.Windows.Forms.Label();
+            this.txtModDList = new System.Windows.Forms.TextBox();
+            this.lblModPos = new System.Windows.Forms.Label();
+            this.lblModDList = new System.Windows.Forms.Label();
+            this.cbLevelSelect = new System.Windows.Forms.ComboBox();
+            this.txtModZRot = new System.Windows.Forms.TextBox();
+            this.btnLoadLevel = new System.Windows.Forms.Button();
+            this.txtModPos = new System.Windows.Forms.TextBox();
+            this.lblModZRot = new System.Windows.Forms.Label();
+            this.txtModUnk = new System.Windows.Forms.TextBox();
+            this.txtModZ = new System.Windows.Forms.TextBox();
+            this.lblModUnk = new System.Windows.Forms.Label();
+            this.lblModZ = new System.Windows.Forms.Label();
+            this.txtModX = new System.Windows.Forms.TextBox();
+            this.txtModYRot = new System.Windows.Forms.TextBox();
+            this.lblModX = new System.Windows.Forms.Label();
+            this.lblModYRot = new System.Windows.Forms.Label();
+            this.lblModXRot = new System.Windows.Forms.Label();
+            this.txtModY = new System.Windows.Forms.TextBox();
+            this.txtModXRot = new System.Windows.Forms.TextBox();
+            this.lblModY = new System.Windows.Forms.Label();
             this.pnlLevelControl.SuspendLayout();
             this.pnlObjectInfo.SuspendLayout();
             this.SuspendLayout();
@@ -91,158 +91,96 @@
             this.pnlLevelControl.Size = new System.Drawing.Size(295, 393);
             this.pnlLevelControl.TabIndex = 35;
             // 
-            // lblModY
+            // pnlObjectInfo
             // 
-            this.lblModY.AutoSize = true;
-            this.lblModY.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModY.Location = new System.Drawing.Point(41, 46);
-            this.lblModY.Name = "lblModY";
-            this.lblModY.Size = new System.Drawing.Size(21, 17);
-            this.lblModY.TabIndex = 12;
-            this.lblModY.Text = "Y:";
+            this.pnlObjectInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlObjectInfo.Controls.Add(this.txtModID);
+            this.pnlObjectInfo.Controls.Add(this.btnModSnapTo);
+            this.pnlObjectInfo.Controls.Add(this.lblModID);
+            this.pnlObjectInfo.Controls.Add(this.txtModDList);
+            this.pnlObjectInfo.Controls.Add(this.lblModPos);
+            this.pnlObjectInfo.Controls.Add(this.lblModDList);
+            this.pnlObjectInfo.Controls.Add(this.cbLevelSelect);
+            this.pnlObjectInfo.Controls.Add(this.txtModZRot);
+            this.pnlObjectInfo.Controls.Add(this.btnLoadLevel);
+            this.pnlObjectInfo.Controls.Add(this.txtModPos);
+            this.pnlObjectInfo.Controls.Add(this.lblModZRot);
+            this.pnlObjectInfo.Controls.Add(this.txtModUnk);
+            this.pnlObjectInfo.Controls.Add(this.txtModZ);
+            this.pnlObjectInfo.Controls.Add(this.lblModUnk);
+            this.pnlObjectInfo.Controls.Add(this.lblModZ);
+            this.pnlObjectInfo.Controls.Add(this.txtModX);
+            this.pnlObjectInfo.Controls.Add(this.txtModYRot);
+            this.pnlObjectInfo.Controls.Add(this.lblModX);
+            this.pnlObjectInfo.Controls.Add(this.lblModYRot);
+            this.pnlObjectInfo.Controls.Add(this.lblModXRot);
+            this.pnlObjectInfo.Controls.Add(this.txtModY);
+            this.pnlObjectInfo.Controls.Add(this.txtModXRot);
+            this.pnlObjectInfo.Controls.Add(this.lblModY);
+            this.pnlObjectInfo.Location = new System.Drawing.Point(3, 114);
+            this.pnlObjectInfo.Name = "pnlObjectInfo";
+            this.pnlObjectInfo.Size = new System.Drawing.Size(289, 276);
+            this.pnlObjectInfo.TabIndex = 33;
             // 
-            // txtModXRot
+            // txtModID
             // 
-            this.txtModXRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModXRot.Location = new System.Drawing.Point(195, 14);
-            this.txtModXRot.Name = "txtModXRot";
-            this.txtModXRot.Size = new System.Drawing.Size(63, 23);
-            this.txtModXRot.TabIndex = 11;
-            this.txtModXRot.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
+            this.txtModID.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModID.Location = new System.Drawing.Point(135, 112);
+            this.txtModID.Name = "txtModID";
+            this.txtModID.ReadOnly = true;
+            this.txtModID.Size = new System.Drawing.Size(121, 23);
+            this.txtModID.TabIndex = 24;
             // 
-            // txtModY
+            // btnModSnapTo
             // 
-            this.txtModY.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModY.Location = new System.Drawing.Point(66, 43);
-            this.txtModY.Name = "txtModY";
-            this.txtModY.Size = new System.Drawing.Size(63, 23);
-            this.txtModY.TabIndex = 13;
-            this.txtModY.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
+            this.btnModSnapTo.Enabled = false;
+            this.btnModSnapTo.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.btnModSnapTo.Location = new System.Drawing.Point(25, 110);
+            this.btnModSnapTo.Name = "btnModSnapTo";
+            this.btnModSnapTo.Size = new System.Drawing.Size(37, 26);
+            this.btnModSnapTo.TabIndex = 31;
+            this.btnModSnapTo.UseVisualStyleBackColor = true;
+            this.btnModSnapTo.Click += new System.EventHandler(this.btnModSnapTo_Click);
             // 
-            // lblModXRot
+            // lblModID
             // 
-            this.lblModXRot.AutoSize = true;
-            this.lblModXRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModXRot.Location = new System.Drawing.Point(146, 17);
-            this.lblModXRot.Name = "lblModXRot";
-            this.lblModXRot.Size = new System.Drawing.Size(43, 17);
-            this.lblModXRot.TabIndex = 10;
-            this.lblModXRot.Text = "XRot:";
+            this.lblModID.AutoSize = true;
+            this.lblModID.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModID.Location = new System.Drawing.Point(104, 115);
+            this.lblModID.Name = "lblModID";
+            this.lblModID.Size = new System.Drawing.Size(25, 17);
+            this.lblModID.TabIndex = 23;
+            this.lblModID.Text = "ID:";
             // 
-            // lblModYRot
+            // txtModDList
             // 
-            this.lblModYRot.AutoSize = true;
-            this.lblModYRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModYRot.Location = new System.Drawing.Point(146, 46);
-            this.lblModYRot.Name = "lblModYRot";
-            this.lblModYRot.Size = new System.Drawing.Size(43, 17);
-            this.lblModYRot.TabIndex = 14;
-            this.lblModYRot.Text = "YRot:";
+            this.txtModDList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModDList.Location = new System.Drawing.Point(135, 199);
+            this.txtModDList.Name = "txtModDList";
+            this.txtModDList.ReadOnly = true;
+            this.txtModDList.Size = new System.Drawing.Size(121, 23);
+            this.txtModDList.TabIndex = 30;
             // 
-            // lblModX
+            // lblModPos
             // 
-            this.lblModX.AutoSize = true;
-            this.lblModX.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModX.Location = new System.Drawing.Point(41, 17);
-            this.lblModX.Name = "lblModX";
-            this.lblModX.Size = new System.Drawing.Size(21, 17);
-            this.lblModX.TabIndex = 8;
-            this.lblModX.Text = "X:";
+            this.lblModPos.AutoSize = true;
+            this.lblModPos.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModPos.Location = new System.Drawing.Point(55, 144);
+            this.lblModPos.Name = "lblModPos";
+            this.lblModPos.Size = new System.Drawing.Size(74, 17);
+            this.lblModPos.TabIndex = 25;
+            this.lblModPos.Text = "Level Pos:";
             // 
-            // txtModYRot
+            // lblModDList
             // 
-            this.txtModYRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModYRot.Location = new System.Drawing.Point(195, 43);
-            this.txtModYRot.Name = "txtModYRot";
-            this.txtModYRot.Size = new System.Drawing.Size(63, 23);
-            this.txtModYRot.TabIndex = 15;
-            this.txtModYRot.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
-            // 
-            // txtModX
-            // 
-            this.txtModX.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModX.Location = new System.Drawing.Point(66, 14);
-            this.txtModX.Name = "txtModX";
-            this.txtModX.Size = new System.Drawing.Size(63, 23);
-            this.txtModX.TabIndex = 9;
-            this.txtModX.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
-            // 
-            // lblModZ
-            // 
-            this.lblModZ.AutoSize = true;
-            this.lblModZ.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModZ.Location = new System.Drawing.Point(41, 75);
-            this.lblModZ.Name = "lblModZ";
-            this.lblModZ.Size = new System.Drawing.Size(21, 17);
-            this.lblModZ.TabIndex = 16;
-            this.lblModZ.Text = "Z:";
-            // 
-            // lblModUnk
-            // 
-            this.lblModUnk.AutoSize = true;
-            this.lblModUnk.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModUnk.Location = new System.Drawing.Point(59, 173);
-            this.lblModUnk.Name = "lblModUnk";
-            this.lblModUnk.Size = new System.Drawing.Size(70, 17);
-            this.lblModUnk.TabIndex = 27;
-            this.lblModUnk.Text = "Unknown:";
-            // 
-            // txtModZ
-            // 
-            this.txtModZ.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModZ.Location = new System.Drawing.Point(66, 72);
-            this.txtModZ.Name = "txtModZ";
-            this.txtModZ.Size = new System.Drawing.Size(63, 23);
-            this.txtModZ.TabIndex = 17;
-            this.txtModZ.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
-            // 
-            // txtModUnk
-            // 
-            this.txtModUnk.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModUnk.Location = new System.Drawing.Point(135, 170);
-            this.txtModUnk.Name = "txtModUnk";
-            this.txtModUnk.ReadOnly = true;
-            this.txtModUnk.Size = new System.Drawing.Size(121, 23);
-            this.txtModUnk.TabIndex = 28;
-            // 
-            // lblModZRot
-            // 
-            this.lblModZRot.AutoSize = true;
-            this.lblModZRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModZRot.Location = new System.Drawing.Point(146, 75);
-            this.lblModZRot.Name = "lblModZRot";
-            this.lblModZRot.Size = new System.Drawing.Size(43, 17);
-            this.lblModZRot.TabIndex = 18;
-            this.lblModZRot.Text = "ZRot:";
-            // 
-            // txtModPos
-            // 
-            this.txtModPos.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModPos.Location = new System.Drawing.Point(135, 141);
-            this.txtModPos.Name = "txtModPos";
-            this.txtModPos.ReadOnly = true;
-            this.txtModPos.Size = new System.Drawing.Size(121, 23);
-            this.txtModPos.TabIndex = 26;
-            // 
-            // btnLoadLevel
-            // 
-            this.btnLoadLevel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.btnLoadLevel.Location = new System.Drawing.Point(195, 234);
-            this.btnLoadLevel.Name = "btnLoadLevel";
-            this.btnLoadLevel.Size = new System.Drawing.Size(95, 36);
-            this.btnLoadLevel.TabIndex = 0;
-            this.btnLoadLevel.Text = "Load";
-            this.btnLoadLevel.UseVisualStyleBackColor = true;
-            this.btnLoadLevel.Click += new System.EventHandler(this.btnLoadLevel_Click);
-            // 
-            // txtModZRot
-            // 
-            this.txtModZRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModZRot.Location = new System.Drawing.Point(195, 72);
-            this.txtModZRot.Name = "txtModZRot";
-            this.txtModZRot.Size = new System.Drawing.Size(63, 23);
-            this.txtModZRot.TabIndex = 19;
-            this.txtModZRot.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
+            this.lblModDList.AutoSize = true;
+            this.lblModDList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModDList.Location = new System.Drawing.Point(43, 202);
+            this.lblModDList.Name = "lblModDList";
+            this.lblModDList.Size = new System.Drawing.Size(86, 17);
+            this.lblModDList.TabIndex = 29;
+            this.lblModDList.Text = "DList Offset:";
             // 
             // cbLevelSelect
             // 
@@ -277,96 +215,158 @@
             this.cbLevelSelect.TabIndex = 1;
             this.cbLevelSelect.SelectedIndexChanged += new System.EventHandler(this.cbLevelSelect_SelectedIndexChanged);
             // 
-            // lblModDList
+            // txtModZRot
             // 
-            this.lblModDList.AutoSize = true;
-            this.lblModDList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModDList.Location = new System.Drawing.Point(43, 202);
-            this.lblModDList.Name = "lblModDList";
-            this.lblModDList.Size = new System.Drawing.Size(86, 17);
-            this.lblModDList.TabIndex = 29;
-            this.lblModDList.Text = "DList Offset:";
+            this.txtModZRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModZRot.Location = new System.Drawing.Point(195, 72);
+            this.txtModZRot.Name = "txtModZRot";
+            this.txtModZRot.Size = new System.Drawing.Size(63, 23);
+            this.txtModZRot.TabIndex = 19;
+            this.txtModZRot.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
             // 
-            // lblModPos
+            // btnLoadLevel
             // 
-            this.lblModPos.AutoSize = true;
-            this.lblModPos.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModPos.Location = new System.Drawing.Point(55, 144);
-            this.lblModPos.Name = "lblModPos";
-            this.lblModPos.Size = new System.Drawing.Size(74, 17);
-            this.lblModPos.TabIndex = 25;
-            this.lblModPos.Text = "Level Pos:";
+            this.btnLoadLevel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.btnLoadLevel.Location = new System.Drawing.Point(195, 234);
+            this.btnLoadLevel.Name = "btnLoadLevel";
+            this.btnLoadLevel.Size = new System.Drawing.Size(91, 36);
+            this.btnLoadLevel.TabIndex = 0;
+            this.btnLoadLevel.Text = "Load";
+            this.btnLoadLevel.UseVisualStyleBackColor = true;
+            this.btnLoadLevel.Click += new System.EventHandler(this.btnLoadLevel_Click);
             // 
-            // txtModDList
+            // txtModPos
             // 
-            this.txtModDList.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModDList.Location = new System.Drawing.Point(135, 199);
-            this.txtModDList.Name = "txtModDList";
-            this.txtModDList.ReadOnly = true;
-            this.txtModDList.Size = new System.Drawing.Size(121, 23);
-            this.txtModDList.TabIndex = 30;
+            this.txtModPos.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModPos.Location = new System.Drawing.Point(135, 141);
+            this.txtModPos.Name = "txtModPos";
+            this.txtModPos.ReadOnly = true;
+            this.txtModPos.Size = new System.Drawing.Size(121, 23);
+            this.txtModPos.TabIndex = 26;
             // 
-            // lblModID
+            // lblModZRot
             // 
-            this.lblModID.AutoSize = true;
-            this.lblModID.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.lblModID.Location = new System.Drawing.Point(104, 115);
-            this.lblModID.Name = "lblModID";
-            this.lblModID.Size = new System.Drawing.Size(25, 17);
-            this.lblModID.TabIndex = 23;
-            this.lblModID.Text = "ID:";
+            this.lblModZRot.AutoSize = true;
+            this.lblModZRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModZRot.Location = new System.Drawing.Point(146, 75);
+            this.lblModZRot.Name = "lblModZRot";
+            this.lblModZRot.Size = new System.Drawing.Size(43, 17);
+            this.lblModZRot.TabIndex = 18;
+            this.lblModZRot.Text = "ZRot:";
             // 
-            // btnModSnapTo
+            // txtModUnk
             // 
-            this.btnModSnapTo.Enabled = false;
-            this.btnModSnapTo.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.btnModSnapTo.Location = new System.Drawing.Point(25, 110);
-            this.btnModSnapTo.Name = "btnModSnapTo";
-            this.btnModSnapTo.Size = new System.Drawing.Size(37, 26);
-            this.btnModSnapTo.TabIndex = 31;
-            this.btnModSnapTo.UseVisualStyleBackColor = true;
-            this.btnModSnapTo.Click += new System.EventHandler(this.btnModSnapTo_Click);
+            this.txtModUnk.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModUnk.Location = new System.Drawing.Point(135, 170);
+            this.txtModUnk.Name = "txtModUnk";
+            this.txtModUnk.ReadOnly = true;
+            this.txtModUnk.Size = new System.Drawing.Size(121, 23);
+            this.txtModUnk.TabIndex = 28;
             // 
-            // txtModID
+            // txtModZ
             // 
-            this.txtModID.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.txtModID.Location = new System.Drawing.Point(135, 112);
-            this.txtModID.Name = "txtModID";
-            this.txtModID.ReadOnly = true;
-            this.txtModID.Size = new System.Drawing.Size(121, 23);
-            this.txtModID.TabIndex = 24;
+            this.txtModZ.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModZ.Location = new System.Drawing.Point(66, 72);
+            this.txtModZ.Name = "txtModZ";
+            this.txtModZ.Size = new System.Drawing.Size(63, 23);
+            this.txtModZ.TabIndex = 17;
+            this.txtModZ.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
             // 
-            // pnlObjectInfo
+            // lblModUnk
             // 
-            this.pnlObjectInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlObjectInfo.Controls.Add(this.txtModID);
-            this.pnlObjectInfo.Controls.Add(this.btnModSnapTo);
-            this.pnlObjectInfo.Controls.Add(this.lblModID);
-            this.pnlObjectInfo.Controls.Add(this.txtModDList);
-            this.pnlObjectInfo.Controls.Add(this.lblModPos);
-            this.pnlObjectInfo.Controls.Add(this.lblModDList);
-            this.pnlObjectInfo.Controls.Add(this.cbLevelSelect);
-            this.pnlObjectInfo.Controls.Add(this.txtModZRot);
-            this.pnlObjectInfo.Controls.Add(this.btnLoadLevel);
-            this.pnlObjectInfo.Controls.Add(this.txtModPos);
-            this.pnlObjectInfo.Controls.Add(this.lblModZRot);
-            this.pnlObjectInfo.Controls.Add(this.txtModUnk);
-            this.pnlObjectInfo.Controls.Add(this.txtModZ);
-            this.pnlObjectInfo.Controls.Add(this.lblModUnk);
-            this.pnlObjectInfo.Controls.Add(this.lblModZ);
-            this.pnlObjectInfo.Controls.Add(this.txtModX);
-            this.pnlObjectInfo.Controls.Add(this.txtModYRot);
-            this.pnlObjectInfo.Controls.Add(this.lblModX);
-            this.pnlObjectInfo.Controls.Add(this.lblModYRot);
-            this.pnlObjectInfo.Controls.Add(this.lblModXRot);
-            this.pnlObjectInfo.Controls.Add(this.txtModY);
-            this.pnlObjectInfo.Controls.Add(this.txtModXRot);
-            this.pnlObjectInfo.Controls.Add(this.lblModY);
-            this.pnlObjectInfo.Location = new System.Drawing.Point(3, 114);
-            this.pnlObjectInfo.Name = "pnlObjectInfo";
-            this.pnlObjectInfo.Size = new System.Drawing.Size(289, 276);
-            this.pnlObjectInfo.TabIndex = 33;
+            this.lblModUnk.AutoSize = true;
+            this.lblModUnk.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModUnk.Location = new System.Drawing.Point(59, 173);
+            this.lblModUnk.Name = "lblModUnk";
+            this.lblModUnk.Size = new System.Drawing.Size(70, 17);
+            this.lblModUnk.TabIndex = 27;
+            this.lblModUnk.Text = "Unknown:";
+            // 
+            // lblModZ
+            // 
+            this.lblModZ.AutoSize = true;
+            this.lblModZ.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModZ.Location = new System.Drawing.Point(41, 75);
+            this.lblModZ.Name = "lblModZ";
+            this.lblModZ.Size = new System.Drawing.Size(21, 17);
+            this.lblModZ.TabIndex = 16;
+            this.lblModZ.Text = "Z:";
+            // 
+            // txtModX
+            // 
+            this.txtModX.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModX.Location = new System.Drawing.Point(66, 14);
+            this.txtModX.Name = "txtModX";
+            this.txtModX.Size = new System.Drawing.Size(63, 23);
+            this.txtModX.TabIndex = 9;
+            this.txtModX.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
+            // 
+            // txtModYRot
+            // 
+            this.txtModYRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModYRot.Location = new System.Drawing.Point(195, 43);
+            this.txtModYRot.Name = "txtModYRot";
+            this.txtModYRot.Size = new System.Drawing.Size(63, 23);
+            this.txtModYRot.TabIndex = 15;
+            this.txtModYRot.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
+            // 
+            // lblModX
+            // 
+            this.lblModX.AutoSize = true;
+            this.lblModX.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModX.Location = new System.Drawing.Point(41, 17);
+            this.lblModX.Name = "lblModX";
+            this.lblModX.Size = new System.Drawing.Size(21, 17);
+            this.lblModX.TabIndex = 8;
+            this.lblModX.Text = "X:";
+            // 
+            // lblModYRot
+            // 
+            this.lblModYRot.AutoSize = true;
+            this.lblModYRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModYRot.Location = new System.Drawing.Point(146, 46);
+            this.lblModYRot.Name = "lblModYRot";
+            this.lblModYRot.Size = new System.Drawing.Size(43, 17);
+            this.lblModYRot.TabIndex = 14;
+            this.lblModYRot.Text = "YRot:";
+            // 
+            // lblModXRot
+            // 
+            this.lblModXRot.AutoSize = true;
+            this.lblModXRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModXRot.Location = new System.Drawing.Point(146, 17);
+            this.lblModXRot.Name = "lblModXRot";
+            this.lblModXRot.Size = new System.Drawing.Size(43, 17);
+            this.lblModXRot.TabIndex = 10;
+            this.lblModXRot.Text = "XRot:";
+            // 
+            // txtModY
+            // 
+            this.txtModY.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModY.Location = new System.Drawing.Point(66, 43);
+            this.txtModY.Name = "txtModY";
+            this.txtModY.Size = new System.Drawing.Size(63, 23);
+            this.txtModY.TabIndex = 13;
+            this.txtModY.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
+            // 
+            // txtModXRot
+            // 
+            this.txtModXRot.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.txtModXRot.Location = new System.Drawing.Point(195, 14);
+            this.txtModXRot.Name = "txtModXRot";
+            this.txtModXRot.Size = new System.Drawing.Size(63, 23);
+            this.txtModXRot.TabIndex = 11;
+            this.txtModXRot.TextChanged += new System.EventHandler(this.txtMod_TextChanged);
+            // 
+            // lblModY
+            // 
+            this.lblModY.AutoSize = true;
+            this.lblModY.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.lblModY.Location = new System.Drawing.Point(41, 46);
+            this.lblModY.Name = "lblModY";
+            this.lblModY.Size = new System.Drawing.Size(21, 17);
+            this.lblModY.TabIndex = 12;
+            this.lblModY.Text = "Y:";
             // 
             // LevelViewerControl
             // 

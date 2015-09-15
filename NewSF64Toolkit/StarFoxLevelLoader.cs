@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OpenTK.Graphics.OpenGL;
+using NewSF64Toolkit.OpenGL;
+using NewSF64Toolkit.OpenGL.F3DEX;
 
 namespace NewSF64Toolkit
 {

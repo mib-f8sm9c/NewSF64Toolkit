@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NewSF64Toolkit.DataStructures
+namespace NewSF64Toolkit.DataStructures.DMA
 {
     public class HeaderDMAFile : DMAFile
     {
@@ -20,7 +20,7 @@ namespace NewSF64Toolkit.DataStructures
 
         }
 
-        public override void LoadFromBytes(byte[] bytes)
+        public override bool LoadFromBytes(byte[] bytes)
         {
             base.LoadFromBytes(bytes);
 
@@ -31,6 +31,8 @@ namespace NewSF64Toolkit.DataStructures
 
             CRC1 = ByteHelper.ReadUInt(bytes, 16);
             CRC2 = ByteHelper.ReadUInt(bytes, 20);
+
+            return true;
         }
 
         public override byte[] GetAsBytes()

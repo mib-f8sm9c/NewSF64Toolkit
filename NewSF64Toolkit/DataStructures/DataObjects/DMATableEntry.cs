@@ -14,27 +14,38 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
 
         public int Offset;
 
-        public DMATableEntry(int offset, uint vstart, uint pstart, uint pend, uint cflag)
+        public DMATableEntry(int offset, byte[] bytes)
         {
             Offset = offset;
 
-            VStart = vstart;
-            PStart = pstart;
-            PEnd = pend;
-            CFlag = cflag;
+            LoadFromBytes(bytes);
         }
 
         public byte[] GetAsBytes()
         {
-            byte[] bytes = new byte[16];
+            byte[] bytes = new byte[Size];
 
-            ByteHelper.WriteUInt(VStart, bytes, 0);
-            ByteHelper.WriteUInt(PStart, bytes, 4);
-            ByteHelper.WriteUInt(PEnd, bytes, 8);
-            ByteHelper.WriteUInt(CFlag, bytes, 12);
+            ByteHelper.WriteUInt(VStart, bytes, 0x0);
+            ByteHelper.WriteUInt(PStart, bytes, 0x4);
+            ByteHelper.WriteUInt(PEnd, bytes, 0x8);
+            ByteHelper.WriteUInt(CFlag, bytes, 0xC);
 
             return bytes;
         }
 
+        public bool LoadFromBytes(byte[] bytes)
+        {
+            if (bytes.Length != Size)
+                return false;
+
+            VStart = ByteHelper.ReadUInt(bytes, 0x0);
+            PStart = ByteHelper.ReadUInt(bytes, 0x4);
+            PEnd = ByteHelper.ReadUInt(bytes, 0x8);
+            CFlag = ByteHelper.ReadUInt(bytes, 0xC);
+
+            return true;
+        }
+
+        public static int Size { get { return 0x10; } }
     }
 }

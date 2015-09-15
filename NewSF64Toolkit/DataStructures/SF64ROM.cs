@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using NewSF64Toolkit.Settings;
+using NewSF64Toolkit.DataStructures.DMA;
 
 namespace NewSF64Toolkit.DataStructures
 {
@@ -14,7 +15,12 @@ namespace NewSF64Toolkit.DataStructures
         private HeaderDMAFile _headerDMA;
         public HeaderDMAFile HeaderInfo { get { return _headerDMA; } }
 
+        private ReferenceDMAFile _referenceDMA;
+        public ReferenceDMAFile ReferenceDMA { get { return _referenceDMA; } }
+
         private DMATableDMAFile _dmaTableDMA;
+
+        private DialogueDMAFile _dialogueDMA;
 
         public string Filename { get; private set; }
 
@@ -129,7 +135,12 @@ namespace NewSF64Toolkit.DataStructures
         {
             Filename = fileName;
 
-            if(DMATable == null)
+            LoadFromBytes(data);
+        }
+
+        public bool LoadFromBytes(byte[] data)
+        {
+            if (DMATable == null)
                 DMATable = new List<DMAFile>();
 
             string gameID = System.Text.Encoding.UTF8.GetString(data, 59, 4);
@@ -140,6 +151,8 @@ namespace NewSF64Toolkit.DataStructures
             IsROMLoaded = BytesToDMATable(data, endianness);
 
             CheckValidity();
+
+            return true;
         }
 
         //Needs to be fixed, now that the system has been changed up
@@ -242,9 +255,35 @@ namespace NewSF64Toolkit.DataStructures
                             entry = new HeaderDMAFile(dmaBytes);
                             _headerDMA = (HeaderDMAFile)entry;
                             break;
+                        case 1: //Reference DMA
+                            entry = new ReferenceDMAFile(dmaBytes);
+                            _referenceDMA = (ReferenceDMAFile)entry;
+                            break;
                         case 2: //DMA Table DMA
                             entry = new DMATableDMAFile(dmaBytes);
                             _dmaTableDMA = (DMATableDMAFile)entry;
+                            break;
+                        case 54: //Dialogue DMA
+                            entry = new DialogueDMAFile(dmaBytes);
+                            _dialogueDMA = (DialogueDMAFile)entry;
+                            break;
+                        //case 12: Appears broken right now, the Game Object table is set up differently than the other files. Possibly a prototype setup?
+                        case 18:
+                        case 19:
+                        case 26:
+                        case 27:
+                        case 29:
+                        case 30:
+                        case 31:
+                        case 33:
+                        case 34:
+                        case 35:
+                        case 36:
+                        case 37:
+                        case 38:
+                        case 47:
+                        case 53:
+                            entry = new LevelDMAFile(dmaBytes, (int)_referenceDMA.LevelInfoOffsets[StarFoxRomInfo.DMATableToLevelIndex(DMATable.Count)]);
                             break;
                         default: //Others
                             entry = new DMAFile(dmaBytes);

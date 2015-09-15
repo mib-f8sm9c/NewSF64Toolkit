@@ -1,4 +1,4 @@
-﻿namespace NewSF64Toolkit
+﻿namespace NewSF64Toolkit.OpenGL
 {
     partial class OpenGLControl
     {

@@ -29,16 +29,20 @@ namespace NewSF64Toolkit
             CRC1 = crc1;
             CRC2 = crc2;
             DMATableOffset = dmaTableOffset;
-
-            //Double check the DMA if it's invalid
-            if (dmaTableOffset == 0x0)
-                DMATableOffset = StarFoxRomInfo.GetDMATableOffset(GameID, Version);
-                
         }
     }
-    static public class StarFoxRomInfo
+
+    public struct MIO0Header
     {
-        static private ROMInfo[] VALID_GAME_VERSIONS =
+        public uint ID;			// always "MIO0"
+        public uint OutputSize;	// decompressed data size
+        public uint CompLoc;		// compressed data loc
+        public uint RawLoc;		// uncompressed data loc
+    }
+
+    public static class StarFoxRomInfo
+    {
+        private static ROMInfo[] VALID_GAME_VERSIONS =
         {
             new ROMInfo("A","NFXJ", 0, 0xFFCAA7C1, 0x68858537, 0x0E93C0),
             new ROMInfo("Star Fox 64 (U) [v1.0]",	"NFXE", 0, 0xA7D015F8, 0x2289AA43, 0x0D9A90),
@@ -47,9 +51,24 @@ namespace NewSF64Toolkit
             new ROMInfo("Lylat Wars (A)",			"NFXU", 0, 0x2483F22B, 0x136E025E, 0x0E0470)
         };
 
+
+
         public static uint[] EndiannessMarkers = { 0x80371240, 0x40123780, 0x37804012, 0x12408037 };
 
-        static public uint GetDMATableOffset(string gameID, byte version)
+        public static int[] LevelIndexAndDMAs = { 18, 19, 26, 29, 29, 35, 30, 36, 37, 47, 53, -1, -1, -1, 34, -1, 38, 33, 27, 31, 12 };
+
+        public static int DMATableToLevelIndex(int dmaTable)
+        {
+            for (int i = 0; i < LevelIndexAndDMAs.Length; i++)
+            {
+                if (LevelIndexAndDMAs[i] == dmaTable)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public static uint GetDMATableOffset(string gameID, byte version)
         {
             //Do more work here, check against the CRC, etc.
             ROMInfo matchingInfo = VALID_GAME_VERSIONS.SingleOrDefault(v => v.GameID == gameID && v.Version == version);
@@ -60,28 +79,20 @@ namespace NewSF64Toolkit
             return 0x0;
         }
 
-        static public bool IsValidVersion(string gameID, byte version)
+        public static bool IsValidVersion(string gameID, byte version)
         {
             //Do more work here, check against the CRC, etc.
             return VALID_GAME_VERSIONS.Count(v => v.GameID == gameID && v.Version == version) > 0;
         }
 
-        static public Endianness GetEndianness(uint endianBytes)
+        public static Endianness GetEndianness(uint endianBytes)
         {
             return EndiannessMarkers.Contains(endianBytes) ? (Endianness)EndiannessMarkers.ToList().IndexOf(endianBytes) : Endianness.BigEndian;
         }
 
-        static public uint GetEndianness(Endianness endian)
+        public static uint GetEndianness(Endianness endian)
         {
             return ((int)endian) >= 0 && ((int)endian) < EndiannessMarkers.Length ? EndiannessMarkers[(int)endian] : EndiannessMarkers[0];
-        }
-
-        private struct MIO0Header
-        {
-            public uint ID;			// always "MIO0"
-            public uint OutputSize;	// decompressed data size
-            public uint CompLoc;		// compressed data loc
-            public uint RawLoc;		// uncompressed data loc
         }
 
         // MIO0 decompression code by HyperHacker (adapted from SF64Toolkit)

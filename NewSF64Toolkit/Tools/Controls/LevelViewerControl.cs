@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using NewSF64Toolkit.DataStructures;
+using NewSF64Toolkit.OpenGL;
+using NewSF64Toolkit.OpenGL.F3DEX;
 
 namespace NewSF64Toolkit.Tools.Controls
 {
@@ -41,7 +43,6 @@ namespace NewSF64Toolkit.Tools.Controls
             else
                 btnLoadLevel.Enabled = true;
         }
-
 
         private void btnLoadLevel_Click(object sender, EventArgs e)
         {

@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
+using NewSF64Toolkit.OpenGL;
 
-namespace NewSF64Toolkit
+namespace NewSF64Toolkit.OpenGL.F3DEX
 {
     public class F3DEXParser
     {

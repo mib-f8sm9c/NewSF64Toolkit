@@ -8,15 +8,33 @@ using System.Text;
 using System.Windows.Forms;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
+using NewSF64Toolkit.OpenGL.F3DEX;
 
-namespace NewSF64Toolkit
+namespace NewSF64Toolkit.OpenGL
 {
     public partial class OpenGLControl : UserControl
     {
+        List<IGLRenderable> Renderables;
+
+        public bool GLLoaded { get; private set; }
+
+        public float[] LightAmbient = new float[4]; //4
+        public float[] LightDiffuse = new float[4]; //4
+        public float[] LightSpecular = new float[4]; //4
+        public float[] LightPosition = new float[4]; //4
+
+        public static uint ChangedModes;
+        public static uint GeometryMode;
+        public static uint OtherModeL;
+        public static uint OtherModeH;
+        public static uint Store_RDPHalf1, Store_RDPHalf2;
+        public static uint Combiner0, Combiner1;
+
         public OpenGLControl()
         {
             InitializeComponent();
 
+            Renderables = new List<IGLRenderable>();
             SFCamera.UpdateCamera += UpdateCamera;
         }
 
@@ -25,20 +43,11 @@ namespace NewSF64Toolkit
             ReDraww();
         }
 
-        public bool GLLoaded { get; private set; }
-
-        public enum MouseType
-        {
-            Camera,
-            Select
-        }
-
-        private MouseType _mouseType;
-
         private void glDisplay_Load(object sender, EventArgs e)
         {
             if (LicenseManager.UsageMode == LicenseUsageMode.Designtime) return;
             SFCamera.Reset();
+
             //If there are unitialized-related errors, it's probably setting this too early
             GL.ClearColor(Color.CornflowerBlue);
             SetupViewport();
@@ -72,6 +81,7 @@ namespace NewSF64Toolkit
         {
             glDisplay.Invalidate();
         }
+
         private void OpenGLControl_Resize(object sender, EventArgs e)
         {
             if (GLLoaded)
@@ -165,16 +175,16 @@ namespace NewSF64Toolkit
 
             int i = 0;
             for(i = 0; i < 4; i++) {
-                SFGfx.LightAmbient[i] = 1.0f;
-                SFGfx.LightDiffuse[i] = 1.0f;
-                SFGfx.LightSpecular[i] = 1.0f;
-                SFGfx.LightPosition[i] = 1.0f;
+                LightAmbient[i] = 1.0f;
+                LightDiffuse[i] = 1.0f;
+                LightSpecular[i] = 1.0f;
+                LightPosition[i] = 1.0f;
             }
 
-	        GL.Light(LightName.Light0, LightParameter.Ambient, SFGfx.LightAmbient);
-	        GL.Light(LightName.Light0, LightParameter.Diffuse, SFGfx.LightDiffuse);
-	        GL.Light(LightName.Light0, LightParameter.Specular, SFGfx.LightSpecular);
-	        GL.Light(LightName.Light0, LightParameter.Position, SFGfx.LightPosition);
+	        GL.Light(LightName.Light0, LightParameter.Ambient, LightAmbient);
+	        GL.Light(LightName.Light0, LightParameter.Diffuse, LightDiffuse);
+	        GL.Light(LightName.Light0, LightParameter.Specular, LightSpecular);
+	        GL.Light(LightName.Light0, LightParameter.Position, LightPosition);
 	        GL.Enable(EnableCap.Light0);
 
 	        GL.Enable(EnableCap.Lighting);
@@ -285,21 +295,23 @@ namespace NewSF64Toolkit
             GL.Color3(1.0f, 1.0f, 1.0f);
             GL.Scale(0.004f, 0.004f, 0.004f);
 
-	        int ObjectNo = 0;
-            while (ObjectNo < SFGfx.GameObjCount)
+	        //int ObjectNo = 0;
+            //while (ObjectNo < SFGfx.GameObjCount)
+            IGLRenderable renderable;
+            for(int i = 0; i < Renderables.Count; i++)
             {
-                SFGfx.GameObject gameObject = SFGfx.GameObjects[ObjectNo];
+                //SFGfx.GameObject gameObject = SFGfx.GameObjects[ObjectNo];
+                renderable = Renderables[i];
 
-                if (Math.Abs(SFCamera.Z * 250 - (gameObject.Z - gameObject.LvlPos)) > 30000)
+                if (Math.Abs(SFCamera.Z * 250 - renderable.GL_Z) > 30000)
                 {
-                    ObjectNo++;
                     continue;
                 }
 
                 if (SFGfx.DisplayWireframe)
                 {
                     GL.PushMatrix();
-                    if (ObjectNo == SFGfx.SelectedGameObject)
+                    if (i == SFGfx.SelectedGameObject)
                     {
                         GL.Color3(0.0f, 1.0f, 0.0f);
                     }
@@ -310,12 +322,13 @@ namespace NewSF64Toolkit
 
                     GL.Disable(EnableCap.Lighting);
 
-                    GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
-                    GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
-                    GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
-                    GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+                    GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
+                    GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
+                    GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
+                    GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                    GL.CallList(SFGfx.WireframeGameObjectDListIndices[gameObject.DListOffset]);
+                    //BRING IN THE WIREFRAMES AGAIN LATER
+                    GL.CallList(renderable.GL_DisplayListIndex);//SFGfx.WireframeGameObjectDListIndices[renderable.DListOffset]);
 
                     GL.Enable(EnableCap.Lighting);
 
@@ -323,16 +336,16 @@ namespace NewSF64Toolkit
                 }
                 else
                 {
-                    if (ObjectNo == SFGfx.SelectedGameObject)
+                    if (i == SFGfx.SelectedGameObject)
                     {
                         GL.PushMatrix();
 
-                        GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
-                        GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
-                        GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
-                        GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+                        GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
+                        GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
+                        GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
+                        GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                        GL.CallList(SFGfx.SelectedGameObjectDListIndices[gameObject.DListOffset]);
+                        GL.CallList(renderable.GL_DisplayListIndex);//SFGfx.SelectedGameObjectDListIndices[renderable.DListOffset]);
 
                         GL.PopMatrix();
                     }
@@ -340,18 +353,16 @@ namespace NewSF64Toolkit
                     {
                         GL.PushMatrix();
 
-                        GL.Translate((float)gameObject.X, (float)gameObject.Y, ((float)gameObject.Z - gameObject.LvlPos));
-                        GL.Rotate((float)gameObject.XRot, 1.0f, 0, 0);
-                        GL.Rotate((float)gameObject.YRot, 0, 1.0f, 0);
-                        GL.Rotate((float)gameObject.ZRot, 0, 0, 1.0f);
+                        GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
+                        GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
+                        GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
+                        GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                        GL.CallList(SFGfx.GameObjectDListIndices[gameObject.DListOffset]);
+                        GL.CallList(renderable.GL_DisplayListIndex);//SFGfx.GameObjectDListIndices[gameObject.DListOffset]);
 
                         GL.PopMatrix();
                     }
                 }
-
-                ObjectNo++;
             }
         }
 

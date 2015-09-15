@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NewSF64Toolkit.DataStructures
+namespace NewSF64Toolkit.DataStructures.DataObjects
 {
     /// <summary>
     /// This class will be used to allow parts of dma data to be pulled out of the whole and
@@ -20,7 +20,7 @@ namespace NewSF64Toolkit.DataStructures
         //public bool ReturnPartialData;
 
         public int StartOffset { get; private set; }
-        public int FullSize { get; private set; }
+        public int Size { get; private set; }
 
         public DynamicMemoryMapping()
         {
@@ -28,7 +28,7 @@ namespace NewSF64Toolkit.DataStructures
             //OverwriteMode = false;
             //ReturnPartialData = false;
             StartOffset = -1;
-            FullSize = -1;
+            Size = -1;
         }
 
         public bool AddMemory(int offset, byte[] data)
@@ -44,17 +44,17 @@ namespace NewSF64Toolkit.DataStructures
             if (MemoryMaps.Count == 1)
             {
                 StartOffset = offset;
-                FullSize = data.Length;
+                Size = data.Length;
             }
             else
             {
                 int oldStart = StartOffset;
                 StartOffset = Math.Min(oldStart, offset);
 
-                int oldEndOffset = oldStart + FullSize;
+                int oldEndOffset = oldStart + Size;
                 int endOffset = offset + data.Length;
                 int finalEndOffset = Math.Max(endOffset, oldEndOffset);
-                FullSize = finalEndOffset - StartOffset;
+                Size = finalEndOffset - StartOffset;
             }
 
             return true;
@@ -119,7 +119,7 @@ namespace NewSF64Toolkit.DataStructures
             MemoryMaps.Clear();
 
             StartOffset = -1;
-            FullSize = -1;
+            Size = -1;
         }
 
 
@@ -163,10 +163,10 @@ namespace NewSF64Toolkit.DataStructures
 
         public byte[] GetAsBytes()
         {
-            if (FullSize == -1)
+            if (Size == -1)
                 return new byte[0];
 
-            byte[] bytes = new byte[FullSize];
+            byte[] bytes = new byte[Size];
 
             foreach (KeyValuePair<int, byte[]> map in MemoryMaps)
             {
@@ -174,6 +174,12 @@ namespace NewSF64Toolkit.DataStructures
             }
 
             return bytes;
+        }
+
+        public bool LoadFromBytes(byte[] bytes)
+        {
+            //throw unimplemented;
+            throw new NotImplementedException();
         }
     }
 }

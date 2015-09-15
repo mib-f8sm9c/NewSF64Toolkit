@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.ComponentModel.Design;
 using NewSF64Toolkit.DataStructures;
+using NewSF64Toolkit.DataStructures.DMA;
 
 namespace NewSF64Toolkit.Tools.Controls
 {
