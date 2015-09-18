@@ -9,6 +9,8 @@ using System.Windows.Forms;
 using OpenTK.Graphics.OpenGL;
 using OpenTK;
 using NewSF64Toolkit.OpenGL.F3DEX;
+using NewSF64Toolkit.DataStructures;
+using NewSF64Toolkit.DataStructures.DMA;
 
 namespace NewSF64Toolkit.OpenGL
 {
@@ -298,10 +300,14 @@ namespace NewSF64Toolkit.OpenGL
 	        //int ObjectNo = 0;
             //while (ObjectNo < SFGfx.GameObjCount)
             IGLRenderable renderable;
-            for(int i = 0; i < Renderables.Count; i++)
+
+            if (SFGfx.SelectedLevelDMA == 0)
+                return;
+
+            for(int i = 0; i < ((LevelDMAFile)SF64ROM.Instance.DMATable[SFGfx.SelectedLevelDMA]).LevelObjects.Count; i++)
             {
                 //SFGfx.GameObject gameObject = SFGfx.GameObjects[ObjectNo];
-                renderable = Renderables[i];
+                renderable = ((LevelDMAFile)SF64ROM.Instance.DMATable[SFGfx.SelectedLevelDMA]).LevelObjects[i];
 
                 if (Math.Abs(SFCamera.Z * 250 - renderable.GL_Z) > 30000)
                 {
@@ -327,8 +333,7 @@ namespace NewSF64Toolkit.OpenGL
                     GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
                     GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                    //BRING IN THE WIREFRAMES AGAIN LATER
-                    GL.CallList(renderable.GL_DisplayListIndex);//SFGfx.WireframeGameObjectDListIndices[renderable.DListOffset]);
+                    GL.CallList(renderable.GL_DisplayListIndex[2]);//SFGfx.WireframeGameObjectDListIndices[renderable.DListOffset]);
 
                     GL.Enable(EnableCap.Lighting);
 
@@ -345,7 +350,7 @@ namespace NewSF64Toolkit.OpenGL
                         GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
                         GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                        GL.CallList(renderable.GL_DisplayListIndex);//SFGfx.SelectedGameObjectDListIndices[renderable.DListOffset]);
+                        GL.CallList(renderable.GL_DisplayListIndex[1]);//SFGfx.SelectedGameObjectDListIndices[renderable.DListOffset]);
 
                         GL.PopMatrix();
                     }
@@ -358,136 +363,10 @@ namespace NewSF64Toolkit.OpenGL
                         GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
                         GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                        GL.CallList(renderable.GL_DisplayListIndex);//SFGfx.GameObjectDListIndices[gameObject.DListOffset]);
+                        GL.CallList(renderable.GL_DisplayListIndex[0]);//SFGfx.GameObjectDListIndices[gameObject.DListOffset]);
 
                         GL.PopMatrix();
                     }
-                }
-            }
-        }
-
-        public void UpdateStates()
-        {
-            if ((SFGfx.ChangedModes & SFGfx.Constants.CHANGED_GEOMETRYMODE) != 0x0)
-            {
-                if ((SFGfx.GeometryMode & SFGfx.Constants.F3DEX_CULL_BOTH) != 0x0)
-                {
-                    GL.Enable(EnableCap.CullFace);
-
-                    if ((SFGfx.GeometryMode & SFGfx.Constants.F3DEX_CULL_BACK) != 0x0)
-                        GL.CullFace(CullFaceMode.Back);
-                    else
-                        GL.CullFace(CullFaceMode.Front);
-                }
-                else
-                {
-                    GL.Disable(EnableCap.CullFace);
-                }
-
-                if ((SFGfx.GeometryMode & SFGfx.Constants.F3DEX_SHADING_SMOOTH) != 0x0 || (SFGfx.GeometryMode & SFGfx.Constants.G_TEXTURE_GEN_LINEAR) == 0x0)
-                {
-                    GL.ShadeModel(ShadingModel.Smooth);
-                }
-                else
-                {
-                    GL.ShadeModel(ShadingModel.Flat);
-                }
-
-                if ((SFGfx.GeometryMode & SFGfx.Constants.G_LIGHTING) != 0x0)
-                {
-                    GL.Enable(EnableCap.Lighting);
-                    GL.Enable(EnableCap.Normalize);
-                }
-                else
-                {
-                    GL.Disable(EnableCap.Lighting);
-                    GL.Disable(EnableCap.Normalize);
-                }
-
-                SFGfx.ChangedModes &= ~(uint)SFGfx.Constants.CHANGED_GEOMETRYMODE;
-            }
-            /*
-                if(Gfx.GeometryMode & G_ZBUFFER)
-                    glEnable(GL_DEPTH_TEST);
-                else
-                    glDisable(GL_DEPTH_TEST);
-            */
-            if ((SFGfx.ChangedModes & SFGfx.Constants.CHANGED_RENDERMODE) != 0x0)
-            {
-                /*		if(Gfx.OtherModeL & Z_CMP)
-                            glDepthFunc(GL_LEQUAL);
-                        else
-                            glDepthFunc(GL_ALWAYS);
-                */
-                /*		if((Gfx.OtherModeL & Z_UPD) && !(Gfx.OtherModeL & ZMODE_INTER && Gfx.OtherModeL & ZMODE_XLU))
-                            glDepthMask(GL_TRUE);
-                        else
-                            glDepthMask(GL_FALSE);
-                */
-                if ((SFGfx.OtherModeL & SFGfx.Constants.ZMODE_DEC) != 0x0)
-                {
-                    GL.Enable(EnableCap.PolygonOffsetFill);
-                    GL.PolygonOffset(-3.0f, -3.0f);
-                }
-                else
-                {
-                    GL.Disable(EnableCap.PolygonOffsetFill);
-                }
-            }
-
-            if ((SFGfx.ChangedModes & SFGfx.Constants.CHANGED_ALPHACOMPARE) != 0x0 || (SFGfx.ChangedModes & SFGfx.Constants.CHANGED_RENDERMODE) != 0x0)
-            {
-                if ((SFGfx.OtherModeL & SFGfx.Constants.ALPHA_CVG_SEL) == 0x0)
-                {
-                    GL.Enable(EnableCap.AlphaTest);
-                    GL.AlphaFunc((SFGfx.BlendColor.A > 0.0f) ? AlphaFunction.Gequal : AlphaFunction.Greater, SFGfx.BlendColor.A);
-                }
-                else if ((SFGfx.OtherModeL & SFGfx.Constants.CVG_X_ALPHA) != 0x0)
-                {
-                    GL.Enable(EnableCap.AlphaTest);
-                    GL.AlphaFunc(AlphaFunction.Gequal, 0.2f);
-                }
-                else
-                    GL.Disable(EnableCap.AlphaTest);
-            }
-
-            if ((SFGfx.ChangedModes & SFGfx.Constants.CHANGED_RENDERMODE) != 0x0)
-            {
-                if ((SFGfx.OtherModeL & SFGfx.Constants.FORCE_BL) != 0x0 && (SFGfx.OtherModeL & SFGfx.Constants.ALPHA_CVG_SEL) == 0x0)
-                {
-                    GL.Enable(EnableCap.Blend);
-
-                    switch (SFGfx.OtherModeL >> 16)
-                    {
-                        case 0x0448: // Add
-                        case 0x055A:
-                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
-                            break;
-                        case 0x0C08: // 1080 Sky
-                        case 0x0F0A: // Used LOTS of places
-                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
-                            break;
-                        case 0xC810: // Blends fog
-                        case 0xC811: // Blends fog
-                        case 0x0C18: // Standard interpolated blend
-                        case 0x0C19: // Used for antialiasing
-                        case 0x0050: // Standard interpolated blend
-                        case 0x0055: // Used for antialiasing
-                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-                            break;
-                        case 0x0FA5: // Seems to be doing just blend color - maybe combiner can be used for this?
-                        case 0x5055: // Used in Paper Mario intro, I'm not sure if this is right...
-                            GL.BlendFunc(BlendingFactorSrc.Zero, BlendingFactorDest.One);
-                            break;
-
-                        default:
-                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-                            break;
-                    }
-                }
-                else
-                {
-                    GL.Disable(EnableCap.Blend);
                 }
             }
         }

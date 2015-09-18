@@ -5,6 +5,8 @@ using System.Text;
 using System.IO;
 using NewSF64Toolkit.Settings;
 using NewSF64Toolkit.DataStructures.DMA;
+using NewSF64Toolkit.DataStructures.DataObjects;
+using NewSF64Toolkit.OpenGL.F3DEX;
 
 namespace NewSF64Toolkit.DataStructures
 {
@@ -21,6 +23,8 @@ namespace NewSF64Toolkit.DataStructures
         private DMATableDMAFile _dmaTableDMA;
 
         private DialogueDMAFile _dialogueDMA;
+
+        private List<LevelDMAFile> _levelDMAs;
 
         public string Filename { get; private set; }
 
@@ -143,6 +147,9 @@ namespace NewSF64Toolkit.DataStructures
             if (DMATable == null)
                 DMATable = new List<DMAFile>();
 
+            if (_levelDMAs == null)
+                _levelDMAs = new List<LevelDMAFile>();
+
             string gameID = System.Text.Encoding.UTF8.GetString(data, 59, 4);
             byte version = data[63];
             DMATableOffset = StarFoxRomInfo.GetDMATableOffset(gameID, version);
@@ -227,8 +234,10 @@ namespace NewSF64Toolkit.DataStructures
             IsCompressed = false;
 
             DMATable.Clear();
+            _levelDMAs.Clear();
             _headerDMA = null;
             _dmaTableDMA = null;
+            _referenceDMA = null;
 
             int CurrentPos = (int)DMATableOffset;
 
@@ -284,6 +293,7 @@ namespace NewSF64Toolkit.DataStructures
                         case 47:
                         case 53:
                             entry = new LevelDMAFile(dmaBytes, (int)_referenceDMA.LevelInfoOffsets[StarFoxRomInfo.DMATableToLevelIndex(DMATable.Count)]);
+                            _levelDMAs.Add(entry as LevelDMAFile);
                             break;
                         default: //Others
                             entry = new DMAFile(dmaBytes);
@@ -305,6 +315,12 @@ namespace NewSF64Toolkit.DataStructures
                         if (DMATable[i].DMAInfo.CFlag == 1)
                             IsCompressed = true;
                     }
+                }
+
+                if (_referenceDMA != null && _levelDMAs.Count > 0)
+                {
+                    //Parse out the F3DEX info
+                    //LoadROMResources();
                 }
             }
             catch
@@ -450,6 +466,50 @@ namespace NewSF64Toolkit.DataStructures
             }
 
             return newRomData;
+        }
+
+        public void LoadROMResources()
+        {
+            //Here we'll go through the level files/reference file, and then create the F3DEX objects and link them to the
+            // simple object list in the reference file
+            F3DEXParser _f3dex = new F3DEXParser();
+
+            //_f3dex.InitInvalidModels();
+
+            //Init the simple objects to use the invalid box dlist indices
+            foreach (RefSimpleLevelObject obj in _referenceDMA.SimpleObjects)
+            {
+                obj.GLDisplayListOffset = F3DEXParser.InvalidBox;
+            }
+
+            foreach (LevelDMAFile level in _levelDMAs)
+            {
+                if (_levelDMAs.IndexOf(level) != 0)
+                    continue;
+
+                byte[] levelBytes = level.GetAsBytes();
+
+                foreach(SFLevelObject obj in level.LevelObjects)
+                {
+                    //We know that the 0x190 is the limit for the simple objects
+                    if (obj.ID < 0x190)
+                    {
+                        obj.DListOffset = _referenceDMA.SimpleObjects[obj.ID].DListOffset;
+
+                        // dlist offset sanity checks
+                        if (((obj.DListOffset & 3) != 0x0) ||							// dlist offset not 4 byte aligned
+                          ((obj.DListOffset & 0xFF000000) == 0x80000000))	// dlist offset lies in ram
+                            obj.DListOffset = 0x00;
+                        else if (obj.DListOffset != 0x00 && (byte)((obj.DListOffset & 0xFF000000) >> 24) == 0x06) //Need segment 6
+                        {
+                            //Load through the F3DEX parser, assign the DisplayListIndex to the Simple Object in the Reference DMA
+                            //In the future we'll serialize the F3DEX commands/textures/vertices too, but for functional purposes
+                            // we'll just use the blank binary
+                            _referenceDMA.SimpleObjects[obj.ID].GLDisplayListOffset = _f3dex.ReadGameObject(levelBytes, obj.DListOffset); //KEEP AN EYE OUT FOR ANY CROSS-DMA REFERENCES
+                        }
+                    }
+                }
+            }
         }
 
     }

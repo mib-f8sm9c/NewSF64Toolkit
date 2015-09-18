@@ -10,8 +10,6 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 {
     public class F3DEXParser
     {
-        private OpenGLControl _viewer;
-
         public enum DrawingModeType
         {
             Texture,
@@ -21,103 +19,224 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
         public DrawingModeType DrawingMode;
 
-        public F3DEXParser(OpenGLControl viewer)
+        public static int[] InvalidBox = new int[3] {0, 1, 2};
+
+        public F3DEXParser()
         {
-            _viewer = viewer;
             DrawingMode = DrawingModeType.Texture;
+
+            SFGfx.sv_ClearStructures(false);
+            SFGfx.gl_ClearRenderer(true);
+            SFGfx.GameObjects.Clear();
+            SFGfx.GameObjCount = 0;
+
+            InitInvalidModels();
         }
 
-        public void ReadGameObject(SFGfx.GameObject gameObject)
+        public void InitInvalidModels()
         {
-            byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
-            uint offset = gameObject.DListOffset & 0x00FFFFFF;
+            int listBase = GL.GenLists(3);
+            //GL.ListBase(listBase);
 
-            if (offset == 0 || !MemoryManager.Instance.HasBank(bankNo) || !MemoryManager.Instance.LocateBank(bankNo, offset).IsValid())
+            //Normal
+            GL.NewList(listBase, ListMode.Compile);
+
+            GL.PushMatrix();
+
+            DrawingMode = F3DEXParser.DrawingModeType.Texture;
+
+            DrawInvalidModel();
+
+            GL.PopMatrix();
+            GL.PopAttrib();
+
+            GL.EndList();
+
+            //Selected
+            GL.NewList(listBase + 1, ListMode.Compile);
+
+            GL.PushMatrix();
+
+            DrawingMode = F3DEXParser.DrawingModeType.TextureSelected;
+
+            DrawInvalidModel();
+
+            GL.PopMatrix();
+            GL.PopAttrib();
+
+            GL.EndList();
+
+            //Wireframe
+            GL.NewList(listBase + 2, ListMode.Compile);
+
+            GL.PushMatrix();
+
+            DrawingMode = F3DEXParser.DrawingModeType.Wireframe;
+
+            DrawInvalidModel();
+
+            GL.PopMatrix();
+            GL.PopAttrib();
+
+            GL.EndList();
+
+            DrawingMode = F3DEXParser.DrawingModeType.Texture;
+
+            InvalidBox = new int[3] { listBase, listBase + 1, listBase + 2 };
+        }
+
+        private void DrawInvalidModel()
+        {
+            GL.Disable(EnableCap.Lighting);
+            GL.Disable(EnableCap.Texture2D);
+
+            GL.Begin(PrimitiveType.Quads);
+            if (DrawingMode != DrawingModeType.Wireframe)
             {
-                //Draw the invalid model
-                GL.Disable(EnableCap.Lighting);
-                GL.Disable(EnableCap.Texture2D);
+                if (DrawingMode == DrawingModeType.TextureSelected)
+                    GL.Color3(0.0f, 1.0f, 0.0f);
+                else
+                    GL.Color3(1.0f, 0.0f, 0.0f);
+            }
 
-                GL.Begin(PrimitiveType.Quads);
-                if (DrawingMode != DrawingModeType.Wireframe)
-                {
-                    if (DrawingMode == DrawingModeType.TextureSelected)
-                        GL.Color3(0.0f, 1.0f, 0.0f);
-                    else
-                        GL.Color3(1.0f, 0.0f, 0.0f);
-                }
+            GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
+            GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
+            GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
+            GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
 
-                GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
-                GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
-                GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
-                GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
+            GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
+            GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
+            GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
+            GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
 
-                GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
-                GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
-                GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
-                GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
+            GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
+            GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
+            GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
+            GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
 
-                GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
-                GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
-                GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
-                GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
+            GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
+            GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
+            GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
+            GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
 
-                GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
-                GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
-                GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
-                GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
+            GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
+            GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
+            GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
+            GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
 
-                GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
-                GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
-                GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
-                GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
+            //front
+            if (DrawingMode != DrawingModeType.Wireframe)
+            {
+                GL.Color3(1.0f, 1.0f, 1.0f);
+            }
 
-                //front
-                if (DrawingMode != DrawingModeType.Wireframe)
-                {
-                    GL.Color3(1.0f, 1.0f, 1.0f);
-                }
+            GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
+            GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
+            GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
+            GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
+            GL.End();
 
-                GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
-                GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
-                GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
-                GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
-                GL.End();
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Lighting);
+        }
 
-                GL.Enable(EnableCap.Texture2D);
-                GL.Enable(EnableCap.Lighting);
+        //NOTE: We should make a way to clean up [DELETE] the old GL display lists
+
+        public int[] ReadGameObject(byte[] bytes, uint fullOffset)//SFGfx.GameObject gameObject)
+        {
+            //byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
+            uint offset = fullOffset & 0x00FFFFFF;
+
+            //Is 0 a valid location?
+            if (offset == 0)// || !MemoryManager.Instance.HasBank(bankNo) || !MemoryManager.Instance.LocateBank(bankNo, offset).IsValid())
+            {
+                //if(InvalidBox == null)
+                //    InitInvalidModels();
+
+                return InvalidBox;
             }
             else
             {
-                if (DrawingMode == DrawingModeType.TextureSelected)
-                {
-                    GL.PushAttrib(AttribMask.AllAttribBits);
-                    GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Add);
-                }
+                int listBase = GL.GenLists(3);
+                //GL.ListBase(listBase);
 
-                if (DrawingMode == DrawingModeType.Wireframe)
-                {
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-                }
+                //Normal
+                GL.NewList(listBase, ListMode.Compile);
 
-                GL.Disable(EnableCap.Texture2D);
-                GL.Disable(EnableCap.Lighting);
+                GL.PushMatrix();
 
-                SFGfx.DLStackPos = 0;
-                ParseDisplayList(gameObject.DListOffset);
+                DrawingMode = F3DEXParser.DrawingModeType.Texture;
 
-                GL.Enable(EnableCap.Texture2D);
-                GL.Enable(EnableCap.Lighting);
+                ReadF3DEX(bytes, offset);
 
-                if (DrawingMode == DrawingModeType.Wireframe)
-                {
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-                }
+                GL.PopMatrix();
 
-                if (DrawingMode == DrawingModeType.TextureSelected)
-                {
-                    GL.PopAttrib();
-                }
+                GL.EndList();
+
+                //Selected
+                GL.NewList(listBase + 1, ListMode.Compile);
+
+                GL.PushMatrix();
+
+                DrawingMode = F3DEXParser.DrawingModeType.TextureSelected;
+
+                ReadF3DEX(bytes, offset);
+
+                GL.PopMatrix();
+
+                GL.EndList();
+
+                //Wireframe
+                GL.NewList(listBase + 2, ListMode.Compile);
+
+                GL.PushMatrix();
+
+                DrawingMode = F3DEXParser.DrawingModeType.Wireframe;
+
+                ReadF3DEX(bytes, offset);
+
+                GL.PopMatrix();
+
+                GL.EndList();
+
+                return new int[3] { listBase, listBase + 1, listBase + 2 };
+            }
+        }
+
+        private byte[] currentBytes;
+
+        private void ReadF3DEX(byte[] bytes, uint offset)
+        {
+            currentBytes = bytes;
+
+            if (DrawingMode == DrawingModeType.TextureSelected)
+            {
+                GL.PushAttrib(AttribMask.AllAttribBits);
+                GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Add);
+            }
+
+            if (DrawingMode == DrawingModeType.Wireframe)
+            {
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            }
+
+            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.Lighting);
+
+            SFGfx.DLStackPos = 0;
+            ParseDisplayList(offset);
+
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Lighting);
+
+            if (DrawingMode == DrawingModeType.Wireframe)
+            {
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            }
+
+            if (DrawingMode == DrawingModeType.TextureSelected)
+            {
+                GL.PopAttrib();
             }
         }
 
@@ -331,12 +450,8 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
         void ParseDisplayList(uint Address)
         {
-            char TempSegment;
-            uint TempOffset;
-
-            SplitAddress(Address, out TempSegment, out TempOffset);
-
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            //We'll assume for now that the address is contained
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
             DListAddress = Address;
 
@@ -350,14 +465,14 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
             {
                 SplitAddress(DListAddress, out Segment, out Offset);
 
-                w0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset);//Read32(RAM[Segment].Data, Offset);
-                w1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 4);//RRead32(RAM[Segment].Data, Offset + 4);
+                w0 = ByteHelper.ReadUInt(currentBytes, Offset);//Read32(RAM[Segment].Data, Offset);
+                w1 = ByteHelper.ReadUInt(currentBytes, Offset + 4);//RRead32(RAM[Segment].Data, Offset + 4);
 
-                wp0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset - 8);//Read32(RAM[Segment].Data, Offset - 8);
-                wp1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset - 4);//Read32(RAM[Segment].Data, Offset - 4);
+                wp0 = ByteHelper.ReadUInt(currentBytes, Offset - 8);//Read32(RAM[Segment].Data, Offset - 8);
+                wp1 = ByteHelper.ReadUInt(currentBytes, Offset - 4);//Read32(RAM[Segment].Data, Offset - 4);
 
-                wn0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 8);//Read32(RAM[Segment].Data, Offset + 8);
-                wn1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 12);//Read32(RAM[Segment].Data, Offset + 12);
+                wn0 = ByteHelper.ReadUInt(currentBytes, Offset + 8);//Read32(RAM[Segment].Data, Offset + 8);
+                wn1 = ByteHelper.ReadUInt(currentBytes, Offset + 12);//Read32(RAM[Segment].Data, Offset + 12);
 
                 UcodeCmd((byte)(w0 >> 24));//UcodeCmd[(byte)(w0 >> 24)]();
 
@@ -396,8 +511,8 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
 	        for(i = 0; i < 4; i++) {
 		        for(j = 0; j < 4; j++) {
-                    MtxTemp1 = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset);//((RAM[Segment].Data[Offset		] * 0x100) + RAM[Segment].Data[Offset + 1		]);
-                    MtxTemp2 = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + 32);//((RAM[Segment].Data[Offset + 32	] * 0x100) + RAM[Segment].Data[Offset + 33	]);
+                    MtxTemp1 = ByteHelper.ReadShort(currentBytes, TempOffset);//((RAM[Segment].Data[Offset		] * 0x100) + RAM[Segment].Data[Offset + 1		]);
+                    MtxTemp2 = ByteHelper.ReadShort(currentBytes, TempOffset + 32);//((RAM[Segment].Data[Offset + 32	] * 0x100) + RAM[Segment].Data[Offset + 33	]);
 			        Matrix[i * 4 + j] = ((MtxTemp1 << 16) | MtxTemp2) * fRecip;
 
 			        Offset += 2;
@@ -436,7 +551,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
             SplitAddress(w1, out TempSegment, out TempOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 	        uint V = _SHIFTR( w0, 17, 7 );
 	        uint N = _SHIFTR( w0, 10, 6 );
@@ -445,15 +560,15 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
 	        int i = 0;
 	        for(i = 0; i < (N << 4); i += 16) {
-                SFGfx.Vertices[V].X = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i);//((RAM[TempSegment].Data[TempOffset + i] << 8) | RAM[TempSegment].Data[TempOffset + i + 1]);
-                SFGfx.Vertices[V].Y = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 2);//((RAM[TempSegment].Data[TempOffset + i + 2] << 8) | RAM[TempSegment].Data[TempOffset + i + 3]);
-                SFGfx.Vertices[V].Z = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 4);//((RAM[TempSegment].Data[TempOffset + i + 4] << 8) | RAM[TempSegment].Data[TempOffset + i + 5]);
-                SFGfx.Vertices[V].S = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 8);//((RAM[TempSegment].Data[TempOffset + i + 8] << 8) | RAM[TempSegment].Data[TempOffset + i + 9]);
-                SFGfx.Vertices[V].T = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 10);//((RAM[TempSegment].Data[TempOffset + i + 10] << 8) | RAM[TempSegment].Data[TempOffset + i + 11]);
-                SFGfx.Vertices[V].R = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 12);//RAM[TempSegment].Data[TempOffset + i + 12];
-                SFGfx.Vertices[V].G = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
-                SFGfx.Vertices[V].B = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
-                SFGfx.Vertices[V].A = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
+                SFGfx.Vertices[V].X = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i);//((RAM[TempSegment].Data[TempOffset + i] << 8) | RAM[TempSegment].Data[TempOffset + i + 1]);
+                SFGfx.Vertices[V].Y = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i + 2);//((RAM[TempSegment].Data[TempOffset + i + 2] << 8) | RAM[TempSegment].Data[TempOffset + i + 3]);
+                SFGfx.Vertices[V].Z = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i + 4);//((RAM[TempSegment].Data[TempOffset + i + 4] << 8) | RAM[TempSegment].Data[TempOffset + i + 5]);
+                SFGfx.Vertices[V].S = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i + 8);//((RAM[TempSegment].Data[TempOffset + i + 8] << 8) | RAM[TempSegment].Data[TempOffset + i + 9]);
+                SFGfx.Vertices[V].T = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i + 10);//((RAM[TempSegment].Data[TempOffset + i + 10] << 8) | RAM[TempSegment].Data[TempOffset + i + 11]);
+                SFGfx.Vertices[V].R = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 12);//RAM[TempSegment].Data[TempOffset + i + 12];
+                SFGfx.Vertices[V].G = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
+                SFGfx.Vertices[V].B = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
+                SFGfx.Vertices[V].A = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
 
 		        V++;
 	        }
@@ -469,7 +584,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
             SplitAddress(w1, out TempSegment, out TempOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 	        SFGfx.DLStack[SFGfx.DLStackPos] = DListAddress;
 	        SFGfx.DLStackPos++;
@@ -490,7 +605,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
             SplitAddress(SFGfx.Store_RDPHalf1, out TempSegment, out TempOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 
 
@@ -507,13 +622,13 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
         void F3DEX_TRI2()
         {
-            if (SFGfx.ChangedModes != 0x00) this._viewer.UpdateStates();
+            if (SFGfx.ChangedModes != 0x00) UpdateStates();
 
 	        int[] Vtxs1 = new int[] { (int)_SHIFTR( w0, 17, 7 ), (int)_SHIFTR( w0, 9, 7 ), (int)_SHIFTR( w0, 1, 7 ) };
 
 	        DrawTriangle(Vtxs1);
 
-            if (SFGfx.ChangedModes != 0x00) this._viewer.UpdateStates();
+            if (SFGfx.ChangedModes != 0x00) UpdateStates();
 
             int[] Vtxs2 = new int[] { (int)_SHIFTR(w1, 17, 7), (int)_SHIFTR(w1, 9, 7), (int)_SHIFTR(w1, 1, 7) };
 	        DrawTriangle(Vtxs2);
@@ -621,7 +736,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
         void F3DEX_TRI1()
         {
-	        if(SFGfx.ChangedModes != 0x0) this._viewer.UpdateStates();
+	        if(SFGfx.ChangedModes != 0x0) UpdateStates();
 
             int[] Vtxs = new int[] { (int)_SHIFTR(w1, 17, 7), (int)_SHIFTR(w1, 9, 7), (int)_SHIFTR(w1, 1, 7) };
 	        DrawTriangle(Vtxs);
@@ -694,7 +809,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
             SplitAddress(SFGfx.Textures[SFGfx.CurrentTexture].PalOffset, out PalSegment, out PalOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
+            //if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
             
 	        uint PalSize = ((w1 & 0x00FFF000) >> 14) + 1;
 
@@ -704,7 +819,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 	        uint PalLoop;
 
 	        for(PalLoop = 0; PalLoop < PalSize; PalLoop++) {
-                Raw = MemoryManager.Instance.ReadUShort((byte)PalSegment, PalOffset);//(RAM[PalSegment].Data[PalOffset] << 8) | RAM[PalSegment].Data[PalOffset + 1];
+                Raw = ByteHelper.ReadUShort(currentBytes, PalOffset);//(RAM[PalSegment].Data[PalOffset] << 8) | RAM[PalSegment].Data[PalOffset + 1];
 
 		        R = (char)((Raw & 0xF800) >> 8);
                 G = (char)(((Raw & 0x07C0) << 5) >> 8);
@@ -719,7 +834,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
 		        PalOffset += 2;
 
-                if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) break;
+                //if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) break;
 	        }
         }
 
@@ -1711,11 +1826,11 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
             SplitAddress(SFGfx.Textures[TextureID].Offset, out TempSegment, out TempOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid())
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid())
             {
                 //memset(TextureData, 0xFF, BufferSize);
             }
-            else
+            //else
             {
                 switch (SFGfx.Textures[TextureID].Format)
                 {
@@ -1730,7 +1845,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
                             {
                                 for (i = 0; i < SFGfx.Textures[TextureID].Width; i++)
                                 {
-                                    Raw = MemoryManager.Instance.ReadUShort((byte)TexSegment, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
+                                    Raw = ByteHelper.ReadUShort(currentBytes, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
 
                                     RGBA = (((uint)Raw & 0xF800) >> 8) << 24;
                                     RGBA |= ((((uint)Raw & 0x07C0) << 5) >> 8) << 16;
@@ -1741,7 +1856,8 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
                                     TexOffset += 2;
                                     GLTexPosition += 4;
 
-                                    if (!MemoryManager.Instance.LocateBank((byte)TexSegment, TexOffset).IsValid()) break;//(TexOffset > RAM[TexSegment].Size) break;
+                                    //For now assume it will be valid
+                                    //if (!MemoryManager.Instance.LocateBank((byte)TexSegment, TexOffset).IsValid()) break;//(TexOffset > RAM[TexSegment].Size) break;
                                 }
                                 TexOffset += SFGfx.Textures[TextureID].LineSize * 4 - SFGfx.Textures[TextureID].Width;
                             }
@@ -1752,7 +1868,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
                         {
                             uint totalSize = (SFGfx.Textures[TextureID].Height * SFGfx.Textures[TextureID].Width);
                             for(uint k = 0; k < totalSize; k++)
-                                Write32(TextureData, k * 4, MemoryManager.Instance.ReadUInt((byte)TexSegment, TexOffset + 4 * k));
+                                Write32(TextureData, k * 4, ByteHelper.ReadUInt(currentBytes, TexOffset + 4 * k));
                             //memcpy(TextureData, &RAM[TexSegment].Data[TexOffset], (SFGfx.Textures[TextureID].Height * SFGfx.Textures[TextureID].Width * 4));
                             break;
                         }
@@ -1973,6 +2089,134 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
         
         #endregion
+
+
+        public void UpdateStates()
+        {
+            if ((SFGfx.ChangedModes & SFGfx.Constants.CHANGED_GEOMETRYMODE) != 0x0)
+            {
+                if ((SFGfx.GeometryMode & SFGfx.Constants.F3DEX_CULL_BOTH) != 0x0)
+                {
+                    GL.Enable(EnableCap.CullFace);
+
+                    if ((SFGfx.GeometryMode & SFGfx.Constants.F3DEX_CULL_BACK) != 0x0)
+                        GL.CullFace(CullFaceMode.Back);
+                    else
+                        GL.CullFace(CullFaceMode.Front);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.CullFace);
+                }
+
+                if ((SFGfx.GeometryMode & SFGfx.Constants.F3DEX_SHADING_SMOOTH) != 0x0 || (SFGfx.GeometryMode & SFGfx.Constants.G_TEXTURE_GEN_LINEAR) == 0x0)
+                {
+                    GL.ShadeModel(ShadingModel.Smooth);
+                }
+                else
+                {
+                    GL.ShadeModel(ShadingModel.Flat);
+                }
+
+                if ((SFGfx.GeometryMode & SFGfx.Constants.G_LIGHTING) != 0x0)
+                {
+                    GL.Enable(EnableCap.Lighting);
+                    GL.Enable(EnableCap.Normalize);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.Lighting);
+                    GL.Disable(EnableCap.Normalize);
+                }
+
+                SFGfx.ChangedModes &= ~(uint)SFGfx.Constants.CHANGED_GEOMETRYMODE;
+            }
+            /*
+                if(Gfx.GeometryMode & G_ZBUFFER)
+                    glEnable(GL_DEPTH_TEST);
+                else
+                    glDisable(GL_DEPTH_TEST);
+            */
+            if ((SFGfx.ChangedModes & SFGfx.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                /*		if(Gfx.OtherModeL & Z_CMP)
+                            glDepthFunc(GL_LEQUAL);
+                        else
+                            glDepthFunc(GL_ALWAYS);
+                */
+                /*		if((Gfx.OtherModeL & Z_UPD) && !(Gfx.OtherModeL & ZMODE_INTER && Gfx.OtherModeL & ZMODE_XLU))
+                            glDepthMask(GL_TRUE);
+                        else
+                            glDepthMask(GL_FALSE);
+                */
+                if ((SFGfx.OtherModeL & SFGfx.Constants.ZMODE_DEC) != 0x0)
+                {
+                    GL.Enable(EnableCap.PolygonOffsetFill);
+                    GL.PolygonOffset(-3.0f, -3.0f);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.PolygonOffsetFill);
+                }
+            }
+
+            if ((SFGfx.ChangedModes & SFGfx.Constants.CHANGED_ALPHACOMPARE) != 0x0 || (SFGfx.ChangedModes & SFGfx.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                if ((SFGfx.OtherModeL & SFGfx.Constants.ALPHA_CVG_SEL) == 0x0)
+                {
+                    GL.Enable(EnableCap.AlphaTest);
+                    GL.AlphaFunc((SFGfx.BlendColor.A > 0.0f) ? AlphaFunction.Gequal : AlphaFunction.Greater, SFGfx.BlendColor.A);
+                }
+                else if ((SFGfx.OtherModeL & SFGfx.Constants.CVG_X_ALPHA) != 0x0)
+                {
+                    GL.Enable(EnableCap.AlphaTest);
+                    GL.AlphaFunc(AlphaFunction.Gequal, 0.2f);
+                }
+                else
+                    GL.Disable(EnableCap.AlphaTest);
+            }
+
+            if ((SFGfx.ChangedModes & SFGfx.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                if ((SFGfx.OtherModeL & SFGfx.Constants.FORCE_BL) != 0x0 && (SFGfx.OtherModeL & SFGfx.Constants.ALPHA_CVG_SEL) == 0x0)
+                {
+                    GL.Enable(EnableCap.Blend);
+
+                    switch (SFGfx.OtherModeL >> 16)
+                    {
+                        case 0x0448: // Add
+                        case 0x055A:
+                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
+                            break;
+                        case 0x0C08: // 1080 Sky
+                        case 0x0F0A: // Used LOTS of places
+                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                            break;
+                        case 0xC810: // Blends fog
+                        case 0xC811: // Blends fog
+                        case 0x0C18: // Standard interpolated blend
+                        case 0x0C19: // Used for antialiasing
+                        case 0x0050: // Standard interpolated blend
+                        case 0x0055: // Used for antialiasing
+                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                            break;
+                        case 0x0FA5: // Seems to be doing just blend color - maybe combiner can be used for this?
+                        case 0x5055: // Used in Paper Mario intro, I'm not sure if this is right...
+                            GL.BlendFunc(BlendingFactorSrc.Zero, BlendingFactorDest.One);
+                            break;
+
+                        default:
+                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                            break;
+                    }
+                }
+                else
+                {
+                    GL.Disable(EnableCap.Blend);
+                }
+            }
+        }
+
 
         private void DrawTextureRGBA(byte[] textureData, int width, int height, string fileName)
         {

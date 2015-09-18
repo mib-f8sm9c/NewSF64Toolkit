@@ -37,18 +37,19 @@ namespace NewSF64Toolkit
 
         #region Singleton code
 
-        private static MemoryManager _instance;
+        //Comment out to break any memorymanager code
+        //private static MemoryManager _instance;
 
-        public static MemoryManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new MemoryManager();
+        //public static MemoryManager Instance
+        //{
+        //    get
+        //    {
+        //        if (_instance == null)
+        //            _instance = new MemoryManager();
 
-                return _instance;
-            }
-        }
+        //        return _instance;
+        //    }
+        //}
 
         #endregion
 

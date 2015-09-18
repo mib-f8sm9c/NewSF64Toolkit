@@ -15,8 +15,8 @@ namespace NewSF64Toolkit.Tools.Controls
     public partial class LevelViewerControl : UserControl
     {
         private OpenGLControl _glControl;
-        private F3DEXParser _parser;
-        private StarFoxLevelLoader _levelLoader;
+        //private F3DEXParser _parser;
+        //private StarFoxLevelLoader _levelLoader;
 
         public LevelViewerControl()
         {
@@ -26,8 +26,8 @@ namespace NewSF64Toolkit.Tools.Controls
             this.glPanel.Controls.Add(_glControl);
             _glControl.Dock = DockStyle.Fill;
 
-            _parser = new F3DEXParser(_glControl);
-            _levelLoader = new StarFoxLevelLoader(_parser);
+            //_parser = new F3DEXParser(_glControl);
+            //_levelLoader = new StarFoxLevelLoader(_parser);
 
             cbLevelSelect.SelectedIndex = 0;
         }
@@ -47,6 +47,9 @@ namespace NewSF64Toolkit.Tools.Controls
         private void btnLoadLevel_Click(object sender, EventArgs e)
         {
             int levelDMAIndex = GetLevelDMAIndex();
+
+            SFGfx.SelectedLevelDMA = levelDMAIndex;
+            SF64ROM.Instance.LoadROMResources();
 
             if (!SF64ROM.Instance.IsROMLoaded || SF64ROM.Instance.DMATable.Count <= levelDMAIndex)
             {
@@ -81,7 +84,7 @@ namespace NewSF64Toolkit.Tools.Controls
             //InitDListNavigEnabled(true);
             //SetupDList();
 
-            //_glControl.ReDraww();
+            _glControl.ReDraww();
         }
 
         private void SetupDList()
@@ -162,7 +165,7 @@ namespace NewSF64Toolkit.Tools.Controls
 
                 //int levelDMAIndex = GetLevelDMAIndex();
 
-                _levelLoader.SaveGameObject(cbLevelSelect.SelectedIndex, SFGfx.SelectedGameObject);
+                //_levelLoader.SaveGameObject(cbLevelSelect.SelectedIndex, SFGfx.SelectedGameObject);
 
                 //_levelLoader.ExecuteDisplayLists(SFGfx.SelectedGameObject);
                 _glControl.ReDraww();

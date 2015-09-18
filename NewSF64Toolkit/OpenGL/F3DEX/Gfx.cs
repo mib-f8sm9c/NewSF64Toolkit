@@ -140,6 +140,8 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
         public static uint[] GLTextureID = new uint[2048]; //2048
         public static int GLTextureCount;
 
+        public static int SelectedLevelDMA = 0;
+
 
         public struct GameObject
         {

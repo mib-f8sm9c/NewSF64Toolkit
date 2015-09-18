@@ -19,13 +19,13 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
 
         public int Offset;
 
-        public int GLDisplayListOffset;
+        public int[] GLDisplayListOffset; //1 is normal, 2 is selected, 3 is wireframe
 
         public RefSimpleLevelObject(int offset, byte[] bytes)
         {
             Offset = offset;
 
-            GLDisplayListOffset = -1;
+            GLDisplayListOffset = new int[3];
             LoadFromBytes(bytes);
         }
 

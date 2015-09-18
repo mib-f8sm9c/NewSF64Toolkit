@@ -17,6 +17,6 @@ namespace NewSF64Toolkit.OpenGL
         float GL_YScale { get; }
         float GL_ZScale { get; }
 
-        int GL_DisplayListIndex { get; }
+        int[] GL_DisplayListIndex { get; }
     }
 }

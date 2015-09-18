@@ -70,7 +70,7 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
 
         public float GL_X { get { return (float)X; } }
         public float GL_Y { get { return (float)Y; } }
-        public float GL_Z { get { return (float)Z; } }
+        public float GL_Z { get { return (float)Z - LvlPos; } }
         public float GL_XRot { get { return (float)XRot; } }
         public float GL_YRot { get { return (float)YRot; } }
         public float GL_ZRot { get { return (float)ZRot; } }
@@ -78,13 +78,13 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
         public float GL_YScale { get { return 1.0f; } }
         public float GL_ZScale { get { return 1.0f; } }
 
-        public int GL_DisplayListIndex { 
+        public int[] GL_DisplayListIndex { 
             get
             {
                 if (ID < 0x190)
-                    return (int)SF64ROM.Instance.ReferenceDMA.SimpleObjects[ID].DListOffset;
+                    return SF64ROM.Instance.ReferenceDMA.SimpleObjects[ID].GLDisplayListOffset;
                 //NOTE THIS IS WRONG!!
-                return 0;
+                return NewSF64Toolkit.OpenGL.F3DEX.F3DEXParser.InvalidBox;
             } 
         }
 

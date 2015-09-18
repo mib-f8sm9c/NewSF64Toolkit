@@ -57,18 +57,6 @@ namespace NewSF64Toolkit.DataStructures.DMA
                 // if object id == 0xffff, break out because this marks end of data!
                 if (newObj.ID == 0xFFFF) break;
 
-                // if object id < 0x190, get offset like this
-                if (newObj.ID < 0x190)
-                {
-                    //NOTE: SET -2 TO DMA 1
-                    //newObj.DListOffset = SF64ROM.Instance.ReferenceDMA.SimpleObjects[newObj.ID].DListOffset;//MemoryManager.Instance.ReadUInt((byte)0xFF, (0xC72E4 + ((uint)newObj.ID * 0x24)));
-                }
-
-                // dlist offset sanity checks
-                if (((newObj.DListOffset & 3) != 0x0) ||							// dlist offset not 4 byte aligned
-                  ((newObj.DListOffset & 0xFF000000) == 0x80000000))	// dlist offset lies in ram
-                    newObj.DListOffset = 0x00;
-
                 levelObjectOffset += SFLevelObject.Size;
                 LevelObjects.Add(newObj);
             }

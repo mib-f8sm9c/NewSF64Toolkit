@@ -15,6 +15,7 @@ namespace NewSF64Toolkit.DataStructures.DMA
         private const int LEVEL_INFO_OFFSETS_LOCATION = 0xCE158;
         private const int LEVEL_INFO_OFFSETS_COUNT = 21;
 
+        public RefSimpleLevelObject InvalidSimpObject;
         public List<RefSimpleLevelObject> SimpleObjects;
         private const int SIMPLE_OBJECTS_LOCATION = 0xC72E4;
         private const int SIMPLE_OBJECTS_COUNT = 0x190;
