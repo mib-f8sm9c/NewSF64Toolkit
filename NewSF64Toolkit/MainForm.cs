@@ -303,7 +303,7 @@ namespace NewSF64Toolkit
 
         private void menuStripViewWireframe_Click(object sender, EventArgs e)
         {
-            SFGfx.DisplayWireframe = menuStripViewWireframe.Checked;
+            ToolSettings.Instance.UseWireframe = menuStripViewWireframe.Checked;
         }
 
         private void menuStripToolsInfo_Click(object sender, EventArgs e)

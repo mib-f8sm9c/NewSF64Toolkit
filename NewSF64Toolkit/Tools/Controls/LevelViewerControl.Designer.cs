@@ -79,6 +79,7 @@
             this.tvLevelInfo.Size = new System.Drawing.Size(289, 105);
             this.tvLevelInfo.TabIndex = 34;
             this.tvLevelInfo.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvLevelInfo_AfterSelect);
+            this.tvLevelInfo.NodeMouseDoubleClick += new System.Windows.Forms.TreeNodeMouseClickEventHandler(this.tvLevelInfo_NodeMouseDoubleClick);
             // 
             // pnlLevelControl
             // 

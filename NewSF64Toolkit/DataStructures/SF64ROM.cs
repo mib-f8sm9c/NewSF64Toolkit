@@ -468,8 +468,13 @@ namespace NewSF64Toolkit.DataStructures
             return newRomData;
         }
 
+        private bool _resourcesLoaded = false;
+
         public void LoadROMResources()
         {
+            if (_resourcesLoaded)
+                return;
+
             //Here we'll go through the level files/reference file, and then create the F3DEX objects and link them to the
             // simple object list in the reference file
             F3DEXParser _f3dex = new F3DEXParser();
@@ -484,9 +489,6 @@ namespace NewSF64Toolkit.DataStructures
 
             foreach (LevelDMAFile level in _levelDMAs)
             {
-                if (_levelDMAs.IndexOf(level) != 0)
-                    continue;
-
                 byte[] levelBytes = level.GetAsBytes();
 
                 foreach(SFLevelObject obj in level.LevelObjects)
@@ -498,18 +500,22 @@ namespace NewSF64Toolkit.DataStructures
 
                         // dlist offset sanity checks
                         if (((obj.DListOffset & 3) != 0x0) ||							// dlist offset not 4 byte aligned
-                          ((obj.DListOffset & 0xFF000000) == 0x80000000))	// dlist offset lies in ram
+                          ((obj.DListOffset & 0xFF000000) == 0x80000000))	// dlist offset lies in ram, leave it alone for now
                             obj.DListOffset = 0x00;
+
                         else if (obj.DListOffset != 0x00 && (byte)((obj.DListOffset & 0xFF000000) >> 24) == 0x06) //Need segment 6
                         {
                             //Load through the F3DEX parser, assign the DisplayListIndex to the Simple Object in the Reference DMA
                             //In the future we'll serialize the F3DEX commands/textures/vertices too, but for functional purposes
                             // we'll just use the blank binary
-                            _referenceDMA.SimpleObjects[obj.ID].GLDisplayListOffset = _f3dex.ReadGameObject(levelBytes, obj.DListOffset); //KEEP AN EYE OUT FOR ANY CROSS-DMA REFERENCES
+                            if(_referenceDMA.SimpleObjects[obj.ID].GLDisplayListOffset == F3DEXParser.InvalidBox)
+                                _referenceDMA.SimpleObjects[obj.ID].GLDisplayListOffset = _f3dex.ReadGameObject(levelBytes, obj.DListOffset); //KEEP AN EYE OUT FOR ANY CROSS-DMA REFERENCES
                         }
                     }
                 }
             }
+
+            _resourcesLoaded = true;
         }
 
     }

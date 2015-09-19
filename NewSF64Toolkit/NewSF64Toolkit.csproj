@@ -74,14 +74,12 @@
     <Compile Include="DataStructures\IGameDataStructure.cs" />
     <Compile Include="DataStructures\DMA\DMAFile.cs" />
     <Compile Include="OpenGL\F3DEX\F3DEXParser.cs" />
-    <Compile Include="OpenGL\F3DEX\Gfx.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MemoryManager.cs" />
     <Compile Include="OpenGL\Mouse.cs" />
     <Compile Include="N64Sums.cs" />
     <Compile Include="OpenGL\OpenGLControl.cs">
@@ -116,8 +114,6 @@
     <Compile Include="Tools\ToolkitFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DataStructures\SF64ROM.cs" />
-    <Compile Include="StarFoxLevelLoader.cs" />
-    <Compile Include="StarFoxModelLoader.cs" />
     <Compile Include="StarFoxRomInfo.cs" />
     <Compile Include="Settings\ToolSettings.cs" />
     <EmbeddedResource Include="Tools\Controls\AboutControl.resx">

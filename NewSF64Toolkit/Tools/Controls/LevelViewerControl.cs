@@ -9,14 +9,14 @@ using System.Windows.Forms;
 using NewSF64Toolkit.DataStructures;
 using NewSF64Toolkit.OpenGL;
 using NewSF64Toolkit.OpenGL.F3DEX;
+using NewSF64Toolkit.DataStructures.DMA;
+using NewSF64Toolkit.DataStructures.DataObjects;
 
 namespace NewSF64Toolkit.Tools.Controls
 {
     public partial class LevelViewerControl : UserControl
     {
         private OpenGLControl _glControl;
-        //private F3DEXParser _parser;
-        //private StarFoxLevelLoader _levelLoader;
 
         public LevelViewerControl()
         {
@@ -25,9 +25,6 @@ namespace NewSF64Toolkit.Tools.Controls
             _glControl = new OpenGLControl();
             this.glPanel.Controls.Add(_glControl);
             _glControl.Dock = DockStyle.Fill;
-
-            //_parser = new F3DEXParser(_glControl);
-            //_levelLoader = new StarFoxLevelLoader(_parser);
 
             cbLevelSelect.SelectedIndex = 0;
         }
@@ -44,12 +41,20 @@ namespace NewSF64Toolkit.Tools.Controls
                 btnLoadLevel.Enabled = true;
         }
 
+        private int _gameObjCount;
+        private int _selectedGameObject;
+        public int _selectedLevelDMA;
+
+
         private void btnLoadLevel_Click(object sender, EventArgs e)
         {
             int levelDMAIndex = GetLevelDMAIndex();
 
-            SFGfx.SelectedLevelDMA = levelDMAIndex;
+            _selectedLevelDMA = levelDMAIndex;
             SF64ROM.Instance.LoadROMResources();
+
+            List<SFLevelObject> levelObjects = ((LevelDMAFile)SF64ROM.Instance.DMATable[levelDMAIndex]).LevelObjects;
+            _gameObjCount = levelObjects.Count;
 
             if (!SF64ROM.Instance.IsROMLoaded || SF64ROM.Instance.DMATable.Count <= levelDMAIndex)
             {
@@ -65,25 +70,11 @@ namespace NewSF64Toolkit.Tools.Controls
                 return;
             }
 
-            ////To be fixed in the future
-            //MemoryManager.Instance.ClearBanks();
+            InitDListNavigEnabled(true);
+            SetupDList();
 
-            ////Initiate the level loading. Grab the correct offset info and pass it to the F3DEX parser
-            //DMAFile offsetTableDMA = SF64ROM.Instance.DMATable[1];
-            //MemoryManager.Instance.AddBank((byte)0xFF, offsetTableDMA.DMAData, (uint)0x0);
-
-            //uint offset = ByteHelper.ReadUInt(offsetTableDMA.DMAData, 0xCE158 + cbLevelSelect.SelectedIndex * 0x04);
-            //byte segment = (byte)((offset & 0xFF000000) >> 24);
-            //offset &= 0x00FFFFFF;
-
-            ////_glControl.Clear();
-            //MemoryManager.Instance.AddBank(segment, SF64ROM.Instance.DMATable[levelDMAIndex].DMAData, 0x00);
-
-            //_levelLoader.StartReadingLevelDataAt(segment, offset);
-
-            //InitDListNavigEnabled(true);
-            //SetupDList();
-
+            _glControl.LevelObjects = levelObjects;
+            _glControl.SelectedObjectIndex = -1;
             _glControl.ReDraww();
         }
 
@@ -92,9 +83,11 @@ namespace NewSF64Toolkit.Tools.Controls
             tvLevelInfo.Nodes.Clear();
 
             //Load the level loader's game objects into the dlist thing
-            for (int i = 0; i < SFGfx.GameObjCount; i++)
+            List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
+
+            for (int i = 0; i < objects.Count; i++)
             {
-                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, SFGfx.GameObjects[i].LvlPos, ByteHelper.DisplayValue(SFGfx.GameObjects[i].ID))));
+                tvLevelInfo.Nodes.Add(new TreeNode(string.Format("Object {0} at {1} ({2})", i, objects[i].LvlPos, ByteHelper.DisplayValue(objects[i].ID))));
             }
         }
 
@@ -153,21 +146,23 @@ namespace NewSF64Toolkit.Tools.Controls
         {
             try
             {
-                SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
+                List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
+
+                SFLevelObject obj = objects[_selectedGameObject];
                 obj.X = Convert.ToInt16(txtModX.Text);
                 obj.XRot = Convert.ToInt16(txtModXRot.Text);
                 obj.Y = Convert.ToInt16(txtModY.Text);
                 obj.YRot = Convert.ToInt16(txtModYRot.Text);
                 obj.Z = Convert.ToInt16(txtModZ.Text);
                 obj.ZRot = Convert.ToInt16(txtModZRot.Text);
-                SFGfx.GameObjects[SFGfx.SelectedGameObject] = obj;
+                objects[_selectedGameObject] = obj;
 
 
                 //int levelDMAIndex = GetLevelDMAIndex();
 
-                //_levelLoader.SaveGameObject(cbLevelSelect.SelectedIndex, SFGfx.SelectedGameObject);
+                //_levelLoader.SaveGameObject(cbLevelSelect.SelectedIndex, F3DEXParser.SelectedGameObject);
 
-                //_levelLoader.ExecuteDisplayLists(SFGfx.SelectedGameObject);
+                //_levelLoader.ExecuteDisplayLists(F3DEXParser.SelectedGameObject);
                 _glControl.ReDraww();
             }
             catch (Exception ee) { };
@@ -175,8 +170,10 @@ namespace NewSF64Toolkit.Tools.Controls
 
         private void btnModSnapTo_Click(object sender, EventArgs e)
         {
+            List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
+
             //Move the camera to the object
-            SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
+            SFLevelObject obj = objects[_selectedGameObject];
 
             SFCamera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
         }
@@ -188,7 +185,9 @@ namespace NewSF64Toolkit.Tools.Controls
 
         private void LoadModelNavigInfo()
         {
-            SFGfx.GameObject obj = SFGfx.GameObjects[SFGfx.SelectedGameObject];
+            List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
+            SFLevelObject obj = objects[_selectedGameObject];
+
 
             txtModX.TextChanged -= txtMod_TextChanged;
             txtModXRot.TextChanged -= txtMod_TextChanged;
@@ -236,7 +235,7 @@ namespace NewSF64Toolkit.Tools.Controls
             }
             else
             {
-                SFGfx.SelectedGameObject = 0;
+                _selectedGameObject = 0;
                 LoadModelNavigInfo();
             }
         }
@@ -245,10 +244,11 @@ namespace NewSF64Toolkit.Tools.Controls
         {
             int objIndex = e.Node.Index;
 
-            if (objIndex < SFGfx.GameObjCount)
+            if (objIndex < _gameObjCount)
             {
-                SFGfx.SelectedGameObject = objIndex;
+                _selectedGameObject = objIndex;
                 LoadModelNavigInfo();
+                _glControl.SelectedObjectIndex = objIndex;
                 _glControl.ReDraww();
             }
         }

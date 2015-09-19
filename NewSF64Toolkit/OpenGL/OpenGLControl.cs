@@ -11,6 +11,8 @@ using OpenTK;
 using NewSF64Toolkit.OpenGL.F3DEX;
 using NewSF64Toolkit.DataStructures;
 using NewSF64Toolkit.DataStructures.DMA;
+using NewSF64Toolkit.Settings;
+using NewSF64Toolkit.DataStructures.DataObjects;
 
 namespace NewSF64Toolkit.OpenGL
 {
@@ -31,6 +33,9 @@ namespace NewSF64Toolkit.OpenGL
         public static uint OtherModeH;
         public static uint Store_RDPHalf1, Store_RDPHalf2;
         public static uint Combiner0, Combiner1;
+
+        public List<SFLevelObject> LevelObjects;
+        public int SelectedObjectIndex;
 
         public OpenGLControl()
         {
@@ -208,25 +213,25 @@ namespace NewSF64Toolkit.OpenGL
 
         //void gl_InitExtensions()
         //{
-        //    SFGfx.OpenGlSettings.IsExtUnsupported = false;
+        //    F3DEXParser.OpenGlSettings.IsExtUnsupported = false;
 
-        //    SFGfx.OpenGlSettings.ExtensionList = strdup((const char*)glGetString(GL_EXTENSIONS));
+        //    F3DEXParser.OpenGlSettings.ExtensionList = strdup((const char*)glGetString(GL_EXTENSIONS));
         //    int i;
-        //    for(i = 0; i < strlen(SFGfx.OpenGlSettings.ExtensionList); i++) {
-        //        if(SFGfx.OpenGlSettings.ExtensionList[i] == ' ') SFGfx.OpenGlSettings.ExtensionList[i] = '\n';
+        //    for(i = 0; i < strlen(F3DEXParser.OpenGlSettings.ExtensionList); i++) {
+        //        if(F3DEXParser.OpenGlSettings.ExtensionList[i] == ' ') F3DEXParser.OpenGlSettings.ExtensionList[i] = '\n';
         //    }
 
-        //    if(strstr(SFGfx.OpenGlSettings.ExtensionList, "GL_ARB_texture_mirrored_repeat")) {
-        //        SFGfx.OpenGlSettings.Ext_TexMirroredRepeat = true;
-        //        sprintf(SFGfx.OpenGlSettings.ExtSupported, "%sGL_ARB_texture_mirrored_repeat\n", SFGfx.OpenGlSettings.ExtSupported);
+        //    if(strstr(F3DEXParser.OpenGlSettings.ExtensionList, "GL_ARB_texture_mirrored_repeat")) {
+        //        F3DEXParser.OpenGlSettings.Ext_TexMirroredRepeat = true;
+        //        sprintf(F3DEXParser.OpenGlSettings.ExtSupported, "%sGL_ARB_texture_mirrored_repeat\n", F3DEXParser.OpenGlSettings.ExtSupported);
         //    } else {
-        //        SFGfx.OpenGlSettings.IsExtUnsupported = true;
-        //        SFGfx.OpenGlSettings.Ext_TexMirroredRepeat = false;
-        //        sprintf(SFGfx.OpenGlSettings.ExtUnsupported, "%sGL_ARB_texture_mirrored_repeat\n", SFGfx.OpenGlSettings.ExtUnsupported);
+        //        F3DEXParser.OpenGlSettings.IsExtUnsupported = true;
+        //        F3DEXParser.OpenGlSettings.Ext_TexMirroredRepeat = false;
+        //        sprintf(F3DEXParser.OpenGlSettings.ExtUnsupported, "%sGL_ARB_texture_mirrored_repeat\n", F3DEXParser.OpenGlSettings.ExtUnsupported);
         //    }
 
-        //    if(strstr(SFGfx.OpenGlSettings.ExtensionList, "GL_ARB_multitexture")) {
-        //        SFGfx.OpenGlSettings.Ext_MultiTexture = true;
+        //    if(strstr(F3DEXParser.OpenGlSettings.ExtensionList, "GL_ARB_multitexture")) {
+        //        F3DEXParser.OpenGlSettings.Ext_MultiTexture = true;
 
         //        glMultiTexCoord1fARB		= (PFNGLMULTITEXCOORD1FARBPROC) wglGetProcAddress("glMultiTexCoord1fARB");
         //        glMultiTexCoord2fARB		= (PFNGLMULTITEXCOORD2FARBPROC) wglGetProcAddress("glMultiTexCoord2fARB");
@@ -235,15 +240,15 @@ namespace NewSF64Toolkit.OpenGL
         //        glActiveTextureARB			= (PFNGLACTIVETEXTUREARBPROC) wglGetProcAddress("glActiveTextureARB");
         //        glClientActiveTextureARB	= (PFNGLCLIENTACTIVETEXTUREARBPROC) wglGetProcAddress("glClientActiveTextureARB");
 
-        //        sprintf(SFGfx.OpenGlSettings.ExtSupported, "%sGL_ARB_multitexture\n", SFGfx.OpenGlSettings.ExtSupported);
+        //        sprintf(F3DEXParser.OpenGlSettings.ExtSupported, "%sGL_ARB_multitexture\n", F3DEXParser.OpenGlSettings.ExtSupported);
         //    } else {
-        //        SFGfx.OpenGlSettings.IsExtUnsupported = true;
-        //        SFGfx.OpenGlSettings.Ext_MultiTexture = false;
-        //        sprintf(SFGfx.OpenGlSettings.ExtUnsupported, "%sGL_ARB_multitexture\n", SFGfx.OpenGlSettings.ExtUnsupported);
+        //        F3DEXParser.OpenGlSettings.IsExtUnsupported = true;
+        //        F3DEXParser.OpenGlSettings.Ext_MultiTexture = false;
+        //        sprintf(F3DEXParser.OpenGlSettings.ExtUnsupported, "%sGL_ARB_multitexture\n", F3DEXParser.OpenGlSettings.ExtUnsupported);
         //    }
 
-        //    if(strstr(SFGfx.OpenGlSettings.ExtensionList, "GL_ARB_fragment_program")) {
-        //        SFGfx.OpenGlSettings.Ext_FragmentProgram = true;
+        //    if(strstr(F3DEXParser.OpenGlSettings.ExtensionList, "GL_ARB_fragment_program")) {
+        //        F3DEXParser.OpenGlSettings.Ext_FragmentProgram = true;
 
         //        glGenProgramsARB				= (PFNGLGENPROGRAMSARBPROC) wglGetProcAddress("glGenProgramsARB");
         //        glBindProgramARB				= (PFNGLBINDPROGRAMARBPROC) wglGetProcAddress("glBindProgramARB");
@@ -252,11 +257,11 @@ namespace NewSF64Toolkit.OpenGL
         //        glProgramEnvParameter4fARB		= (PFNGLPROGRAMENVPARAMETER4FARBPROC) wglGetProcAddress("glProgramEnvParameter4fARB");
         //        glProgramLocalParameter4fARB	= (PFNGLPROGRAMLOCALPARAMETER4FARBPROC) wglGetProcAddress("glProgramLocalParameter4fARB");
 
-        //        sprintf(SFGfx.OpenGlSettings.ExtSupported, "%sGL_ARB_fragment_program\n", SFGfx.OpenGlSettings.ExtSupported);
+        //        sprintf(F3DEXParser.OpenGlSettings.ExtSupported, "%sGL_ARB_fragment_program\n", F3DEXParser.OpenGlSettings.ExtSupported);
         //    } else {
-        //        SFGfx.OpenGlSettings.IsExtUnsupported = true;
-        //        SFGfx.OpenGlSettings.Ext_FragmentProgram = false;
-        //        sprintf(SFGfx.OpenGlSettings.ExtUnsupported, "%sGL_ARB_fragment_program\n", SFGfx.OpenGlSettings.ExtUnsupported);
+        //        F3DEXParser.OpenGlSettings.IsExtUnsupported = true;
+        //        F3DEXParser.OpenGlSettings.Ext_FragmentProgram = false;
+        //        sprintf(F3DEXParser.OpenGlSettings.ExtUnsupported, "%sGL_ARB_fragment_program\n", F3DEXParser.OpenGlSettings.ExtUnsupported);
         //    }
         //}
 
@@ -298,26 +303,26 @@ namespace NewSF64Toolkit.OpenGL
             GL.Scale(0.004f, 0.004f, 0.004f);
 
 	        //int ObjectNo = 0;
-            //while (ObjectNo < SFGfx.GameObjCount)
+            //while (ObjectNo < F3DEXParser.GameObjCount)
             IGLRenderable renderable;
 
-            if (SFGfx.SelectedLevelDMA == 0)
+            if (LevelObjects == null || LevelObjects.Count == 0)
                 return;
 
-            for(int i = 0; i < ((LevelDMAFile)SF64ROM.Instance.DMATable[SFGfx.SelectedLevelDMA]).LevelObjects.Count; i++)
+            for(int i = 0; i < LevelObjects.Count; i++)
             {
-                //SFGfx.GameObject gameObject = SFGfx.GameObjects[ObjectNo];
-                renderable = ((LevelDMAFile)SF64ROM.Instance.DMATable[SFGfx.SelectedLevelDMA]).LevelObjects[i];
+                //F3DEXParser.GameObject gameObject = F3DEXParser.GameObjects[ObjectNo];
+                renderable = LevelObjects[i];
 
                 if (Math.Abs(SFCamera.Z * 250 - renderable.GL_Z) > 30000)
                 {
                     continue;
                 }
 
-                if (SFGfx.DisplayWireframe)
+                if (ToolSettings.Instance.UseWireframe)
                 {
                     GL.PushMatrix();
-                    if (i == SFGfx.SelectedGameObject)
+                    if (i == SelectedObjectIndex)
                     {
                         GL.Color3(0.0f, 1.0f, 0.0f);
                     }
@@ -333,7 +338,7 @@ namespace NewSF64Toolkit.OpenGL
                     GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
                     GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                    GL.CallList(renderable.GL_DisplayListIndex[2]);//SFGfx.WireframeGameObjectDListIndices[renderable.DListOffset]);
+                    GL.CallList(renderable.GL_DisplayListIndex[2]);//F3DEXParser.WireframeGameObjectDListIndices[renderable.DListOffset]);
 
                     GL.Enable(EnableCap.Lighting);
 
@@ -341,7 +346,7 @@ namespace NewSF64Toolkit.OpenGL
                 }
                 else
                 {
-                    if (i == SFGfx.SelectedGameObject)
+                    if (i == SelectedObjectIndex)
                     {
                         GL.PushMatrix();
 
@@ -350,7 +355,7 @@ namespace NewSF64Toolkit.OpenGL
                         GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
                         GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                        GL.CallList(renderable.GL_DisplayListIndex[1]);//SFGfx.SelectedGameObjectDListIndices[renderable.DListOffset]);
+                        GL.CallList(renderable.GL_DisplayListIndex[1]);//F3DEXParser.SelectedGameObjectDListIndices[renderable.DListOffset]);
 
                         GL.PopMatrix();
                     }
@@ -363,7 +368,7 @@ namespace NewSF64Toolkit.OpenGL
                         GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
                         GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                        GL.CallList(renderable.GL_DisplayListIndex[0]);//SFGfx.GameObjectDListIndices[gameObject.DListOffset]);
+                        GL.CallList(renderable.GL_DisplayListIndex[0]);//F3DEXParser.GameObjectDListIndices[gameObject.DListOffset]);
 
                         GL.PopMatrix();
                     }
@@ -471,7 +476,7 @@ namespace NewSF64Toolkit.OpenGL
             //    // look for the point you tried to select. Calculate the distance between the 2 endpoints that passes through
             //    // each plotted point. The one that is most similar with the straight line will be the selected point.
             //    int selectedPoint = 0;
-            //    for (int i = 0; i < SFGfx.TestVertices.Length; i++)
+            //    for (int i = 0; i < F3DEXParser.TestVertices.Length; i++)
             //    {
             //        double d1 = Math.Sqrt(Math.Pow(worldPositionNear.X - PointsInfo[i].Position.X, 2) +
             //                              Math.Pow(worldPositionNear.Y - PointsInfo[i].Position.Y, 2) +
