@@ -13,6 +13,8 @@ namespace NewSF64Toolkit.Tools
     {
         private HexEditorControl _hexEditorControl;
 
+        private bool _needInit = true;
+
         public HexEditorTool()
             : base()
         {
@@ -22,7 +24,13 @@ namespace NewSF64Toolkit.Tools
 
         public override void Activate()
         {
-            _hexEditorControl.RefreshDMATable();
+            if (_needInit)
+            {
+                _hexEditorControl.ResetDMATable();
+                _needInit = false;
+            }
+            else
+                _hexEditorControl.RefreshDMATable();
 
             base.Activate();
         }
@@ -35,16 +43,27 @@ namespace NewSF64Toolkit.Tools
         public override void ROMUpdated(SF64ROM.RomUpdateType updateType)
         {
             if (!IsActive)
+            {
+                switch (updateType)
+                {
+                    case SF64ROM.RomUpdateType.RomUnloaded:
+                    case SF64ROM.RomUpdateType.RomLoaded:
+                        _needInit = true;
+                        break;
+                }
                 return;
+            }
 
             switch (updateType)
             {
                 case SF64ROM.RomUpdateType.RomUnloaded:
                 case SF64ROM.RomUpdateType.RomLoaded:
+                    _hexEditorControl.ResetDMATable();
+                    break;
                 case SF64ROM.RomUpdateType.CRCFixed:
                 case SF64ROM.RomUpdateType.Decompressed:
                 case SF64ROM.RomUpdateType.RomEdited:
-                    _hexEditorControl.ResetDMATable();
+                    _hexEditorControl.RefreshDMATable();
                     break;
             }
         }

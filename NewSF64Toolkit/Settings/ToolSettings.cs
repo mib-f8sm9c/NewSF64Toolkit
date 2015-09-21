@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.IO;
+using System.Xml;
 
 namespace NewSF64Toolkit.Settings
 {
@@ -49,16 +51,103 @@ namespace NewSF64Toolkit.Settings
             }
         }
 
+        private List<string> _recentlyOpened;
+        public List<string> RecentlyOpened
+        {
+            get
+            {
+                return _recentlyOpened;
+            }
+        }
+        public void AddRecentlyOpened(string path)
+        {
+            if (_recentlyOpened.Contains(path))
+            {
+                UpdateRecentlyOpenedToTop(_recentlyOpened.IndexOf(path));
+            }
+            else
+            {
+                _recentlyOpened.Insert(0, path);
+                if (_recentlyOpened.Count > 5)
+                    _recentlyOpened.RemoveAt(5);
+            }
+        }
+
+        public void UpdateRecentlyOpenedToTop(int index)
+        {
+            string str = _recentlyOpened[index];
+            _recentlyOpened.RemoveAt(index);
+            AddRecentlyOpened(str);
+        }
+
         public ToolSettings()
         {
             _displayInHex = true;
             _useWireframe = false;
+            _recentlyOpened = new List<string>();
         }
 
-        public static void Load()
+        public void Load()
         {
-            //Eventually have an xml file loading here
-            _instance = new ToolSettings();
+            if (File.Exists("settings.xml"))
+            {
+                using (XmlTextReader xml = new XmlTextReader("settings.xml"))
+                {
+                    while (xml.Read())
+                    {
+                        switch (xml.NodeType)
+                        {
+                            case XmlNodeType.Element:
+                                if (xml.Name == "settings")
+                                {
+                                    while (xml.MoveToNextAttribute())
+                                    {
+                                        switch (xml.Name)
+                                        {
+                                            case "usewireframe":
+                                                _useWireframe = bool.Parse(xml.Value);
+                                                break;
+                                            case "displayhex":
+                                                _displayInHex = bool.Parse(xml.Value);
+                                                break;
+                                        }
+                                    }
+                                }
+                                else if (xml.Name == "recentlyopenedfile")
+                                {
+                                    _recentlyOpened.Add(xml.ReadString());
+                                    //string str;
+                                    //while (!string.IsNullOrEmpty((str = xml.ReadElementString("recentlyopenedfile"))))
+                                    //    _recentlyOpened.Add(str);
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+
+        public void Save()
+        {
+            using (XmlWriter xml = XmlWriter.Create("settings.xml"))
+            {
+                xml.WriteStartDocument();
+                xml.WriteStartElement("settings");
+                xml.WriteAttributeString("usewireframe", _useWireframe.ToString());
+                xml.WriteAttributeString("displayhex", _displayInHex.ToString());
+
+                xml.WriteStartElement("recentlyopened");
+                foreach (string str in _recentlyOpened)
+                {
+                    xml.WriteElementString("recentlyopenedfile", str);
+                }
+
+                xml.WriteEndElement();
+                xml.WriteEndElement();
+
+                xml.WriteEndDocument();
+                xml.Close();
+            }
         }
     }
 }

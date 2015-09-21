@@ -33,7 +33,6 @@
             this.pnlLevelControl = new System.Windows.Forms.Panel();
             this.pnlObjectInfo = new System.Windows.Forms.Panel();
             this.txtModID = new System.Windows.Forms.TextBox();
-            this.btnModSnapTo = new System.Windows.Forms.Button();
             this.lblModID = new System.Windows.Forms.Label();
             this.txtModDList = new System.Windows.Forms.TextBox();
             this.lblModPos = new System.Windows.Forms.Label();
@@ -97,7 +96,6 @@
             this.pnlObjectInfo.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlObjectInfo.Controls.Add(this.txtModID);
-            this.pnlObjectInfo.Controls.Add(this.btnModSnapTo);
             this.pnlObjectInfo.Controls.Add(this.lblModID);
             this.pnlObjectInfo.Controls.Add(this.txtModDList);
             this.pnlObjectInfo.Controls.Add(this.lblModPos);
@@ -132,17 +130,6 @@
             this.txtModID.ReadOnly = true;
             this.txtModID.Size = new System.Drawing.Size(121, 23);
             this.txtModID.TabIndex = 24;
-            // 
-            // btnModSnapTo
-            // 
-            this.btnModSnapTo.Enabled = false;
-            this.btnModSnapTo.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.btnModSnapTo.Location = new System.Drawing.Point(25, 110);
-            this.btnModSnapTo.Name = "btnModSnapTo";
-            this.btnModSnapTo.Size = new System.Drawing.Size(37, 26);
-            this.btnModSnapTo.TabIndex = 31;
-            this.btnModSnapTo.UseVisualStyleBackColor = true;
-            this.btnModSnapTo.Click += new System.EventHandler(this.btnModSnapTo_Click);
             // 
             // lblModID
             // 
@@ -392,7 +379,6 @@
         private System.Windows.Forms.Panel pnlLevelControl;
         private System.Windows.Forms.Panel pnlObjectInfo;
         private System.Windows.Forms.TextBox txtModID;
-        private System.Windows.Forms.Button btnModSnapTo;
         private System.Windows.Forms.Label lblModID;
         private System.Windows.Forms.TextBox txtModDList;
         private System.Windows.Forms.Label lblModPos;

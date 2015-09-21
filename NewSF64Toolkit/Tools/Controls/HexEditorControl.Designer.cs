@@ -35,18 +35,22 @@
             this.colPStart = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPEnd = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.pnlHexViewer = new System.Windows.Forms.Panel();
+            this.splitContainer = new System.Windows.Forms.SplitContainer();
             this.pnlDMATables.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvDMA)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).BeginInit();
+            this.splitContainer.Panel1.SuspendLayout();
+            this.splitContainer.Panel2.SuspendLayout();
+            this.splitContainer.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlDMATables
             // 
-            this.pnlDMATables.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlDMATables.Controls.Add(this.dgvDMA);
-            this.pnlDMATables.Location = new System.Drawing.Point(519, 3);
+            this.pnlDMATables.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlDMATables.Location = new System.Drawing.Point(0, 0);
             this.pnlDMATables.Name = "pnlDMATables";
-            this.pnlDMATables.Size = new System.Drawing.Size(243, 445);
+            this.pnlDMATables.Size = new System.Drawing.Size(244, 451);
             this.pnlDMATables.TabIndex = 1;
             // 
             // dgvDMA
@@ -62,9 +66,10 @@
             this.dgvDMA.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgvDMA.EditMode = System.Windows.Forms.DataGridViewEditMode.EditProgrammatically;
             this.dgvDMA.Location = new System.Drawing.Point(0, 0);
+            this.dgvDMA.MultiSelect = false;
             this.dgvDMA.Name = "dgvDMA";
             this.dgvDMA.ReadOnly = true;
-            this.dgvDMA.Size = new System.Drawing.Size(243, 445);
+            this.dgvDMA.Size = new System.Drawing.Size(244, 451);
             this.dgvDMA.TabIndex = 0;
             this.dgvDMA.SelectionChanged += new System.EventHandler(this.dgvDMA_SelectionChanged);
             // 
@@ -73,6 +78,7 @@
             this.colNum.HeaderText = "#";
             this.colNum.Name = "colNum";
             this.colNum.ReadOnly = true;
+            this.colNum.Width = 30;
             // 
             // colVStart
             // 
@@ -94,25 +100,43 @@
             // 
             // pnlHexViewer
             // 
-            this.pnlHexViewer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlHexViewer.Location = new System.Drawing.Point(3, 3);
+            this.pnlHexViewer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlHexViewer.Location = new System.Drawing.Point(0, 0);
             this.pnlHexViewer.Name = "pnlHexViewer";
             this.pnlHexViewer.Padding = new System.Windows.Forms.Padding(6);
-            this.pnlHexViewer.Size = new System.Drawing.Size(510, 445);
+            this.pnlHexViewer.Size = new System.Drawing.Size(517, 451);
             this.pnlHexViewer.TabIndex = 1;
+            // 
+            // splitContainer
+            // 
+            this.splitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitContainer.Location = new System.Drawing.Point(0, 0);
+            this.splitContainer.Name = "splitContainer";
+            // 
+            // splitContainer.Panel1
+            // 
+            this.splitContainer.Panel1.Controls.Add(this.pnlHexViewer);
+            // 
+            // splitContainer.Panel2
+            // 
+            this.splitContainer.Panel2.Controls.Add(this.pnlDMATables);
+            this.splitContainer.Size = new System.Drawing.Size(765, 451);
+            this.splitContainer.SplitterDistance = 517;
+            this.splitContainer.TabIndex = 2;
             // 
             // HexEditorControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.pnlHexViewer);
-            this.Controls.Add(this.pnlDMATables);
+            this.Controls.Add(this.splitContainer);
             this.Name = "HexEditorControl";
             this.Size = new System.Drawing.Size(765, 451);
             this.pnlDMATables.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvDMA)).EndInit();
+            this.splitContainer.Panel1.ResumeLayout(false);
+            this.splitContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer)).EndInit();
+            this.splitContainer.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -121,10 +145,11 @@
 
         private System.Windows.Forms.Panel pnlDMATables;
         private System.Windows.Forms.DataGridView dgvDMA;
+        private System.Windows.Forms.Panel pnlHexViewer;
         private System.Windows.Forms.DataGridViewTextBoxColumn colNum;
         private System.Windows.Forms.DataGridViewTextBoxColumn colVStart;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPStart;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPEnd;
-        private System.Windows.Forms.Panel pnlHexViewer;
+        private System.Windows.Forms.SplitContainer splitContainer;
     }
 }

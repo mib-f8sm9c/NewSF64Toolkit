@@ -82,6 +82,9 @@ namespace NewSF64Toolkit.Tools.Controls
         {
             tvLevelInfo.Nodes.Clear();
 
+            if (_selectedLevelDMA == -1)
+                return;
+
             //Load the level loader's game objects into the dlist thing
             List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
 
@@ -168,7 +171,7 @@ namespace NewSF64Toolkit.Tools.Controls
             catch (Exception ee) { };
         }
 
-        private void btnModSnapTo_Click(object sender, EventArgs e)
+        private void tvLevelInfo_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
         {
             List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
 
@@ -178,48 +181,72 @@ namespace NewSF64Toolkit.Tools.Controls
             SFCamera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
         }
 
-        private void tvLevelInfo_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
-        {
-            btnModSnapTo_Click(sender, e);
-        }
-
         private void LoadModelNavigInfo()
         {
-            List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
-            SFLevelObject obj = objects[_selectedGameObject];
+            if (_selectedLevelDMA == -1)
+            {
+
+                txtModX.TextChanged -= txtMod_TextChanged;
+                txtModXRot.TextChanged -= txtMod_TextChanged;
+                txtModY.TextChanged -= txtMod_TextChanged;
+                txtModYRot.TextChanged -= txtMod_TextChanged;
+                txtModZ.TextChanged -= txtMod_TextChanged;
+                txtModZRot.TextChanged -= txtMod_TextChanged;
+
+                txtModDList.Text = string.Empty;
+                txtModID.Text = string.Empty;
+                txtModPos.Text = string.Empty;
+                txtModUnk.Text = string.Empty;
+                txtModX.Text = string.Empty;
+                txtModXRot.Text = string.Empty;
+                txtModY.Text = string.Empty;
+                txtModYRot.Text = string.Empty;
+                txtModZ.Text = string.Empty;
+                txtModZRot.Text = string.Empty;
+
+                txtModX.TextChanged += txtMod_TextChanged;
+                txtModXRot.TextChanged += txtMod_TextChanged;
+                txtModY.TextChanged += txtMod_TextChanged;
+                txtModYRot.TextChanged += txtMod_TextChanged;
+                txtModZ.TextChanged += txtMod_TextChanged;
+                txtModZRot.TextChanged += txtMod_TextChanged;
+
+            }
+            else
+            {
+                List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
+                SFLevelObject obj = objects[_selectedGameObject];
 
 
-            txtModX.TextChanged -= txtMod_TextChanged;
-            txtModXRot.TextChanged -= txtMod_TextChanged;
-            txtModY.TextChanged -= txtMod_TextChanged;
-            txtModYRot.TextChanged -= txtMod_TextChanged;
-            txtModZ.TextChanged -= txtMod_TextChanged;
-            txtModZRot.TextChanged -= txtMod_TextChanged;
+                txtModX.TextChanged -= txtMod_TextChanged;
+                txtModXRot.TextChanged -= txtMod_TextChanged;
+                txtModY.TextChanged -= txtMod_TextChanged;
+                txtModYRot.TextChanged -= txtMod_TextChanged;
+                txtModZ.TextChanged -= txtMod_TextChanged;
+                txtModZRot.TextChanged -= txtMod_TextChanged;
 
-            txtModDList.Text = ByteHelper.DisplayValue(obj.DListOffset);
-            txtModID.Text = obj.ID.ToString();
-            txtModPos.Text = obj.LvlPos.ToString();
-            txtModUnk.Text = obj.Unk.ToString();
-            txtModX.Text = obj.X.ToString();
-            txtModXRot.Text = obj.XRot.ToString();
-            txtModY.Text = obj.Y.ToString();
-            txtModYRot.Text = obj.YRot.ToString();
-            txtModZ.Text = obj.Z.ToString();
-            txtModZRot.Text = obj.ZRot.ToString();
+                txtModDList.Text = ByteHelper.DisplayValue(obj.DListOffset);
+                txtModID.Text = obj.ID.ToString();
+                txtModPos.Text = obj.LvlPos.ToString();
+                txtModUnk.Text = obj.Unk.ToString();
+                txtModX.Text = obj.X.ToString();
+                txtModXRot.Text = obj.XRot.ToString();
+                txtModY.Text = obj.Y.ToString();
+                txtModYRot.Text = obj.YRot.ToString();
+                txtModZ.Text = obj.Z.ToString();
+                txtModZRot.Text = obj.ZRot.ToString();
 
-            txtModX.TextChanged += txtMod_TextChanged;
-            txtModXRot.TextChanged += txtMod_TextChanged;
-            txtModY.TextChanged += txtMod_TextChanged;
-            txtModYRot.TextChanged += txtMod_TextChanged;
-            txtModZ.TextChanged += txtMod_TextChanged;
-            txtModZRot.TextChanged += txtMod_TextChanged;
-
+                txtModX.TextChanged += txtMod_TextChanged;
+                txtModXRot.TextChanged += txtMod_TextChanged;
+                txtModY.TextChanged += txtMod_TextChanged;
+                txtModYRot.TextChanged += txtMod_TextChanged;
+                txtModZ.TextChanged += txtMod_TextChanged;
+                txtModZRot.TextChanged += txtMod_TextChanged;
+            }
         }
 
         private void InitDListNavigEnabled(bool enable)
         {
-            btnModSnapTo.Enabled = enable;
-
             if (!enable)
             {
                 txtModDList.Clear();
@@ -251,6 +278,39 @@ namespace NewSF64Toolkit.Tools.Controls
                 _glControl.SelectedObjectIndex = objIndex;
                 _glControl.ReDraww();
             }
+        }
+
+        public void RefreshGL()
+        {
+            _glControl.ReDraww();
+        }
+
+        public void UpdateLevelInfo()
+        {
+            //Load the level loader's game objects into the dlist thing
+            List<SFLevelObject> objects = ((LevelDMAFile)SF64ROM.Instance.DMATable[_selectedLevelDMA]).LevelObjects;
+
+            tvLevelInfo.BeginUpdate();
+            for (int i = 0; i < objects.Count; i++)
+            {
+                tvLevelInfo.Nodes[i].Text = string.Format("Object {0} at {1} ({2})", i, objects[i].LvlPos, ByteHelper.DisplayValue(objects[i].ID));
+            }
+            tvLevelInfo.EndUpdate();
+
+            LoadModelNavigInfo();
+        }
+
+        public void ResetGL()
+        {
+            _gameObjCount = 0;
+            _selectedLevelDMA = -1;
+
+            InitDListNavigEnabled(true);
+            SetupDList();
+
+            _glControl.LevelObjects = new List<SFLevelObject>();
+            _glControl.SelectedObjectIndex = -1;
+            _glControl.ReDraww();
         }
 
     }

@@ -2083,154 +2083,6 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
         
         #endregion
 
-
-        public void UpdateStates()
-        {
-            if ((ChangedModes & F3DEXParser.Constants.CHANGED_GEOMETRYMODE) != 0x0)
-            {
-                if ((GeometryMode & F3DEXParser.Constants.F3DEX_CULL_BOTH) != 0x0)
-                {
-                    GL.Enable(EnableCap.CullFace);
-
-                    if ((GeometryMode & F3DEXParser.Constants.F3DEX_CULL_BACK) != 0x0)
-                        GL.CullFace(CullFaceMode.Back);
-                    else
-                        GL.CullFace(CullFaceMode.Front);
-                }
-                else
-                {
-                    GL.Disable(EnableCap.CullFace);
-                }
-
-                if ((GeometryMode & F3DEXParser.Constants.F3DEX_SHADING_SMOOTH) != 0x0 || (GeometryMode & F3DEXParser.Constants.G_TEXTURE_GEN_LINEAR) == 0x0)
-                {
-                    GL.ShadeModel(ShadingModel.Smooth);
-                }
-                else
-                {
-                    GL.ShadeModel(ShadingModel.Flat);
-                }
-
-                if ((GeometryMode & F3DEXParser.Constants.G_LIGHTING) != 0x0)
-                {
-                    GL.Enable(EnableCap.Lighting);
-                    GL.Enable(EnableCap.Normalize);
-                }
-                else
-                {
-                    GL.Disable(EnableCap.Lighting);
-                    GL.Disable(EnableCap.Normalize);
-                }
-
-                ChangedModes &= ~(uint)F3DEXParser.Constants.CHANGED_GEOMETRYMODE;
-            }
-            /*
-                if(Gfx.GeometryMode & G_ZBUFFER)
-                    glEnable(GL_DEPTH_TEST);
-                else
-                    glDisable(GL_DEPTH_TEST);
-            */
-            if ((ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
-            {
-                /*		if(Gfx.OtherModeL & Z_CMP)
-                            glDepthFunc(GL_LEQUAL);
-                        else
-                            glDepthFunc(GL_ALWAYS);
-                */
-                /*		if((Gfx.OtherModeL & Z_UPD) && !(Gfx.OtherModeL & ZMODE_INTER && Gfx.OtherModeL & ZMODE_XLU))
-                            glDepthMask(GL_TRUE);
-                        else
-                            glDepthMask(GL_FALSE);
-                */
-                if ((OtherModeL & F3DEXParser.Constants.ZMODE_DEC) != 0x0)
-                {
-                    GL.Enable(EnableCap.PolygonOffsetFill);
-                    GL.PolygonOffset(-3.0f, -3.0f);
-                }
-                else
-                {
-                    GL.Disable(EnableCap.PolygonOffsetFill);
-                }
-            }
-
-            if ((ChangedModes & F3DEXParser.Constants.CHANGED_ALPHACOMPARE) != 0x0 || (ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
-            {
-                if ((OtherModeL & F3DEXParser.Constants.ALPHA_CVG_SEL) == 0x0)
-                {
-                    GL.Enable(EnableCap.AlphaTest);
-                    GL.AlphaFunc((BlendColor.A > 0.0f) ? AlphaFunction.Gequal : AlphaFunction.Greater, BlendColor.A);
-                }
-                else if ((OtherModeL & F3DEXParser.Constants.CVG_X_ALPHA) != 0x0)
-                {
-                    GL.Enable(EnableCap.AlphaTest);
-                    GL.AlphaFunc(AlphaFunction.Gequal, 0.2f);
-                }
-                else
-                    GL.Disable(EnableCap.AlphaTest);
-            }
-
-            if ((ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
-            {
-                if ((OtherModeL & F3DEXParser.Constants.FORCE_BL) != 0x0 && (OtherModeL & F3DEXParser.Constants.ALPHA_CVG_SEL) == 0x0)
-                {
-                    GL.Enable(EnableCap.Blend);
-
-                    switch (OtherModeL >> 16)
-                    {
-                        case 0x0448: // Add
-                        case 0x055A:
-                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
-                            break;
-                        case 0x0C08: // 1080 Sky
-                        case 0x0F0A: // Used LOTS of places
-                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
-                            break;
-                        case 0xC810: // Blends fog
-                        case 0xC811: // Blends fog
-                        case 0x0C18: // Standard interpolated blend
-                        case 0x0C19: // Used for antialiasing
-                        case 0x0050: // Standard interpolated blend
-                        case 0x0055: // Used for antialiasing
-                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-                            break;
-                        case 0x0FA5: // Seems to be doing just blend color - maybe combiner can be used for this?
-                        case 0x5055: // Used in Paper Mario intro, I'm not sure if this is right...
-                            GL.BlendFunc(BlendingFactorSrc.Zero, BlendingFactorDest.One);
-                            break;
-
-                        default:
-                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
-                            break;
-                    }
-                }
-                else
-                {
-                    GL.Disable(EnableCap.Blend);
-                }
-            }
-        }
-
-
-        private void DrawTextureRGBA(byte[] textureData, int width, int height, string fileName)
-        {
-            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width, height);
-            int index;
-            for (int h = 0; h < width; h++)
-            {
-                for (int k = 0; k < height; k++)
-                {
-                    index = h * 4 + k * width * 4;
-                    bmp.SetPixel(h, k, Color.FromArgb(textureData[index + 3], textureData[index], textureData[index + 1], textureData[index + 2]));
-                }
-            }
-            bmp.Save(fileName);
-        }
-
-
-
-
-
-
         #region GFX structs/variables
 
 
@@ -2427,7 +2279,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
             //    Camera = Camera_Empty;
             //}
         }
-        
+
         public static class Constants
         {
             public const uint F3DEX_TEXTURE_ENABLE = 0x00000002;
@@ -2519,9 +2371,151 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
             public const byte CHANGED_RENDERMODE = 0x02;
             public const byte CHANGED_ALPHACOMPARE = 0x04;
         }
-        
+
         #endregion
 
+
+        public void UpdateStates()
+        {
+            if ((ChangedModes & F3DEXParser.Constants.CHANGED_GEOMETRYMODE) != 0x0)
+            {
+                if ((GeometryMode & F3DEXParser.Constants.F3DEX_CULL_BOTH) != 0x0)
+                {
+                    GL.Enable(EnableCap.CullFace);
+
+                    if ((GeometryMode & F3DEXParser.Constants.F3DEX_CULL_BACK) != 0x0)
+                        GL.CullFace(CullFaceMode.Back);
+                    else
+                        GL.CullFace(CullFaceMode.Front);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.CullFace);
+                }
+
+                if ((GeometryMode & F3DEXParser.Constants.F3DEX_SHADING_SMOOTH) != 0x0 || (GeometryMode & F3DEXParser.Constants.G_TEXTURE_GEN_LINEAR) == 0x0)
+                {
+                    GL.ShadeModel(ShadingModel.Smooth);
+                }
+                else
+                {
+                    GL.ShadeModel(ShadingModel.Flat);
+                }
+
+                if ((GeometryMode & F3DEXParser.Constants.G_LIGHTING) != 0x0)
+                {
+                    GL.Enable(EnableCap.Lighting);
+                    GL.Enable(EnableCap.Normalize);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.Lighting);
+                    GL.Disable(EnableCap.Normalize);
+                }
+
+                ChangedModes &= ~(uint)F3DEXParser.Constants.CHANGED_GEOMETRYMODE;
+            }
+            /*
+                if(Gfx.GeometryMode & G_ZBUFFER)
+                    glEnable(GL_DEPTH_TEST);
+                else
+                    glDisable(GL_DEPTH_TEST);
+            */
+            if ((ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                /*		if(Gfx.OtherModeL & Z_CMP)
+                            glDepthFunc(GL_LEQUAL);
+                        else
+                            glDepthFunc(GL_ALWAYS);
+                */
+                /*		if((Gfx.OtherModeL & Z_UPD) && !(Gfx.OtherModeL & ZMODE_INTER && Gfx.OtherModeL & ZMODE_XLU))
+                            glDepthMask(GL_TRUE);
+                        else
+                            glDepthMask(GL_FALSE);
+                */
+                if ((OtherModeL & F3DEXParser.Constants.ZMODE_DEC) != 0x0)
+                {
+                    GL.Enable(EnableCap.PolygonOffsetFill);
+                    GL.PolygonOffset(-3.0f, -3.0f);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.PolygonOffsetFill);
+                }
+            }
+
+            if ((ChangedModes & F3DEXParser.Constants.CHANGED_ALPHACOMPARE) != 0x0 || (ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                if ((OtherModeL & F3DEXParser.Constants.ALPHA_CVG_SEL) == 0x0)
+                {
+                    GL.Enable(EnableCap.AlphaTest);
+                    GL.AlphaFunc((BlendColor.A > 0.0f) ? AlphaFunction.Gequal : AlphaFunction.Greater, BlendColor.A);
+                }
+                else if ((OtherModeL & F3DEXParser.Constants.CVG_X_ALPHA) != 0x0)
+                {
+                    GL.Enable(EnableCap.AlphaTest);
+                    GL.AlphaFunc(AlphaFunction.Gequal, 0.2f);
+                }
+                else
+                    GL.Disable(EnableCap.AlphaTest);
+            }
+
+            if ((ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                if ((OtherModeL & F3DEXParser.Constants.FORCE_BL) != 0x0 && (OtherModeL & F3DEXParser.Constants.ALPHA_CVG_SEL) == 0x0)
+                {
+                    GL.Enable(EnableCap.Blend);
+
+                    switch (OtherModeL >> 16)
+                    {
+                        case 0x0448: // Add
+                        case 0x055A:
+                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
+                            break;
+                        case 0x0C08: // 1080 Sky
+                        case 0x0F0A: // Used LOTS of places
+                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                            break;
+                        case 0xC810: // Blends fog
+                        case 0xC811: // Blends fog
+                        case 0x0C18: // Standard interpolated blend
+                        case 0x0C19: // Used for antialiasing
+                        case 0x0050: // Standard interpolated blend
+                        case 0x0055: // Used for antialiasing
+                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                            break;
+                        case 0x0FA5: // Seems to be doing just blend color - maybe combiner can be used for this?
+                        case 0x5055: // Used in Paper Mario intro, I'm not sure if this is right...
+                            GL.BlendFunc(BlendingFactorSrc.Zero, BlendingFactorDest.One);
+                            break;
+
+                        default:
+                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                            break;
+                    }
+                }
+                else
+                {
+                    GL.Disable(EnableCap.Blend);
+                }
+            }
+        }
+
+
+        private void DrawTextureRGBA(byte[] textureData, int width, int height, string fileName)
+        {
+            System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(width, height);
+            int index;
+            for (int h = 0; h < width; h++)
+            {
+                for (int k = 0; k < height; k++)
+                {
+                    index = h * 4 + k * width * 4;
+                    bmp.SetPixel(h, k, Color.FromArgb(textureData[index + 3], textureData[index], textureData[index + 1], textureData[index + 2]));
+                }
+            }
+            bmp.Save(fileName);
+        }
 
     }
 }

@@ -33,12 +33,45 @@ namespace NewSF64Toolkit
         {
             InitializeComponent();
 
-            ToolSettings.Load();
+            ToolSettings.Instance.Load();
+
+            UpdateFormSettings();
 
             tsStatus.Text = STATUS_NO_FILE_LOADED;
 
             SwitchToolkitMode(ToolTypes.RomInfo);
             UpdateMenuStripToolCheckState(menuStripToolsInfo);
+        }
+
+        private void UpdateFormSettings()
+        {
+            menuStripViewHex.Checked = ToolSettings.Instance.DisplayInHex;
+            menuStripViewWireframe.Checked = ToolSettings.Instance.UseWireframe;
+
+            menuStripFileRecent.DropDownItems.Clear();
+
+            if (ToolSettings.Instance.RecentlyOpened.Count == 0)
+                menuStripFileRecent.Enabled = false;
+            else
+            {
+                for (int i = 0; i < ToolSettings.Instance.RecentlyOpened.Count; i++)
+                {
+                    ToolStripMenuItem newMenu = new ToolStripMenuItem();
+                    newMenu.Text = ToolSettings.Instance.RecentlyOpened[i];
+                    newMenu.Tag = i;
+                    newMenu.Click += new EventHandler(recentlyOpened_Click);
+                    menuStripFileRecent.DropDownItems.Add(newMenu);
+                }
+            }
+        }
+
+        private void recentlyOpened_Click(object sender, EventArgs e)
+        {
+            int index = (int)((ToolStripMenuItem)sender).Tag;
+
+            LoadFile(ToolSettings.Instance.RecentlyOpened[index]);
+
+            UpdateFormSettings();
         }
 
         #region Event handlers
@@ -51,8 +84,15 @@ namespace NewSF64Toolkit
             //Load the rom here
             if (openFileDialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                 return;
-            
-            string romFile = openFileDialog.FileName;
+
+            LoadFile(openFileDialog.FileName);
+
+            UpdateFormSettings();
+        }
+
+        private void LoadFile(string file)
+        {
+            string romFile = file;
 
             if (!File.Exists(romFile))
             {
@@ -88,13 +128,13 @@ namespace NewSF64Toolkit
             saveFileDialog.DefaultExt = Path.GetExtension(romFile);
             saveFileDialog.FileName = fileName;
 
+            ToolSettings.Instance.AddRecentlyOpened(romFile);
 
             //We need a way to discriminate the endianess of the system, and keep the data
             //    right side forward. EDIT: Endianness is described at header of ROM file, see
             //    http://www.emutalk.net/archive/index.php/t-16045.html
-
-
         }
+
 
         private void menuStripViewHex_Click(object sender, EventArgs e)
         {
@@ -126,6 +166,12 @@ namespace NewSF64Toolkit
             }
 
             SF64ROM.SaveRomTo(saveFileDialog.FileName);
+
+            if (!ToolSettings.Instance.RecentlyOpened.Contains(saveFileDialog.FileName))
+            {
+                ToolSettings.Instance.AddRecentlyOpened(saveFileDialog.FileName);
+                UpdateFormSettings();
+            }
         }
 
         //Needs to be fixed, now that the system has been changed up
@@ -362,6 +408,16 @@ namespace NewSF64Toolkit
         }
 
         #endregion
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            ToolSettings.Instance.Save();
+        }
+
+        private void menuStripFileExit_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
 
     }
 }

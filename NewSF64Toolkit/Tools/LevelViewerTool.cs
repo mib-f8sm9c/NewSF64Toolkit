@@ -22,7 +22,6 @@ namespace NewSF64Toolkit.Tools
 
         public override void Activate()
         {
-
             base.Activate();
         }
 
@@ -33,14 +32,34 @@ namespace NewSF64Toolkit.Tools
 
         public override void ROMUpdated(SF64ROM.RomUpdateType updateType)
         {
-            if (IsActive)
-                ;
+
+            if (!IsActive)
+                return;
+
+            switch (updateType)
+            {
+                case SF64ROM.RomUpdateType.RomUnloaded:
+                case SF64ROM.RomUpdateType.RomLoaded:
+                case SF64ROM.RomUpdateType.RomEdited:
+                    _levelViewerControl.ResetGL();
+                    break;
+            }
         }
 
         public override void SettingsUpdated(ToolSettings.SettingsUpdatedType updateType)
         {
-            if (IsActive)
-                ;
+            if (!IsActive)
+                return;
+
+            switch (updateType)
+            {
+                case ToolSettings.SettingsUpdatedType.WireframeChange:
+                    _levelViewerControl.RefreshGL();
+                    break;
+                case ToolSettings.SettingsUpdatedType.BaseSystemChange:
+                    _levelViewerControl.UpdateLevelInfo();
+                    break;
+            }
         }
 
         public override Control GetToolControl()

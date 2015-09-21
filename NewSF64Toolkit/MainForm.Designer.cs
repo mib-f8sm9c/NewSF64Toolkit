@@ -53,6 +53,8 @@
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.pnlCurrentTool = new System.Windows.Forms.Panel();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.menuStripFileRecent = new System.Windows.Forms.ToolStripMenuItem();
             this.statusStrip.SuspendLayout();
             this.menuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -93,6 +95,8 @@
             this.menuStripFileLoadDMA,
             this.menuStripFileSaveDMA,
             this.toolStripSeparator2,
+            this.menuStripFileRecent,
+            this.toolStripSeparator3,
             this.menuStripFileExit});
             this.menuStripFile.Name = "menuStripFile";
             this.menuStripFile.Size = new System.Drawing.Size(37, 20);
@@ -101,27 +105,27 @@
             // menuStripFileLoad
             // 
             this.menuStripFileLoad.Name = "menuStripFileLoad";
-            this.menuStripFileLoad.Size = new System.Drawing.Size(152, 22);
+            this.menuStripFileLoad.Size = new System.Drawing.Size(173, 22);
             this.menuStripFileLoad.Text = "Load ROM...";
             this.menuStripFileLoad.Click += new System.EventHandler(this.menuStripFileLoad_Click);
             // 
             // menuStripFileSave
             // 
             this.menuStripFileSave.Name = "menuStripFileSave";
-            this.menuStripFileSave.Size = new System.Drawing.Size(152, 22);
+            this.menuStripFileSave.Size = new System.Drawing.Size(173, 22);
             this.menuStripFileSave.Text = "Save ROM...";
             this.menuStripFileSave.Click += new System.EventHandler(this.menuStripFileSave_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(170, 6);
             // 
             // menuStripFileLoadDMA
             // 
             this.menuStripFileLoadDMA.Enabled = false;
             this.menuStripFileLoadDMA.Name = "menuStripFileLoadDMA";
-            this.menuStripFileLoadDMA.Size = new System.Drawing.Size(152, 22);
+            this.menuStripFileLoadDMA.Size = new System.Drawing.Size(173, 22);
             this.menuStripFileLoadDMA.Text = "Load DMA...";
             this.menuStripFileLoadDMA.Click += new System.EventHandler(this.menuStripFileLoadDMA_Click);
             // 
@@ -129,20 +133,21 @@
             // 
             this.menuStripFileSaveDMA.Enabled = false;
             this.menuStripFileSaveDMA.Name = "menuStripFileSaveDMA";
-            this.menuStripFileSaveDMA.Size = new System.Drawing.Size(152, 22);
+            this.menuStripFileSaveDMA.Size = new System.Drawing.Size(173, 22);
             this.menuStripFileSaveDMA.Text = "Save DMA...";
             this.menuStripFileSaveDMA.Click += new System.EventHandler(this.menuStripFileSaveDMA_Click);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(149, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(170, 6);
             // 
             // menuStripFileExit
             // 
             this.menuStripFileExit.Name = "menuStripFileExit";
-            this.menuStripFileExit.Size = new System.Drawing.Size(152, 22);
+            this.menuStripFileExit.Size = new System.Drawing.Size(173, 22);
             this.menuStripFileExit.Text = "Exit";
+            this.menuStripFileExit.Click += new System.EventHandler(this.menuStripFileExit_Click);
             // 
             // menuStripROM
             // 
@@ -228,6 +233,7 @@
             // openFileDialog
             // 
             this.openFileDialog.FileName = "sf64.z64";
+            this.openFileDialog.Filter = "Rom files|*.n64;*.z64;*.rom|All files|*.*";
             // 
             // pnlCurrentTool
             // 
@@ -236,6 +242,17 @@
             this.pnlCurrentTool.Name = "pnlCurrentTool";
             this.pnlCurrentTool.Size = new System.Drawing.Size(1121, 582);
             this.pnlCurrentTool.TabIndex = 3;
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(170, 6);
+            // 
+            // menuStripFileRecent
+            // 
+            this.menuStripFileRecent.Name = "menuStripFileRecent";
+            this.menuStripFileRecent.Size = new System.Drawing.Size(173, 22);
+            this.menuStripFileRecent.Text = "Recently Opened...";
             // 
             // MainForm
             // 
@@ -247,6 +264,7 @@
             this.Controls.Add(this.menuStrip);
             this.Name = "MainForm";
             this.Text = "NewSF64Toolkit";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.statusStrip.ResumeLayout(false);
             this.statusStrip.PerformLayout();
             this.menuStrip.ResumeLayout(false);
@@ -283,6 +301,8 @@
         private System.Windows.Forms.ToolStripMenuItem menuStripToolsInfo;
         private System.Windows.Forms.ToolStripMenuItem menuStripToolsHex;
         private System.Windows.Forms.ToolStripMenuItem menuStripToolsLevel;
+        private System.Windows.Forms.ToolStripMenuItem menuStripFileRecent;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
     }
 }
 
