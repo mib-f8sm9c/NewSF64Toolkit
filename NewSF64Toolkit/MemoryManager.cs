@@ -37,18 +37,19 @@ namespace NewSF64Toolkit
 
         #region Singleton code
 
-        private static MemoryManager _instance;
+        //Comment out to break any memorymanager code
+        //private static MemoryManager _instance;
 
-        public static MemoryManager Instance
-        {
-            get
-            {
-                if (_instance == null)
-                    _instance = new MemoryManager();
+        //public static MemoryManager Instance
+        //{
+        //    get
+        //    {
+        //        if (_instance == null)
+        //            _instance = new MemoryManager();
 
-                return _instance;
-            }
-        }
+        //        return _instance;
+        //    }
+        //}
 
         #endregion
 
@@ -128,7 +129,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                return ToolSettings.ReadUInt(bank.Data, offset - bank.VirtualStart);
+                return ByteHelper.ReadUInt(bank.Data, offset - bank.VirtualStart);
             }
 
             //Bad value
@@ -141,7 +142,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                return ToolSettings.ReadInt(bank.Data, offset - bank.VirtualStart);
+                return ByteHelper.ReadInt(bank.Data, offset - bank.VirtualStart);
             }
 
             //Bad value
@@ -154,7 +155,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                return ToolSettings.ReadUShort(bank.Data, offset - bank.VirtualStart);
+                return ByteHelper.ReadUShort(bank.Data, offset - bank.VirtualStart);
             }
 
             //Bad value
@@ -167,7 +168,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                return ToolSettings.ReadShort(bank.Data, offset - bank.VirtualStart);
+                return ByteHelper.ReadShort(bank.Data, offset - bank.VirtualStart);
             }
 
             //Bad value
@@ -180,7 +181,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                return ToolSettings.ReadByte(bank.Data, offset - bank.VirtualStart);
+                return ByteHelper.ReadByte(bank.Data, offset - bank.VirtualStart);
             }
 
             //Bad value
@@ -193,7 +194,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                return ToolSettings.ReadFloat(bank.Data, offset - bank.VirtualStart);
+                return ByteHelper.ReadFloat(bank.Data, offset - bank.VirtualStart);
             }
 
             //Bad value
@@ -206,7 +207,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                ToolSettings.WriteFloat(val, bank.Data, offset);
+                ByteHelper.WriteFloat(val, bank.Data, offset);
             }
         }
 
@@ -216,7 +217,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                ToolSettings.WriteUShort(val, bank.Data, offset);
+                ByteHelper.WriteUShort(val, bank.Data, offset);
             }
         }
 
@@ -226,7 +227,7 @@ namespace NewSF64Toolkit
 
             if (bank.IsValid())
             {
-                ToolSettings.WriteShort(val, bank.Data, offset);
+                ByteHelper.WriteShort(val, bank.Data, offset);
             }
         }
 

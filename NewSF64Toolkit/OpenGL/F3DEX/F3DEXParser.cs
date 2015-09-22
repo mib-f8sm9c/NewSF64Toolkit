@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
+using NewSF64Toolkit.OpenGL;
 
-namespace NewSF64Toolkit
+namespace NewSF64Toolkit.OpenGL.F3DEX
 {
     public class F3DEXParser
     {
-        private OpenGLControl _viewer;
-
         public enum DrawingModeType
         {
             Texture,
@@ -20,103 +19,215 @@ namespace NewSF64Toolkit
 
         public DrawingModeType DrawingMode;
 
-        public F3DEXParser(OpenGLControl viewer)
+        public static int[] InvalidBox = new int[3] {0, 1, 2};
+
+        public F3DEXParser()
         {
-            _viewer = viewer;
             DrawingMode = DrawingModeType.Texture;
+
+            sv_ClearStructures(false);
+            gl_ClearRenderer(true);
+
+            InitInvalidModels();
         }
 
-        public void ReadGameObject(SFGfx.GameObject gameObject)
+        public void InitInvalidModels()
         {
-            byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
-            uint offset = gameObject.DListOffset & 0x00FFFFFF;
+            int listBase = GL.GenLists(3);
 
-            if (offset == 0 || !MemoryManager.Instance.HasBank(bankNo) || !MemoryManager.Instance.LocateBank(bankNo, offset).IsValid())
+            //Normal
+            GL.NewList(listBase, ListMode.Compile);
+
+            GL.PushMatrix();
+
+            DrawingMode = F3DEXParser.DrawingModeType.Texture;
+
+            DrawInvalidModel();
+
+            GL.PopMatrix();
+
+            GL.EndList();
+
+            //Selected
+            GL.NewList(listBase + 1, ListMode.Compile);
+
+            GL.PushMatrix();
+
+            DrawingMode = F3DEXParser.DrawingModeType.TextureSelected;
+
+            DrawInvalidModel();
+
+            GL.PopMatrix();
+
+            GL.EndList();
+
+            //Wireframe
+            GL.NewList(listBase + 2, ListMode.Compile);
+
+            GL.PushMatrix();
+
+            DrawingMode = F3DEXParser.DrawingModeType.Wireframe;
+
+            DrawInvalidModel();
+
+            GL.PopMatrix();
+
+            GL.EndList();
+
+            DrawingMode = F3DEXParser.DrawingModeType.Texture;
+
+            InvalidBox = new int[3] { listBase, listBase + 1, listBase + 2 };
+        }
+
+        private void DrawInvalidModel()
+        {
+            GL.Disable(EnableCap.Lighting);
+            GL.Disable(EnableCap.Texture2D);
+
+            GL.Begin(PrimitiveType.Quads);
+            if (DrawingMode != DrawingModeType.Wireframe)
             {
-                //Draw the invalid model
-                GL.Disable(EnableCap.Lighting);
-                GL.Disable(EnableCap.Texture2D);
+                if (DrawingMode == DrawingModeType.TextureSelected)
+                    GL.Color3(0.0f, 1.0f, 0.0f);
+                else
+                    GL.Color3(1.0f, 0.0f, 0.0f);
+            }
 
-                GL.Begin(PrimitiveType.Quads);
-                if (DrawingMode != DrawingModeType.Wireframe)
-                {
-                    if (DrawingMode == DrawingModeType.TextureSelected)
-                        GL.Color3(0.0f, 1.0f, 0.0f);
-                    else
-                        GL.Color3(1.0f, 0.0f, 0.0f);
-                }
+            GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
+            GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
+            GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
+            GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
 
-                GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
-                GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
-                GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
-                GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
+            GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
+            GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
+            GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
+            GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
 
-                GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
-                GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
-                GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
-                GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
+            GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
+            GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
+            GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
+            GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
 
-                GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
-                GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
-                GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
-                GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
+            GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
+            GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
+            GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
+            GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
 
-                GL.Vertex3(-15.0f, 15.0f, -15.0f);   //V6
-                GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
-                GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
-                GL.Vertex3(15.0f, 15.0f, -15.0f);   //V4
+            GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
+            GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
+            GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
+            GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
 
-                GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
-                GL.Vertex3(-15.0f, -15.0f, -15.0f);   //V5
-                GL.Vertex3(15.0f, -15.0f, -15.0f);   //V3
-                GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
+            //front
+            if (DrawingMode != DrawingModeType.Wireframe)
+            {
+                GL.Color3(1.0f, 1.0f, 1.0f);
+            }
 
-                //front
-                if (DrawingMode != DrawingModeType.Wireframe)
-                {
-                    GL.Color3(1.0f, 1.0f, 1.0f);
-                }
+            GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
+            GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
+            GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
+            GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
+            GL.End();
 
-                GL.Vertex3(-15.0f, 15.0f, 15.0f);   //V8
-                GL.Vertex3(-15.0f, -15.0f, 15.0f);   //V7
-                GL.Vertex3(15.0f, -15.0f, 15.0f);   //V1
-                GL.Vertex3(15.0f, 15.0f, 15.0f);   //V2
-                GL.End();
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Lighting);
+        }
 
-                GL.Enable(EnableCap.Texture2D);
-                GL.Enable(EnableCap.Lighting);
+        //NOTE: We should make a way to clean up [DELETE] the old GL display lists
+
+        public int[] ReadGameObject(byte[] bytes, uint fullOffset)//F3DEXParser.GameObject gameObject)
+        {
+            //byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
+            uint offset = fullOffset & 0x00FFFFFF;
+
+            //Is 0 a valid location?
+            if (offset == 0)// || !MemoryManager.Instance.HasBank(bankNo) || !MemoryManager.Instance.LocateBank(bankNo, offset).IsValid())
+            {
+                return InvalidBox;
             }
             else
             {
-                if (DrawingMode == DrawingModeType.TextureSelected)
-                {
-                    GL.PushAttrib(AttribMask.AllAttribBits);
-                    GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Add);
-                }
+                int listBase = GL.GenLists(3);
+                //GL.ListBase(listBase);
 
-                if (DrawingMode == DrawingModeType.Wireframe)
-                {
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-                }
+                //Normal
+                GL.NewList(listBase, ListMode.Compile);
 
-                GL.Disable(EnableCap.Texture2D);
-                GL.Disable(EnableCap.Lighting);
+                GL.PushMatrix();
 
-                SFGfx.DLStackPos = 0;
-                ParseDisplayList(gameObject.DListOffset);
+                DrawingMode = F3DEXParser.DrawingModeType.Texture;
 
-                GL.Enable(EnableCap.Texture2D);
-                GL.Enable(EnableCap.Lighting);
+                ReadF3DEX(bytes, offset);
 
-                if (DrawingMode == DrawingModeType.Wireframe)
-                {
-                    GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-                }
+                GL.PopMatrix();
 
-                if (DrawingMode == DrawingModeType.TextureSelected)
-                {
-                    GL.PopAttrib();
-                }
+                GL.EndList();
+
+                //Selected
+                GL.NewList(listBase + 1, ListMode.Compile);
+
+                GL.PushMatrix();
+
+                DrawingMode = F3DEXParser.DrawingModeType.TextureSelected;
+
+                ReadF3DEX(bytes, offset);
+
+                GL.PopMatrix();
+
+                GL.EndList();
+
+                //Wireframe
+                GL.NewList(listBase + 2, ListMode.Compile);
+
+                GL.PushMatrix();
+
+                DrawingMode = F3DEXParser.DrawingModeType.Wireframe;
+
+                ReadF3DEX(bytes, offset);
+
+                GL.PopMatrix();
+
+                GL.EndList();
+
+                return new int[3] { listBase, listBase + 1, listBase + 2 };
+            }
+        }
+
+        private byte[] currentBytes;
+
+        private void ReadF3DEX(byte[] bytes, uint offset)
+        {
+            currentBytes = bytes;
+
+            if (DrawingMode == DrawingModeType.TextureSelected)
+            {
+                GL.PushAttrib(AttribMask.AllAttribBits);
+                GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (int)TextureEnvMode.Add);
+            }
+
+            if (DrawingMode == DrawingModeType.Wireframe)
+            {
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            }
+
+            GL.Disable(EnableCap.Texture2D);
+            GL.Disable(EnableCap.Lighting);
+
+            DLStackPos = 0;
+            ParseDisplayList(offset);
+
+            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.Lighting);
+
+            if (DrawingMode == DrawingModeType.Wireframe)
+            {
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            }
+
+            if (DrawingMode == DrawingModeType.TextureSelected)
+            {
+                GL.PopAttrib();
             }
         }
 
@@ -330,33 +441,29 @@ namespace NewSF64Toolkit
 
         void ParseDisplayList(uint Address)
         {
-            char TempSegment;
-            uint TempOffset;
-
-            SplitAddress(Address, out TempSegment, out TempOffset);
-
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            //We'll assume for now that the address is contained
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
             DListAddress = Address;
 
             //Decode the rest here
             SetRenderMode(0, 0);
 
-            SFGfx.GeometryMode = SFGfx.Constants.G_LIGHTING | SFGfx.Constants.F3DEX_SHADING_SMOOTH;
-            SFGfx.ChangedModes |= SFGfx.Constants.CHANGED_GEOMETRYMODE;
+            GeometryMode = F3DEXParser.Constants.G_LIGHTING | F3DEXParser.Constants.F3DEX_SHADING_SMOOTH;
+            ChangedModes |= F3DEXParser.Constants.CHANGED_GEOMETRYMODE;
 
-            while (SFGfx.DLStackPos >= 0)
+            while (DLStackPos >= 0)
             {
                 SplitAddress(DListAddress, out Segment, out Offset);
 
-                w0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset);//Read32(RAM[Segment].Data, Offset);
-                w1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 4);//RRead32(RAM[Segment].Data, Offset + 4);
+                w0 = ByteHelper.ReadUInt(currentBytes, Offset);//Read32(RAM[Segment].Data, Offset);
+                w1 = ByteHelper.ReadUInt(currentBytes, Offset + 4);//RRead32(RAM[Segment].Data, Offset + 4);
 
-                wp0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset - 8);//Read32(RAM[Segment].Data, Offset - 8);
-                wp1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset - 4);//Read32(RAM[Segment].Data, Offset - 4);
+                wp0 = ByteHelper.ReadUInt(currentBytes, Offset - 8);//Read32(RAM[Segment].Data, Offset - 8);
+                wp1 = ByteHelper.ReadUInt(currentBytes, Offset - 4);//Read32(RAM[Segment].Data, Offset - 4);
 
-                wn0 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 8);//Read32(RAM[Segment].Data, Offset + 8);
-                wn1 = MemoryManager.Instance.ReadUInt((byte)Segment, Offset + 12);//Read32(RAM[Segment].Data, Offset + 12);
+                wn0 = ByteHelper.ReadUInt(currentBytes, Offset + 8);//Read32(RAM[Segment].Data, Offset + 8);
+                wn1 = ByteHelper.ReadUInt(currentBytes, Offset + 12);//Read32(RAM[Segment].Data, Offset + 12);
 
                 UcodeCmd((byte)(w0 >> 24));//UcodeCmd[(byte)(w0 >> 24)]();
 
@@ -395,8 +502,8 @@ namespace NewSF64Toolkit
 
 	        for(i = 0; i < 4; i++) {
 		        for(j = 0; j < 4; j++) {
-                    MtxTemp1 = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset);//((RAM[Segment].Data[Offset		] * 0x100) + RAM[Segment].Data[Offset + 1		]);
-                    MtxTemp2 = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + 32);//((RAM[Segment].Data[Offset + 32	] * 0x100) + RAM[Segment].Data[Offset + 33	]);
+                    MtxTemp1 = ByteHelper.ReadShort(currentBytes, TempOffset);//((RAM[Segment].Data[Offset		] * 0x100) + RAM[Segment].Data[Offset + 1		]);
+                    MtxTemp2 = ByteHelper.ReadShort(currentBytes, TempOffset + 32);//((RAM[Segment].Data[Offset + 32	] * 0x100) + RAM[Segment].Data[Offset + 33	]);
 			        Matrix[i * 4 + j] = ((MtxTemp1 << 16) | MtxTemp2) * fRecip;
 
 			        Offset += 2;
@@ -435,7 +542,7 @@ namespace NewSF64Toolkit
 
             SplitAddress(w1, out TempSegment, out TempOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 	        uint V = _SHIFTR( w0, 17, 7 );
 	        uint N = _SHIFTR( w0, 10, 6 );
@@ -444,15 +551,15 @@ namespace NewSF64Toolkit
 
 	        int i = 0;
 	        for(i = 0; i < (N << 4); i += 16) {
-                SFGfx.Vertices[V].X = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i);//((RAM[TempSegment].Data[TempOffset + i] << 8) | RAM[TempSegment].Data[TempOffset + i + 1]);
-                SFGfx.Vertices[V].Y = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 2);//((RAM[TempSegment].Data[TempOffset + i + 2] << 8) | RAM[TempSegment].Data[TempOffset + i + 3]);
-                SFGfx.Vertices[V].Z = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 4);//((RAM[TempSegment].Data[TempOffset + i + 4] << 8) | RAM[TempSegment].Data[TempOffset + i + 5]);
-                SFGfx.Vertices[V].S = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 8);//((RAM[TempSegment].Data[TempOffset + i + 8] << 8) | RAM[TempSegment].Data[TempOffset + i + 9]);
-                SFGfx.Vertices[V].T = MemoryManager.Instance.ReadShort((byte)TempSegment, TempOffset + (uint)i + 10);//((RAM[TempSegment].Data[TempOffset + i + 10] << 8) | RAM[TempSegment].Data[TempOffset + i + 11]);
-                SFGfx.Vertices[V].R = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 12);//RAM[TempSegment].Data[TempOffset + i + 12];
-                SFGfx.Vertices[V].G = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
-                SFGfx.Vertices[V].B = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
-                SFGfx.Vertices[V].A = (char)MemoryManager.Instance.ReadByte((byte)TempSegment, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
+                Vertices[V].X = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i);//((RAM[TempSegment].Data[TempOffset + i] << 8) | RAM[TempSegment].Data[TempOffset + i + 1]);
+                Vertices[V].Y = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i + 2);//((RAM[TempSegment].Data[TempOffset + i + 2] << 8) | RAM[TempSegment].Data[TempOffset + i + 3]);
+                Vertices[V].Z = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i + 4);//((RAM[TempSegment].Data[TempOffset + i + 4] << 8) | RAM[TempSegment].Data[TempOffset + i + 5]);
+                Vertices[V].S = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i + 8);//((RAM[TempSegment].Data[TempOffset + i + 8] << 8) | RAM[TempSegment].Data[TempOffset + i + 9]);
+                Vertices[V].T = ByteHelper.ReadShort(currentBytes, TempOffset + (uint)i + 10);//((RAM[TempSegment].Data[TempOffset + i + 10] << 8) | RAM[TempSegment].Data[TempOffset + i + 11]);
+                Vertices[V].R = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 12);//RAM[TempSegment].Data[TempOffset + i + 12];
+                Vertices[V].G = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
+                Vertices[V].B = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
+                Vertices[V].A = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
 
 		        V++;
 	        }
@@ -468,10 +575,10 @@ namespace NewSF64Toolkit
 
             SplitAddress(w1, out TempSegment, out TempOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
-	        SFGfx.DLStack[SFGfx.DLStackPos] = DListAddress;
-	        SFGfx.DLStackPos++;
+	        DLStack[DLStackPos] = DListAddress;
+	        DLStackPos++;
 
 	        ParseDisplayList(w1);
         }
@@ -487,32 +594,32 @@ namespace NewSF64Toolkit
             char TempSegment;
             uint TempOffset;
 
-            SplitAddress(SFGfx.Store_RDPHalf1, out TempSegment, out TempOffset);
+            SplitAddress(Store_RDPHalf1, out TempSegment, out TempOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid()) return;
 
 
 
 	        int Vtx = (int)_SHIFTR(w0, 1, 11);
 	        int ZVal = (int)w1;
 
-	        if(SFGfx.Vertices[Vtx].Z < ZVal) {
-		        SFGfx.DLStack[SFGfx.DLStackPos] = DListAddress;
-		        SFGfx.DLStackPos++;
+	        if(Vertices[Vtx].Z < ZVal) {
+		        DLStack[DLStackPos] = DListAddress;
+		        DLStackPos++;
 
-		        ParseDisplayList(SFGfx.Store_RDPHalf1);
+		        ParseDisplayList(Store_RDPHalf1);
 	        }
         }
 
         void F3DEX_TRI2()
         {
-            if (SFGfx.ChangedModes != 0x00) this._viewer.UpdateStates();
+            if (ChangedModes != 0x00) UpdateStates();
 
 	        int[] Vtxs1 = new int[] { (int)_SHIFTR( w0, 17, 7 ), (int)_SHIFTR( w0, 9, 7 ), (int)_SHIFTR( w0, 1, 7 ) };
 
 	        DrawTriangle(Vtxs1);
 
-            if (SFGfx.ChangedModes != 0x00) this._viewer.UpdateStates();
+            if (ChangedModes != 0x00) UpdateStates();
 
             int[] Vtxs2 = new int[] { (int)_SHIFTR(w1, 17, 7), (int)_SHIFTR(w1, 9, 7), (int)_SHIFTR(w1, 1, 7) };
 	        DrawTriangle(Vtxs2);
@@ -525,33 +632,33 @@ namespace NewSF64Toolkit
 
         void F3DEX_RDPHALF_2()
         {
-	        SFGfx.Store_RDPHalf2 = w1;
+	        Store_RDPHalf2 = w1;
         }
 
         void F3DEX_RDPHALF_1()
         {
-	        SFGfx.Store_RDPHalf1 = w1;
+	        Store_RDPHalf1 = w1;
         }
 
         void F3DEX_CLEARGEOMETRYMODE()
         {
-	        SFGfx.GeometryMode &= ~w1;
+	        GeometryMode &= ~w1;
 
-	        SFGfx.ChangedModes |= SFGfx.Constants.CHANGED_GEOMETRYMODE;
+	        ChangedModes |= F3DEXParser.Constants.CHANGED_GEOMETRYMODE;
         }
         
         void F3DEX_SETGEOMETRYMODE()
         {
-	        SFGfx.GeometryMode |= w1;
+	        GeometryMode |= w1;
 
-	        SFGfx.ChangedModes |= SFGfx.Constants.CHANGED_GEOMETRYMODE;
+	        ChangedModes |= F3DEXParser.Constants.CHANGED_GEOMETRYMODE;
         }
 
         void F3DEX_ENDDL()
         {
-	        SFGfx.DLStackPos--;
-            if (SFGfx.DLStackPos >= 0)
-                DListAddress = SFGfx.DLStack[SFGfx.DLStackPos];
+	        DLStackPos--;
+            if (DLStackPos >= 0)
+                DListAddress = DLStack[DLStackPos];
             else
                 DListAddress = 0x0;
         }
@@ -559,7 +666,7 @@ namespace NewSF64Toolkit
         void F3DEX_SETOTHERMODE_L()
         {
 	        switch(_SHIFTR( w0, 8, 8 )) {
-                case SFGfx.Constants.G_MDSFT_RENDERMODE:
+                case F3DEXParser.Constants.G_MDSFT_RENDERMODE:
 			        SetRenderMode(w1 & 0xCCCCFFFF, w1 & 0x3333FFFF);
 			        break;
 		        default: {
@@ -567,10 +674,10 @@ namespace NewSF64Toolkit
 			        uint length = _SHIFTR( w0, 0, 8 );
                     uint mask = (uint)((1 << (int)length) - 1) << (int)shift;
 
-			        SFGfx.OtherModeL &= ~mask;
-			        SFGfx.OtherModeL |= w1 & mask;
+			        OtherModeL &= ~mask;
+			        OtherModeL |= w1 & mask;
 
-                    SFGfx.ChangedModes |= SFGfx.Constants.CHANGED_RENDERMODE | SFGfx.Constants.CHANGED_ALPHACOMPARE;
+                    ChangedModes |= F3DEXParser.Constants.CHANGED_RENDERMODE | F3DEXParser.Constants.CHANGED_ALPHACOMPARE;
 			        break;
 		        }
 	        }
@@ -584,8 +691,8 @@ namespace NewSF64Toolkit
 			        uint length = _SHIFTR(w0, 0, 8);
 			        uint mask = (uint)((1 << (int)length) - 1) << (int)shift;
 
-			        SFGfx.OtherModeH &= ~mask;
-			        SFGfx.OtherModeH |= w1 & mask;
+			        OtherModeH &= ~mask;
+			        OtherModeH |= w1 & mask;
 			        break;
 		        }
 	        }
@@ -593,14 +700,14 @@ namespace NewSF64Toolkit
 
         void F3DEX_TEXTURE()
         {
-	        SFGfx.Textures[0].ScaleS = FIXED2FLOAT(_SHIFTR(w1, 16, 16), 16);
-	        SFGfx.Textures[0].ScaleT = FIXED2FLOAT(_SHIFTR(w1, 0, 16), 16);
+	        Textures[0].ScaleS = FIXED2FLOAT(_SHIFTR(w1, 16, 16), 16);
+	        Textures[0].ScaleT = FIXED2FLOAT(_SHIFTR(w1, 0, 16), 16);
 
-            if (SFGfx.Textures[0].ScaleS == 0.0f) SFGfx.Textures[0].ScaleS = 1.0f;
-            if (SFGfx.Textures[0].ScaleT == 0.0f) SFGfx.Textures[0].ScaleT = 1.0f;
+            if (Textures[0].ScaleS == 0.0f) Textures[0].ScaleS = 1.0f;
+            if (Textures[0].ScaleT == 0.0f) Textures[0].ScaleT = 1.0f;
 
-	        SFGfx.Textures[1].ScaleS = SFGfx.Textures[0].ScaleS;
-	        SFGfx.Textures[1].ScaleT = SFGfx.Textures[0].ScaleT;
+	        Textures[1].ScaleS = Textures[0].ScaleS;
+	        Textures[1].ScaleT = Textures[0].ScaleT;
         }
         
         void F3DEX_MOVEWORD()
@@ -620,7 +727,7 @@ namespace NewSF64Toolkit
 
         void F3DEX_TRI1()
         {
-	        if(SFGfx.ChangedModes != 0x0) this._viewer.UpdateStates();
+	        if(ChangedModes != 0x0) UpdateStates();
 
             int[] Vtxs = new int[] { (int)_SHIFTR(w1, 17, 7), (int)_SHIFTR(w1, 9, 7), (int)_SHIFTR(w1, 1, 7) };
 	        DrawTriangle(Vtxs);
@@ -691,9 +798,9 @@ namespace NewSF64Toolkit
             char PalSegment;
             uint PalOffset;
 
-            SplitAddress(SFGfx.Textures[SFGfx.CurrentTexture].PalOffset, out PalSegment, out PalOffset);
+            SplitAddress(Textures[CurrentTexture].PalOffset, out PalSegment, out PalOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
+            //if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
             
 	        uint PalSize = ((w1 & 0x00FFF000) >> 14) + 1;
 
@@ -703,7 +810,7 @@ namespace NewSF64Toolkit
 	        uint PalLoop;
 
 	        for(PalLoop = 0; PalLoop < PalSize; PalLoop++) {
-                Raw = MemoryManager.Instance.ReadUShort((byte)PalSegment, PalOffset);//(RAM[PalSegment].Data[PalOffset] << 8) | RAM[PalSegment].Data[PalOffset + 1];
+                Raw = ByteHelper.ReadUShort(currentBytes, PalOffset);//(RAM[PalSegment].Data[PalOffset] << 8) | RAM[PalSegment].Data[PalOffset + 1];
 
 		        R = (char)((Raw & 0xF800) >> 8);
                 G = (char)(((Raw & 0x07C0) << 5) >> 8);
@@ -711,14 +818,14 @@ namespace NewSF64Toolkit
 
                 if (((Raw & 0x0001) != 0x0000)) { A = (char)0xFF; } else { A = (char)0x00; }
 
-		        SFGfx.Palettes[PalLoop].R = R;
-                SFGfx.Palettes[PalLoop].G = G;
-                SFGfx.Palettes[PalLoop].B = B;
-                SFGfx.Palettes[PalLoop].A = A;
+		        Palettes[PalLoop].R = R;
+                Palettes[PalLoop].G = G;
+                Palettes[PalLoop].B = B;
+                Palettes[PalLoop].A = A;
 
 		        PalOffset += 2;
 
-                if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) break;
+                //if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) break;
 	        }
         }
 
@@ -741,15 +848,15 @@ namespace NewSF64Toolkit
         {
 	        if(w1 == 0x07000000) return;
 
-            SFGfx.Textures[SFGfx.CurrentTexture].Format = (w0 & 0x00FF0000) >> 16;
-            SFGfx.Textures[SFGfx.CurrentTexture].CMT = _SHIFTR(w1, 18, 2);
-            SFGfx.Textures[SFGfx.CurrentTexture].CMS = _SHIFTR(w1, 8, 2);
-            SFGfx.Textures[SFGfx.CurrentTexture].LineSize = _SHIFTR(w0, 9, 9);
-            SFGfx.Textures[SFGfx.CurrentTexture].Palette = _SHIFTR(w1, 20, 4);
-            SFGfx.Textures[SFGfx.CurrentTexture].ShiftT = _SHIFTR(w1, 10, 4);
-            SFGfx.Textures[SFGfx.CurrentTexture].ShiftS = _SHIFTR(w1, 0, 4);
-            SFGfx.Textures[SFGfx.CurrentTexture].MaskT = _SHIFTR(w1, 14, 4);
-            SFGfx.Textures[SFGfx.CurrentTexture].MaskS = _SHIFTR(w1, 4, 4);
+            Textures[CurrentTexture].Format = (w0 & 0x00FF0000) >> 16;
+            Textures[CurrentTexture].CMT = _SHIFTR(w1, 18, 2);
+            Textures[CurrentTexture].CMS = _SHIFTR(w1, 8, 2);
+            Textures[CurrentTexture].LineSize = _SHIFTR(w0, 9, 9);
+            Textures[CurrentTexture].Palette = _SHIFTR(w1, 20, 4);
+            Textures[CurrentTexture].ShiftT = _SHIFTR(w1, 10, 4);
+            Textures[CurrentTexture].ShiftS = _SHIFTR(w1, 0, 4);
+            Textures[CurrentTexture].MaskT = _SHIFTR(w1, 14, 4);
+            Textures[CurrentTexture].MaskS = _SHIFTR(w1, 4, 4);
         }
 
         void G_FILLRECT()
@@ -759,29 +866,29 @@ namespace NewSF64Toolkit
 
         void G_SETFILLCOLOR()
         {
-	        SFGfx.FillColor.R = _SHIFTR(w1, 11, 5) * 0.032258064f;
-	        SFGfx.FillColor.G = _SHIFTR(w1, 6, 5) * 0.032258064f;
-	        SFGfx.FillColor.B = _SHIFTR(w1, 1, 5) * 0.032258064f;
-	        SFGfx.FillColor.A = _SHIFTR(w1, 0, 1);
+	        FillColor.R = _SHIFTR(w1, 11, 5) * 0.032258064f;
+	        FillColor.G = _SHIFTR(w1, 6, 5) * 0.032258064f;
+	        FillColor.B = _SHIFTR(w1, 1, 5) * 0.032258064f;
+	        FillColor.A = _SHIFTR(w1, 0, 1);
 
-	        SFGfx.FillColor.Z = _SHIFTR(w1, 2, 14);
-	        SFGfx.FillColor.DZ = _SHIFTR(w1, 0, 2);
+	        FillColor.Z = _SHIFTR(w1, 2, 14);
+	        FillColor.DZ = _SHIFTR(w1, 0, 2);
         }
 
         void G_SETFOGCOLOR()
         {
-	        SFGfx.FogColor.R = _SHIFTR(w1, 24, 8) * 0.0039215689f;
-	        SFGfx.FogColor.G = _SHIFTR(w1, 16, 8) * 0.0039215689f;
-	        SFGfx.FogColor.B = _SHIFTR(w1, 8, 8) * 0.0039215689f;
-	        SFGfx.FogColor.A = _SHIFTR(w1, 0, 8) * 0.0039215689f;
+	        FogColor.R = _SHIFTR(w1, 24, 8) * 0.0039215689f;
+	        FogColor.G = _SHIFTR(w1, 16, 8) * 0.0039215689f;
+	        FogColor.B = _SHIFTR(w1, 8, 8) * 0.0039215689f;
+	        FogColor.A = _SHIFTR(w1, 0, 8) * 0.0039215689f;
         }
         
         void G_SETBLENDCOLOR()
         {
-	        SFGfx.BlendColor.R = _SHIFTR(w1, 24, 8) * 0.0039215689f;
-	        SFGfx.BlendColor.G = _SHIFTR(w1, 16, 8) * 0.0039215689f;
-	        SFGfx.BlendColor.B = _SHIFTR(w1, 8, 8) * 0.0039215689f;
-	        SFGfx.BlendColor.A = _SHIFTR(w1, 0, 8) * 0.0039215689f;
+	        BlendColor.R = _SHIFTR(w1, 24, 8) * 0.0039215689f;
+	        BlendColor.G = _SHIFTR(w1, 16, 8) * 0.0039215689f;
+	        BlendColor.B = _SHIFTR(w1, 8, 8) * 0.0039215689f;
+	        BlendColor.A = _SHIFTR(w1, 0, 8) * 0.0039215689f;
 
             //Bring in with textures
             //if(OpenGL.Ext_FragmentProgram) {
@@ -791,13 +898,13 @@ namespace NewSF64Toolkit
 
         void G_SETPRIMCOLOR()
         {
-	        SFGfx.PrimColor.R = _SHIFTR(w1, 24, 8) * 0.0039215689f;
-	        SFGfx.PrimColor.G = _SHIFTR(w1, 16, 8) * 0.0039215689f;
-	        SFGfx.PrimColor.B = _SHIFTR(w1, 8, 8) * 0.0039215689f;
-	        SFGfx.PrimColor.A = _SHIFTR(w1, 0, 8) * 0.0039215689f;
+	        PrimColor.R = _SHIFTR(w1, 24, 8) * 0.0039215689f;
+	        PrimColor.G = _SHIFTR(w1, 16, 8) * 0.0039215689f;
+	        PrimColor.B = _SHIFTR(w1, 8, 8) * 0.0039215689f;
+	        PrimColor.A = _SHIFTR(w1, 0, 8) * 0.0039215689f;
 
-	        SFGfx.PrimColor.M = (ushort)_SHIFTL(w0, 8, 8);
-	        SFGfx.PrimColor.L = _SHIFTL(w0, 0, 8) * 0.0039215689f;
+	        PrimColor.M = (ushort)_SHIFTL(w0, 8, 8);
+	        PrimColor.L = _SHIFTL(w0, 0, 8) * 0.0039215689f;
 
             //Bring in with other textures
             //if(OpenGL.Ext_FragmentProgram) {
@@ -808,10 +915,10 @@ namespace NewSF64Toolkit
 
         void G_SETENVCOLOR()
         {
-	        SFGfx.EnvColor.R = _SHIFTR(w1, 24, 8) * 0.0039215689f;
-	        SFGfx.EnvColor.G = _SHIFTR(w1, 16, 8) * 0.0039215689f;
-	        SFGfx.EnvColor.B = _SHIFTR(w1, 8, 8) * 0.0039215689f;
-	        SFGfx.EnvColor.A = _SHIFTR(w1, 0, 8) * 0.0039215689f;
+	        EnvColor.R = _SHIFTR(w1, 24, 8) * 0.0039215689f;
+	        EnvColor.G = _SHIFTR(w1, 16, 8) * 0.0039215689f;
+	        EnvColor.B = _SHIFTR(w1, 8, 8) * 0.0039215689f;
+	        EnvColor.A = _SHIFTR(w1, 0, 8) * 0.0039215689f;
 
             //Bring in with texture code
             //if(OpenGL.Ext_FragmentProgram) {
@@ -821,8 +928,8 @@ namespace NewSF64Toolkit
 
         void G_SETCOMBINE()
         {
-	        SFGfx.Combiner0 = (w0 & 0x00FFFFFF);
-	        SFGfx.Combiner1 = w1;
+	        Combiner0 = (w0 & 0x00FFFFFF);
+	        Combiner1 = w1;
 
             //Bring in with texture code
             //if(OpenGL.Ext_FragmentProgram) dl_CheckFragmentCache();
@@ -830,10 +937,10 @@ namespace NewSF64Toolkit
 
         void G_SETTIMG()
         {
-	        SFGfx.CurrentTexture = 0;
-	        SFGfx.IsMultiTexture = false;
+	        CurrentTexture = 0;
+	        IsMultiTexture = false;
 
-	        SFGfx.Textures[SFGfx.CurrentTexture].Offset = w1;
+	        Textures[CurrentTexture].Offset = w1;
         }
 
         void G_SETZIMG()
@@ -940,15 +1047,15 @@ namespace NewSF64Toolkit
 
 	        int i = 0;
 	        for(i = 0; i < 3; i++) {
-		        float TempS0 = FIXED2FLOAT(SFGfx.Vertices[Vtxs[i]].S, 16) * (SFGfx.Textures[0].ScaleS * SFGfx.Textures[0].ShiftScaleS) / 32.0f / FIXED2FLOAT(SFGfx.Textures[0].RealWidth, 16);
-                float TempT0 = FIXED2FLOAT(SFGfx.Vertices[Vtxs[i]].T, 16) * (SFGfx.Textures[0].ScaleT * SFGfx.Textures[0].ShiftScaleT) / 32.0f / FIXED2FLOAT(SFGfx.Textures[0].RealHeight, 16);
+		        float TempS0 = FIXED2FLOAT(Vertices[Vtxs[i]].S, 16) * (Textures[0].ScaleS * Textures[0].ShiftScaleS) / 32.0f / FIXED2FLOAT(Textures[0].RealWidth, 16);
+                float TempT0 = FIXED2FLOAT(Vertices[Vtxs[i]].T, 16) * (Textures[0].ScaleT * Textures[0].ShiftScaleT) / 32.0f / FIXED2FLOAT(Textures[0].RealHeight, 16);
 
                 //Bring in with texture code
 		        /*if(OpenGL.Ext_MultiTexture) {
 			        GL.MultiTexCoord2(TextureUnit.Texture0, TempS0, TempT0);
-			        if(SFGfx.IsMultiTexture) {
-				        float TempS1 = _FIXED2FLOAT(SFGfx.Vertices[Vtxs[i]].S, 16) * (SFGfx.Textures[1].ScaleS * SFGfx.Textures[1].ShiftScaleS) / 32.0f / _FIXED2FLOAT(SFGfx.Textures[1].RealWidth, 16);
-				        float TempT1 = _FIXED2FLOAT(SFGfx.Vertices[Vtxs[i]].T, 16) * (SFGfx.Textures[1].ScaleT * SFGfx.Textures[1].ShiftScaleT) / 32.0f / _FIXED2FLOAT(SFGfx.Textures[1].RealHeight, 16);
+			        if(F3DEXParser.IsMultiTexture) {
+				        float TempS1 = _FIXED2FLOAT(F3DEXParser.Vertices[Vtxs[i]].S, 16) * (Textures[1].ScaleS * Textures[1].ShiftScaleS) / 32.0f / _FIXED2FLOAT(Textures[1].RealWidth, 16);
+				        float TempT1 = _FIXED2FLOAT(F3DEXParser.Vertices[Vtxs[i]].T, 16) * (Textures[1].ScaleT * Textures[1].ShiftScaleT) / 32.0f / _FIXED2FLOAT(Textures[1].RealHeight, 16);
 				        GL.MultiTexCoord2(TextureUnit.Texture1, TempS1, TempT1);
 			        }
 		        } else*/ {
@@ -962,10 +1069,10 @@ namespace NewSF64Toolkit
         //            check = false;
         //        }
         //* /
-		        GL.Normal3(SFGfx.Vertices[Vtxs[i]].R, SFGfx.Vertices[Vtxs[i]].G, SFGfx.Vertices[Vtxs[i]].B);
-		        if((SFGfx.GeometryMode & SFGfx.Constants.G_LIGHTING) == 0x0) GL.Color4(SFGfx.Vertices[Vtxs[i]].R, SFGfx.Vertices[Vtxs[i]].G, SFGfx.Vertices[Vtxs[i]].B, SFGfx.Vertices[Vtxs[i]].A);
+		        GL.Normal3(Vertices[Vtxs[i]].R, Vertices[Vtxs[i]].G, Vertices[Vtxs[i]].B);
+		        if((GeometryMode & F3DEXParser.Constants.G_LIGHTING) == 0x0) GL.Color4(Vertices[Vtxs[i]].R, Vertices[Vtxs[i]].G, Vertices[Vtxs[i]].B, Vertices[Vtxs[i]].A);
 
-		        GL.Vertex3(SFGfx.Vertices[Vtxs[i]].X, SFGfx.Vertices[Vtxs[i]].Y, SFGfx.Vertices[Vtxs[i]].Z);
+		        GL.Vertex3(Vertices[Vtxs[i]].X, Vertices[Vtxs[i]].Y, Vertices[Vtxs[i]].Z);
 	        }
 
 	        GL.End();
@@ -973,17 +1080,17 @@ namespace NewSF64Toolkit
 
         void SetRenderMode(uint Mode1, uint Mode2)
         {
-	        SFGfx.OtherModeL &= 0x00000007;
-	        SFGfx.OtherModeL |= Mode1 | Mode2;
+	        OtherModeL &= 0x00000007;
+	        OtherModeL |= Mode1 | Mode2;
             
-	        SFGfx.ChangedModes |= SFGfx.Constants.CHANGED_RENDERMODE;
+	        ChangedModes |= F3DEXParser.Constants.CHANGED_RENDERMODE;
         }
         /* What is this
         void CheckFragmentCache()
         {
 	        int CacheCheck = 0; bool SearchingCache = true; bool NewProg = false;
 	        while(SearchingCache) {
-		        if((FragmentCache[CacheCheck].Combiner0 == SFGfx.Combiner0) && (FragmentCache[CacheCheck].Combiner1 == SFGfx.Combiner1)) {
+		        if((FragmentCache[CacheCheck].Combiner0 == F3DEXParser.Combiner0) && (FragmentCache[CacheCheck].Combiner1 == F3DEXParser.Combiner1)) {
 			        SearchingCache = false;
 			        NewProg = false;
 		        } else {
@@ -1419,18 +1526,18 @@ namespace NewSF64Toolkit
 
         void ChangeTileSize(uint Tile, uint ULS, uint ULT, uint LRS, uint LRT)
         {
-	        SFGfx.Textures[SFGfx.CurrentTexture].Tile = Tile;
-	        SFGfx.Textures[SFGfx.CurrentTexture].ULS = ULS;
-	        SFGfx.Textures[SFGfx.CurrentTexture].ULT = ULT;
-	        SFGfx.Textures[SFGfx.CurrentTexture].LRS = LRS;
-	        SFGfx.Textures[SFGfx.CurrentTexture].LRT = LRT;
+	        Textures[CurrentTexture].Tile = Tile;
+	        Textures[CurrentTexture].ULS = ULS;
+	        Textures[CurrentTexture].ULT = ULT;
+	        Textures[CurrentTexture].LRS = LRS;
+	        Textures[CurrentTexture].LRT = LRT;
         }
 
         void CalcTextureSize(int TextureID)
         {
 	        uint MaxTexel = 0, Line_Shift = 0;
 
-	        switch(SFGfx.Textures[TextureID].Format) {
+	        switch(Textures[TextureID].Format) {
 		        /* 4-bit */
 		        case 0x00: { MaxTexel = 4096; Line_Shift = 4; break; }	// RGBA
 		        case 0x40: { MaxTexel = 4096; Line_Shift = 4; break; }	// CI
@@ -1453,93 +1560,93 @@ namespace NewSF64Toolkit
 		        case 0x18: { MaxTexel = 1024; Line_Shift = 2; break; }	// RGBA
 	        }
 
-	        uint Line_Width = SFGfx.Textures[TextureID].LineSize << (int)Line_Shift;
+	        uint Line_Width = Textures[TextureID].LineSize << (int)Line_Shift;
 
-	        uint Tile_Width = SFGfx.Textures[TextureID].LRS - SFGfx.Textures[TextureID].ULS + 1;
-	        uint Tile_Height = SFGfx.Textures[TextureID].LRT - SFGfx.Textures[TextureID].ULT + 1;
+	        uint Tile_Width = Textures[TextureID].LRS - Textures[TextureID].ULS + 1;
+	        uint Tile_Height = Textures[TextureID].LRT - Textures[TextureID].ULT + 1;
 
-            uint Mask_Width = (uint)1 << (int)SFGfx.Textures[TextureID].MaskS;
-            uint Mask_Height = (uint)1 << (int)SFGfx.Textures[TextureID].MaskT;
+            uint Mask_Width = (uint)1 << (int)Textures[TextureID].MaskS;
+            uint Mask_Height = (uint)1 << (int)Textures[TextureID].MaskT;
 
 	        uint Line_Height = 0;
 	        if(Line_Width > 0) Line_Height = Math.Min(MaxTexel / Line_Width, Tile_Height);
 
-	        if((SFGfx.Textures[TextureID].MaskS > 0) && ((Mask_Width * Mask_Height) <= MaxTexel)) {
-		        SFGfx.Textures[TextureID].Width = Mask_Width;
+	        if((Textures[TextureID].MaskS > 0) && ((Mask_Width * Mask_Height) <= MaxTexel)) {
+		        Textures[TextureID].Width = Mask_Width;
 	        } else if((Tile_Width * Tile_Height) <= MaxTexel) {
-		        SFGfx.Textures[TextureID].Width = Tile_Width;
+		        Textures[TextureID].Width = Tile_Width;
 	        } else {
-		        SFGfx.Textures[TextureID].Width = Line_Width;
+		        Textures[TextureID].Width = Line_Width;
 	        }
 
-	        if((SFGfx.Textures[TextureID].MaskT > 0) && ((Mask_Width * Mask_Height) <= MaxTexel)) {
-		        SFGfx.Textures[TextureID].Height = Mask_Height;
+	        if((Textures[TextureID].MaskT > 0) && ((Mask_Width * Mask_Height) <= MaxTexel)) {
+		        Textures[TextureID].Height = Mask_Height;
 	        } else if((Tile_Width * Tile_Height) <= MaxTexel) {
-		        SFGfx.Textures[TextureID].Height = Tile_Height;
+		        Textures[TextureID].Height = Tile_Height;
 	        } else {
-		        SFGfx.Textures[TextureID].Height = Line_Height;
+		        Textures[TextureID].Height = Line_Height;
 	        }
 
 	        uint Clamp_Width = 0;
 	        uint Clamp_Height = 0;
 
-            //if ((SFGfx.Textures[TextureID].CMS & SFGfx.Constants.G_TX_CLAMP) && (!SFGfx.Textures[TextureID].CMS & SFGfx.Constants.G_TX_MIRROR))
+            //if ((Textures[TextureID].CMS & F3DEXParser.Constants.G_TX_CLAMP) && (!Textures[TextureID].CMS & F3DEXParser.Constants.G_TX_MIRROR))
             if (false) //NOTE: THIS LINE IS IMPOSSIBLE TO GET THROUGH. The ! WILL CONVERT 0x0 TO 0x1, AND ANY OTHER VALUE TO 0x0.
             {
 		        Clamp_Width = Tile_Width;
 	        } else {
-		        Clamp_Width = SFGfx.Textures[TextureID].Width;
+		        Clamp_Width = Textures[TextureID].Width;
 	        }
-            //if ((SFGfx.Textures[TextureID].CMT & SFGfx.Constants.G_TX_CLAMP) && (!SFGfx.Textures[TextureID].CMT & SFGfx.Constants.G_TX_MIRROR))
+            //if ((Textures[TextureID].CMT & F3DEXParser.Constants.G_TX_CLAMP) && (!Textures[TextureID].CMT & F3DEXParser.Constants.G_TX_MIRROR))
             if (false) //NOTE: THIS LINE IS IMPOSSIBLE TO GET THROUGH. The ! WILL CONVERT 0x0 TO 0x1, AND ANY OTHER VALUE TO 0x0.
             {
 		        Clamp_Height = Tile_Height;
 	        } else {
-		        Clamp_Height = SFGfx.Textures[TextureID].Height;
+		        Clamp_Height = Textures[TextureID].Height;
 	        }
 
-	        if(Mask_Width > SFGfx.Textures[TextureID].Width) {
-		        SFGfx.Textures[TextureID].MaskS = PowOf(SFGfx.Textures[TextureID].Width);
-                Mask_Width = (uint)1 << (int)SFGfx.Textures[TextureID].MaskS;
+	        if(Mask_Width > Textures[TextureID].Width) {
+		        Textures[TextureID].MaskS = PowOf(Textures[TextureID].Width);
+                Mask_Width = (uint)1 << (int)Textures[TextureID].MaskS;
 	        }
-	        if(Mask_Height > SFGfx.Textures[TextureID].Height) {
-		        SFGfx.Textures[TextureID].MaskT = PowOf(SFGfx.Textures[TextureID].Height);
-                Mask_Height = (uint)1 << (int)SFGfx.Textures[TextureID].MaskT;
+	        if(Mask_Height > Textures[TextureID].Height) {
+		        Textures[TextureID].MaskT = PowOf(Textures[TextureID].Height);
+                Mask_Height = (uint)1 << (int)Textures[TextureID].MaskT;
 	        }
 
-            if ((SFGfx.Textures[TextureID].CMS & SFGfx.Constants.G_TX_CLAMP) != 0x0)
+            if ((Textures[TextureID].CMS & F3DEXParser.Constants.G_TX_CLAMP) != 0x0)
             {
-		        SFGfx.Textures[TextureID].RealWidth = Pow2(Clamp_Width);
+		        Textures[TextureID].RealWidth = Pow2(Clamp_Width);
             }
-            else if ((SFGfx.Textures[TextureID].CMS & SFGfx.Constants.G_TX_MIRROR) != 0x0)
+            else if ((Textures[TextureID].CMS & F3DEXParser.Constants.G_TX_MIRROR) != 0x0)
             {
-		        SFGfx.Textures[TextureID].RealWidth = Pow2(Mask_Width);
+		        Textures[TextureID].RealWidth = Pow2(Mask_Width);
 	        } else {
-		        SFGfx.Textures[TextureID].RealWidth = Pow2(SFGfx.Textures[TextureID].Width);
+		        Textures[TextureID].RealWidth = Pow2(Textures[TextureID].Width);
 	        }
 
-            if ((SFGfx.Textures[TextureID].CMT & SFGfx.Constants.G_TX_CLAMP) != 0x0)
+            if ((Textures[TextureID].CMT & F3DEXParser.Constants.G_TX_CLAMP) != 0x0)
             {
-		        SFGfx.Textures[TextureID].RealHeight = Pow2(Clamp_Height);
-	        } else if((SFGfx.Textures[TextureID].CMT & SFGfx.Constants.G_TX_MIRROR) != 0x0) {
-		        SFGfx.Textures[TextureID].RealHeight = Pow2(Mask_Height);
+		        Textures[TextureID].RealHeight = Pow2(Clamp_Height);
+	        } else if((Textures[TextureID].CMT & F3DEXParser.Constants.G_TX_MIRROR) != 0x0) {
+		        Textures[TextureID].RealHeight = Pow2(Mask_Height);
 	        } else {
-		        SFGfx.Textures[TextureID].RealHeight = Pow2(SFGfx.Textures[TextureID].Height);
+		        Textures[TextureID].RealHeight = Pow2(Textures[TextureID].Height);
 	        }
 
-	        SFGfx.Textures[TextureID].ShiftScaleS = 1.0f;
-	        SFGfx.Textures[TextureID].ShiftScaleT = 1.0f;
+	        Textures[TextureID].ShiftScaleS = 1.0f;
+	        Textures[TextureID].ShiftScaleT = 1.0f;
 
-	        if(SFGfx.Textures[TextureID].ShiftS > 10) {
-                SFGfx.Textures[TextureID].ShiftScaleS = (1 << (int)(16 - SFGfx.Textures[TextureID].ShiftS));
-	        } else if(SFGfx.Textures[TextureID].ShiftS > 0) {
-                SFGfx.Textures[TextureID].ShiftScaleS /= (1 << (int)SFGfx.Textures[TextureID].ShiftS);
+	        if(Textures[TextureID].ShiftS > 10) {
+                Textures[TextureID].ShiftScaleS = (1 << (int)(16 - Textures[TextureID].ShiftS));
+	        } else if(Textures[TextureID].ShiftS > 0) {
+                Textures[TextureID].ShiftScaleS /= (1 << (int)Textures[TextureID].ShiftS);
 	        }
 
-	        if(SFGfx.Textures[TextureID].ShiftT > 10) {
-                SFGfx.Textures[TextureID].ShiftScaleT = (1 << (int)(16 - SFGfx.Textures[TextureID].ShiftT));
-	        } else if(SFGfx.Textures[TextureID].ShiftT > 0) {
-                SFGfx.Textures[TextureID].ShiftScaleT /= (1 << (int)SFGfx.Textures[TextureID].ShiftT);
+	        if(Textures[TextureID].ShiftT > 10) {
+                Textures[TextureID].ShiftScaleT = (1 << (int)(16 - Textures[TextureID].ShiftT));
+	        } else if(Textures[TextureID].ShiftT > 0) {
+                Textures[TextureID].ShiftScaleT /= (1 << (int)Textures[TextureID].ShiftT);
 	        }
         }
 
@@ -1568,14 +1675,14 @@ namespace NewSF64Toolkit
         {
             if (false)
             {//OpenGL.Ext_MultiTexture) {
-                if (SFGfx.Textures[0].Offset != 0x00)
+                if (Textures[0].Offset != 0x00)
                 {
                     GL.Enable(EnableCap.Texture2D);
                     GL.ActiveTexture(TextureUnit.Texture0);
                     GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(0));
                 }
 
-                if (SFGfx.IsMultiTexture && (SFGfx.Textures[1].Offset != 0x00))
+                if (IsMultiTexture && (Textures[1].Offset != 0x00))
                 {
                     GL.Enable(EnableCap.Texture2D);
                     GL.ActiveTexture(TextureUnit.Texture1);
@@ -1588,10 +1695,12 @@ namespace NewSF64Toolkit
             }
             else
             {
-                if (SFGfx.Textures[0].Offset != 0x00)
+                if (Textures[0].Offset != 0x00)
                 {
                     GL.Enable(EnableCap.Texture2D);
-                    GL.BindTexture(TextureTarget.Texture2D, CheckTextureCache(0));
+                    uint cache = CheckTextureCache(0);
+                    //GL.ActiveTexture(TextureUnit.Texture0);
+                    GL.BindTexture(TextureTarget.Texture2D, cache);
                 }
             }
         }
@@ -1605,9 +1714,9 @@ namespace NewSF64Toolkit
             int CacheCheck = 0; bool SearchingCache = true; bool NewTexture = false;
             while (SearchingCache)
             {
-                if ((SFGfx.TextureCache[CacheCheck].Offset == SFGfx.Textures[TexID].Offset) &&
-                    (SFGfx.TextureCache[CacheCheck].RealWidth == SFGfx.Textures[TexID].RealWidth) &&
-                    (SFGfx.TextureCache[CacheCheck].RealHeight == SFGfx.Textures[TexID].RealHeight))
+                if ((TextureCache[CacheCheck].Offset == Textures[TexID].Offset) &&
+                    (TextureCache[CacheCheck].RealWidth == Textures[TexID].RealWidth) &&
+                    (TextureCache[CacheCheck].RealHeight == Textures[TexID].RealHeight))
                 {
                     SearchingCache = false;
                     NewTexture = false;
@@ -1631,21 +1740,21 @@ namespace NewSF64Toolkit
                 CalcTextureSize((int)TexID);
 
                 GLID = LoadTexture((int)TexID);
-                SFGfx.TextureCache[SFGfx.TextureCachePosition].Offset = SFGfx.Textures[TexID].Offset;
-                SFGfx.TextureCache[SFGfx.TextureCachePosition].RealWidth = SFGfx.Textures[TexID].RealWidth;
-                SFGfx.TextureCache[SFGfx.TextureCachePosition].RealHeight = SFGfx.Textures[TexID].RealHeight;
-                SFGfx.TextureCache[SFGfx.TextureCachePosition].TextureID = GLID;
-                SFGfx.TextureCachePosition++;
+                TextureCache[TextureCachePosition].Offset = Textures[TexID].Offset;
+                TextureCache[TextureCachePosition].RealWidth = Textures[TexID].RealWidth;
+                TextureCache[TextureCachePosition].RealHeight = Textures[TexID].RealHeight;
+                TextureCache[TextureCachePosition].TextureID = GLID;
+                TextureCachePosition++;
             }
             else
             {
-                GLID = SFGfx.TextureCache[CacheCheck].TextureID;
+                GLID = TextureCache[CacheCheck].TextureID;
             }
 
-            if (SFGfx.TextureCachePosition >= 2048)
+            if (TextureCachePosition >= 2048)
             {
-                for(int i = 0; i < 2048; i++) SFGfx.TextureCache[i] = SFGfx.BlankTextureCache;
-                SFGfx.TextureCachePosition = 0;
+                for(int i = 0; i < 2048; i++) TextureCache[i] = BlankTextureCache;
+                TextureCachePosition = 0;
             }
 
             return GLID;
@@ -1662,13 +1771,13 @@ namespace NewSF64Toolkit
         //Handle later
         uint LoadTexture(int TextureID)
         {
-            char TexSegment = (char)((SFGfx.Textures[TextureID].Offset & 0xFF000000) >> 24);
-            uint TexOffset = (SFGfx.Textures[TextureID].Offset & 0x00FFFFFF);
+            char TexSegment = (char)((Textures[TextureID].Offset & 0xFF000000) >> 24);
+            uint TexOffset = (Textures[TextureID].Offset & 0x00FFFFFF);
 
-            if (SFGfx.GLTextureCount == 23)
+            if (GLTextureCount == 23)
             {
-                SFGfx.Textures[TextureID].RealHeight = SFGfx.Textures[TextureID].Height;
-                SFGfx.Textures[TextureID].RealWidth = SFGfx.Textures[TextureID].Width;
+                Textures[TextureID].RealHeight = Textures[TextureID].Height;
+                Textures[TextureID].RealWidth = Textures[TextureID].Width;
             }
 
             // CalcTextureSize(TextureID);
@@ -1676,7 +1785,7 @@ namespace NewSF64Toolkit
             int i = 0, j = 0;
 
             int BytesPerPixel = 0x08;
-            switch(SFGfx.Textures[TextureID].Format) {
+            switch(Textures[TextureID].Format) {
                 /* 4bit, 8bit */
                 case 0x00: case 0x40: case 0x60: case 0x80:
                 case 0x08: case 0x48: case 0x68: case 0x88:
@@ -1692,7 +1801,7 @@ namespace NewSF64Toolkit
                     break;
             }
 
-            uint BufferSize = (SFGfx.Textures[TextureID].RealHeight * SFGfx.Textures[TextureID].RealWidth) * (uint)BytesPerPixel;
+            uint BufferSize = (Textures[TextureID].RealHeight * Textures[TextureID].RealWidth) * (uint)BytesPerPixel;
             byte[] TextureData = new byte[BufferSize];
 
             for (int lj = 0; lj < TextureData.Length; lj++)
@@ -1708,15 +1817,15 @@ namespace NewSF64Toolkit
             char TempSegment;
             uint TempOffset;
 
-            SplitAddress(SFGfx.Textures[TextureID].Offset, out TempSegment, out TempOffset);
+            SplitAddress(Textures[TextureID].Offset, out TempSegment, out TempOffset);
 
-            if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid())
+            //if (!MemoryManager.Instance.LocateBank((byte)TempSegment, TempOffset).IsValid())
             {
                 //memset(TextureData, 0xFF, BufferSize);
             }
-            else
+            //else
             {
-                switch (SFGfx.Textures[TextureID].Format)
+                switch (Textures[TextureID].Format)
                 {
                     case 0x00:
                     case 0x08:
@@ -1725,11 +1834,11 @@ namespace NewSF64Toolkit
                             ushort Raw;
                             uint RGBA = 0;
 
-                            for (j = 0; j < SFGfx.Textures[TextureID].Height; j++)
+                            for (j = 0; j < Textures[TextureID].Height; j++)
                             {
-                                for (i = 0; i < SFGfx.Textures[TextureID].Width; i++)
+                                for (i = 0; i < Textures[TextureID].Width; i++)
                                 {
-                                    Raw = MemoryManager.Instance.ReadUShort((byte)TexSegment, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
+                                    Raw = ByteHelper.ReadUShort(currentBytes, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
 
                                     RGBA = (((uint)Raw & 0xF800) >> 8) << 24;
                                     RGBA |= ((((uint)Raw & 0x07C0) << 5) >> 8) << 16;
@@ -1740,19 +1849,20 @@ namespace NewSF64Toolkit
                                     TexOffset += 2;
                                     GLTexPosition += 4;
 
-                                    if (!MemoryManager.Instance.LocateBank((byte)TexSegment, TexOffset).IsValid()) break;//(TexOffset > RAM[TexSegment].Size) break;
+                                    //For now assume it will be valid
+                                    //if (!MemoryManager.Instance.LocateBank((byte)TexSegment, TexOffset).IsValid()) break;//(TexOffset > RAM[TexSegment].Size) break;
                                 }
-                                TexOffset += SFGfx.Textures[TextureID].LineSize * 4 - SFGfx.Textures[TextureID].Width;
+                                TexOffset += Textures[TextureID].LineSize * 4 - Textures[TextureID].Width;
                             }
                             break;
                         }
 
                     case 0x18:
                         {
-                            uint totalSize = (SFGfx.Textures[TextureID].Height * SFGfx.Textures[TextureID].Width);
+                            uint totalSize = (Textures[TextureID].Height * Textures[TextureID].Width);
                             for(uint k = 0; k < totalSize; k++)
-                                Write32(TextureData, k * 4, MemoryManager.Instance.ReadUInt((byte)TexSegment, TexOffset + 4 * k));
-                            //memcpy(TextureData, &RAM[TexSegment].Data[TexOffset], (SFGfx.Textures[TextureID].Height * SFGfx.Textures[TextureID].Width * 4));
+                                Write32(TextureData, k * 4, ByteHelper.ReadUInt(currentBytes, TexOffset + 4 * k));
+                            //memcpy(TextureData, &RAM[TexSegment].Data[TexOffset], (Textures[TextureID].Height * Textures[TextureID].Width * 4));
                             break;
                         }
 
@@ -1762,29 +1872,29 @@ namespace NewSF64Toolkit
                     //        uint CI1, CI2;
                     //        uint RGBA = 0;
 
-                    //        for (j = 0; j < SFGfx.Textures[TextureID].Height; j++)
+                    //        for (j = 0; j < Textures[TextureID].Height; j++)
                     //        {
-                    //            for (i = 0; i < SFGfx.Textures[TextureID].Width / 2; i++)
+                    //            for (i = 0; i < Textures[TextureID].Width / 2; i++)
                     //            {
                     //                CI1 = (RAM[TexSegment].Data[TexOffset] & 0xF0) >> 4;
                     //                CI2 = (RAM[TexSegment].Data[TexOffset] & 0x0F);
 
-                    //                RGBA = ((uint)SFGfx.Palettes[CI1].R << 24);
-                    //                RGBA |= ((uint)SFGfx.Palettes[CI1].G << 16);
-                    //                RGBA |= ((uint)SFGfx.Palettes[CI1].B << 8);
-                    //                RGBA |= (uint)SFGfx.Palettes[CI1].A;
+                    //                RGBA = ((uint)F3DEXParser.Palettes[CI1].R << 24);
+                    //                RGBA |= ((uint)F3DEXParser.Palettes[CI1].G << 16);
+                    //                RGBA |= ((uint)F3DEXParser.Palettes[CI1].B << 8);
+                    //                RGBA |= (uint)F3DEXParser.Palettes[CI1].A;
                     //                Write32(TextureData, GLTexPosition, RGBA);
 
-                    //                RGBA = ((uint)SFGfx.Palettes[CI2].R << 24);
-                    //                RGBA |= ((uint)SFGfx.Palettes[CI2].G << 16);
-                    //                RGBA |= ((uint)SFGfx.Palettes[CI2].B << 8);
-                    //                RGBA |= (uint)SFGfx.Palettes[CI2].A;
+                    //                RGBA = ((uint)F3DEXParser.Palettes[CI2].R << 24);
+                    //                RGBA |= ((uint)F3DEXParser.Palettes[CI2].G << 16);
+                    //                RGBA |= ((uint)F3DEXParser.Palettes[CI2].B << 8);
+                    //                RGBA |= (uint)F3DEXParser.Palettes[CI2].A;
                     //                Write32(TextureData, GLTexPosition + 4, RGBA);
 
                     //                TexOffset += 1;
                     //                GLTexPosition += 8;
                     //            }
-                    //            TexOffset += SFGfx.Textures[TextureID].LineSize * 8 - (SFGfx.Textures[TextureID].Width / 2);
+                    //            TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
                     //        }
                     //        break;
                     //    }
@@ -1794,22 +1904,22 @@ namespace NewSF64Toolkit
                     //        ushort Raw;
                     //        uint RGBA = 0;
 
-                    //        for (j = 0; j < SFGfx.Textures[TextureID].Height; j++)
+                    //        for (j = 0; j < Textures[TextureID].Height; j++)
                     //        {
-                    //            for (i = 0; i < SFGfx.Textures[TextureID].Width; i++)
+                    //            for (i = 0; i < Textures[TextureID].Width; i++)
                     //            {
                     //                Raw = RAM[TexSegment].Data[TexOffset];
 
-                    //                RGBA = ((uint)SFGfx.Palettes[Raw].R << 24);
-                    //                RGBA |= ((uint)SFGfx.Palettes[Raw].G << 16);
-                    //                RGBA |= ((uint)SFGfx.Palettes[Raw].B << 8);
-                    //                RGBA |= (uint)SFGfx.Palettes[Raw].A;
+                    //                RGBA = ((uint)F3DEXParser.Palettes[Raw].R << 24);
+                    //                RGBA |= ((uint)F3DEXParser.Palettes[Raw].G << 16);
+                    //                RGBA |= ((uint)F3DEXParser.Palettes[Raw].B << 8);
+                    //                RGBA |= (uint)F3DEXParser.Palettes[Raw].A;
                     //                Write32(TextureData, GLTexPosition, RGBA);
 
                     //                TexOffset += 1;
                     //                GLTexPosition += 4;
                     //            }
-                    //            TexOffset += SFGfx.Textures[TextureID].LineSize * 8 - SFGfx.Textures[TextureID].Width;
+                    //            TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
                     //        }
                     //        break;
                     //    }
@@ -1819,9 +1929,9 @@ namespace NewSF64Toolkit
                     //        ushort Raw;
                     //        uint RGBA = 0;
 
-                    //        for (j = 0; j < SFGfx.Textures[TextureID].Height; j++)
+                    //        for (j = 0; j < Textures[TextureID].Height; j++)
                     //        {
-                    //            for (i = 0; i < SFGfx.Textures[TextureID].Width / 2; i++)
+                    //            for (i = 0; i < Textures[TextureID].Width / 2; i++)
                     //            {
                     //                Raw = (RAM[TexSegment].Data[TexOffset] & 0xF0) >> 4;
                     //                RGBA = (((Raw & 0x0E) << 4) << 24);
@@ -1840,7 +1950,7 @@ namespace NewSF64Toolkit
                     //                TexOffset += 1;
                     //                GLTexPosition += 8;
                     //            }
-                    //            TexOffset += SFGfx.Textures[TextureID].LineSize * 8 - (SFGfx.Textures[TextureID].Width / 2);
+                    //            TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
                     //        }
                     //        break;
                     //    }
@@ -1850,9 +1960,9 @@ namespace NewSF64Toolkit
                     //        ushort Raw;
                     //        uint RGBA = 0;
 
-                    //        for (j = 0; j < SFGfx.Textures[TextureID].Height; j++)
+                    //        for (j = 0; j < Textures[TextureID].Height; j++)
                     //        {
-                    //            for (i = 0; i < SFGfx.Textures[TextureID].Width; i++)
+                    //            for (i = 0; i < Textures[TextureID].Width; i++)
                     //            {
                     //                Raw = RAM[TexSegment].Data[TexOffset];
                     //                RGBA = (((Raw & 0xF0) + 0x0F) << 24);
@@ -1864,16 +1974,16 @@ namespace NewSF64Toolkit
                     //                TexOffset += 1;
                     //                GLTexPosition += 4;
                     //            }
-                    //            TexOffset += SFGfx.Textures[TextureID].LineSize * 8 - SFGfx.Textures[TextureID].Width;
+                    //            TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
                     //        }
                     //        break;
                     //    }
 
                     //case 0x70:
                     //    {
-                    //        for (j = 0; j < SFGfx.Textures[TextureID].Height; j++)
+                    //        for (j = 0; j < Textures[TextureID].Height; j++)
                     //        {
-                    //            for (i = 0; i < SFGfx.Textures[TextureID].Width; i++)
+                    //            for (i = 0; i < Textures[TextureID].Width; i++)
                     //            {
                     //                TextureData[GLTexPosition] = RAM[TexSegment].Data[TexOffset];
                     //                TextureData[GLTexPosition + 1] = RAM[TexSegment].Data[TexOffset];
@@ -1883,7 +1993,7 @@ namespace NewSF64Toolkit
                     //                TexOffset += 2;
                     //                GLTexPosition += 4;
                     //            }
-                    //            TexOffset += SFGfx.Textures[TextureID].LineSize * 4 - SFGfx.Textures[TextureID].Width;
+                    //            TexOffset += Textures[TextureID].LineSize * 4 - Textures[TextureID].Width;
                     //        }
                     //        break;
                     //    }
@@ -1894,9 +2004,9 @@ namespace NewSF64Toolkit
                     //        ushort Raw;
                     //        uint RGBA = 0;
 
-                    //        for (j = 0; j < SFGfx.Textures[TextureID].Height; j++)
+                    //        for (j = 0; j < Textures[TextureID].Height; j++)
                     //        {
-                    //            for (i = 0; i < SFGfx.Textures[TextureID].Width / 2; i++)
+                    //            for (i = 0; i < Textures[TextureID].Width / 2; i++)
                     //            {
                     //                Raw = (RAM[TexSegment].Data[TexOffset] & 0xF0) >> 4;
                     //                RGBA = (((Raw & 0x0F) << 4) << 24);
@@ -1915,16 +2025,16 @@ namespace NewSF64Toolkit
                     //                TexOffset += 1;
                     //                GLTexPosition += 8;
                     //            }
-                    //            TexOffset += SFGfx.Textures[TextureID].LineSize * 8 - (SFGfx.Textures[TextureID].Width / 2);
+                    //            TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
                     //        }
                     //        break;
                     //    }
 
                     //case 0x88:
                     //    {
-                    //        for (j = 0; j < SFGfx.Textures[TextureID].Height; j++)
+                    //        for (j = 0; j < Textures[TextureID].Height; j++)
                     //        {
-                    //            for (i = 0; i < SFGfx.Textures[TextureID].Width; i++)
+                    //            for (i = 0; i < Textures[TextureID].Width; i++)
                     //            {
                     //                TextureData[GLTexPosition] = RAM[TexSegment].Data[TexOffset];
                     //                TextureData[GLTexPosition + 1] = RAM[TexSegment].Data[TexOffset];
@@ -1934,7 +2044,7 @@ namespace NewSF64Toolkit
                     //                TexOffset += 1;
                     //                GLTexPosition += 4;
                     //            }
-                    //            TexOffset += SFGfx.Textures[TextureID].LineSize * 8 - SFGfx.Textures[TextureID].Width;
+                    //            TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
                     //        }
                     //        break;
                     //    }
@@ -1945,33 +2055,452 @@ namespace NewSF64Toolkit
                 }
             }
 
-            GL.BindTexture(TextureTarget.Texture2D, SFGfx.GLTextureID[SFGfx.GLTextureCount]);
+            GL.BindTexture(TextureTarget.Texture2D, GLTextureID[GLTextureCount]);
 
-            if ((SFGfx.Textures[TextureID].CMT & SFGfx.Constants.G_TX_CLAMP) != 0) { GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge); }
-            if ((SFGfx.Textures[TextureID].CMT & SFGfx.Constants.G_TX_WRAP) != 0) { GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat); }
-            if ((SFGfx.Textures[TextureID].CMT & SFGfx.Constants.G_TX_MIRROR) != 0) { if (SFGfx.OpenGlSettings.Ext_TexMirroredRepeat) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.MirroredRepeat); }
+            if ((Textures[TextureID].CMT & F3DEXParser.Constants.G_TX_CLAMP) != 0) { GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.ClampToEdge); }
+            if ((Textures[TextureID].CMT & F3DEXParser.Constants.G_TX_WRAP) != 0) { GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat); }
+            if ((Textures[TextureID].CMT & F3DEXParser.Constants.G_TX_MIRROR) != 0) { if (OpenGlSettings.Ext_TexMirroredRepeat) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.MirroredRepeat); }
 
-            if ((SFGfx.Textures[TextureID].CMS & SFGfx.Constants.G_TX_CLAMP) != 0) { GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge); }
-            if ((SFGfx.Textures[TextureID].CMS & SFGfx.Constants.G_TX_WRAP) != 0) { GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat); }
-            if ((SFGfx.Textures[TextureID].CMS & SFGfx.Constants.G_TX_MIRROR) != 0) { if (SFGfx.OpenGlSettings.Ext_TexMirroredRepeat) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.MirroredRepeat); }
+            if ((Textures[TextureID].CMS & F3DEXParser.Constants.G_TX_CLAMP) != 0) { GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.ClampToEdge); }
+            if ((Textures[TextureID].CMS & F3DEXParser.Constants.G_TX_WRAP) != 0) { GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat); }
+            if ((Textures[TextureID].CMS & F3DEXParser.Constants.G_TX_MIRROR) != 0) { if (OpenGlSettings.Ext_TexMirroredRepeat) GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.MirroredRepeat); }
 
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, (int)SFGfx.Textures[TextureID].RealWidth, (int)SFGfx.Textures[TextureID].RealHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, TextureData); //last param needs ref??
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, (int)Textures[TextureID].RealWidth, (int)Textures[TextureID].RealHeight, 0, PixelFormat.Rgba, PixelType.UnsignedByte, TextureData); //last param needs ref??
             
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
 
             //Debug outputting texture data
-            //DrawTextureRGBA(TextureData, (int)SFGfx.Textures[TextureID].RealWidth, (int)SFGfx.Textures[TextureID].RealHeight, string.Format("Texture{0}.bmp", SFGfx.GLTextureCount));
+            //DrawTextureRGBA(TextureData, (int)Textures[TextureID].RealWidth, (int)Textures[TextureID].RealHeight, string.Format("Texture{0}.bmp", F3DEXParser.GLTextureCount));
 
-            SFGfx.GLTextureCount++;
+            GLTextureCount++;
 
-            return SFGfx.GLTextureID[SFGfx.GLTextureCount-1];
+            return GLTextureID[GLTextureCount-1];
             
         }
 
 
         
         #endregion
+
+        #region GFX structs/variables
+
+
+        public struct sfRGBA
+        {
+            public float R;
+            public float B;
+            public float G;
+            public float A;
+            public float Z;
+            public float DZ;
+        }
+        public struct sfFillColor
+        {
+            public float R;
+            public float B;
+            public float G;
+            public float A;
+            public float Z;
+            public float DZ;
+        }
+        public struct sfPrimColor
+        {
+            public float R;
+            public float B;
+            public float G;
+            public float A;
+            public float L;
+            public ushort M;
+        }
+
+        public struct sfVertex
+        {
+            public short X;
+            public short Y;
+            public short Z;
+            public short S;
+            public short T;
+            public char R;
+            public char G;
+            public char B;
+            public char A;
+        }
+
+
+        public struct sfPalette
+        {
+            public char R;
+            public char G;
+            public char B;
+            public char A;
+        }
+
+        public struct sfTexture
+        {
+            public uint Offset;
+            public uint PalOffset;
+
+            public uint Format;
+            public uint Tile;
+            public uint Width;
+            public uint RealWidth;
+            public uint Height;
+            public uint RealHeight;
+            public uint ULT, ULS;
+            public uint LRT, LRS;
+            public uint LineSize, Palette;
+            public uint MaskT, MaskS;
+            public uint ShiftT, ShiftS;
+            public uint CMT, CMS;
+            public float ScaleT, ScaleS;
+            public float ShiftScaleT, ShiftScaleS;
+        }
+
+        public struct sfTextureCache
+        {
+            public uint Offset;
+            public uint RealWidth;
+            public uint RealHeight;
+            public uint TextureID;
+        }
+
+        public struct OpenGLSetting
+        {
+            public char[] ExtensionList;
+            public char[] ExtSupported; //256
+            public char[] ExtUnsupported; //256
+            public bool IsExtUnsupported;
+            public bool Ext_MultiTexture;
+            public bool Ext_TexMirroredRepeat;
+            public bool Ext_FragmentProgram;
+        }
+
+
+
+        public uint[] DLStack = new uint[16]; //16
+        public int DLStackPos;
+
+        public sfVertex[] Vertices = new sfVertex[32]; //32
+
+        public sfPalette[] Palettes = new sfPalette[256]; //256
+        public sfTexture[] Textures = new sfTexture[2]; //2
+        public sfTextureCache[] TextureCache = new sfTextureCache[2048]; //2048
+
+        public sfVertex BlankVertex = new sfVertex();
+        public sfPalette BlankPalette = new sfPalette();
+        public sfTexture BlankTexture = new sfTexture();
+        public sfTextureCache BlankTextureCache = new sfTextureCache();
+
+        //public static uint FragCachePosition;
+        public uint TextureCachePosition;
+
+        public OpenGLSetting OpenGlSettings;
+
+        //public uint GLListBase;
+
+        public uint ChangedModes;
+        public uint GeometryMode;
+        public uint OtherModeL;
+        public uint OtherModeH;
+        public uint Store_RDPHalf1, Store_RDPHalf2;
+        public uint Combiner0, Combiner1;
+
+        public sfRGBA BlendColor;
+        public sfRGBA EnvColor;
+        public sfRGBA FogColor;
+        public sfFillColor FillColor;
+        public sfPrimColor PrimColor;
+
+        public bool IsMultiTexture;
+        public int CurrentTexture;
+
+        public uint[] GLTextureID = new uint[2048]; //2048
+        public int GLTextureCount;
+
+        public void gl_ClearRenderer(bool Full)
+        {
+            //if (Full)
+            //{
+            //    if (GL.IsList(GLListBase)) GL.DeleteLists(GLListBase, GLListBase);
+            //}
+
+            if (GLTextureID[0] != 0) GL.DeleteTextures(GLTextureCount, GLTextureID);
+            GLTextureCount = 0;
+
+            GL.GenTextures(2048, GLTextureID);
+        }
+
+        public void sv_ClearStructures(bool Full)
+        {
+            int i = 0;
+
+            for (i = 0; i < Vertices.Length; i++) Vertices[i] = new sfVertex();
+
+            Textures[0] = new sfTexture();
+            Textures[1] = new sfTexture();
+
+            for (i = 0; i < TextureCache.Length; i++) TextureCache[i] = new sfTextureCache();
+            TextureCachePosition = 0;
+
+            BlendColor = new sfRGBA();
+            EnvColor = new sfRGBA();
+            FogColor = new sfRGBA();
+            FillColor = new sfFillColor();
+            PrimColor = new sfPrimColor();
+
+            DLStackPos = 0;
+
+            ChangedModes = 0;
+            GeometryMode = 0;
+            OtherModeL = 0;
+            OtherModeH = 0;
+            Store_RDPHalf1 = 0; Store_RDPHalf2 = 0;
+            Combiner0 = 0; Combiner1 = 0;
+
+            Textures[0].ScaleS = 1.0f;
+            Textures[0].ScaleT = 1.0f;
+            Textures[1].ScaleS = 1.0f;
+            Textures[1].ScaleT = 1.0f;
+
+            Textures[0].ShiftScaleS = 1.0f;
+            Textures[0].ShiftScaleT = 1.0f;
+            Textures[1].ShiftScaleS = 1.0f;
+            Textures[1].ShiftScaleT = 1.0f;
+
+            //if(Full) {
+            //    i = 0; j = 0;
+
+            //    static const struct __FragmentCache FragmentCache_Empty;
+            //    for(i = 0; i < ArraySize(FragmentCache); i++) FragmentCache[i] = FragmentCache_Empty;
+            //    Program.FragCachePosition = 0;
+
+            //    static const struct __Camera Camera_Empty;
+            //    Camera = Camera_Empty;
+            //}
+        }
+
+        public static class Constants
+        {
+            public const uint F3DEX_TEXTURE_ENABLE = 0x00000002;
+            public const uint F3DEX_SHADING_SMOOTH = 0x00000200;
+            public const uint F3DEX_CULL_FRONT = 0x00001000;
+            public const uint F3DEX_CULL_BACK = 0x00002000;
+            public const uint F3DEX_CULL_BOTH = 0x00003000;
+            public const uint F3DEX_CLIPPING = 0x00800000;
+
+            public const uint G_ZBUFFER = 0x00000001;
+            public const uint G_SHADE = 0x00000004;
+            public const uint G_FOG = 0x00010000;
+            public const uint G_LIGHTING = 0x00020000;
+            public const uint G_TEXTURE_GEN = 0x00040000;
+            public const uint G_TEXTURE_GEN_LINEAR = 0x00080000;
+            public const uint G_LOD = 0x00100000;
+
+            public const byte G_MDSFT_ALPHACOMPARE = 0;
+            public const byte G_MDSFT_ZSRCSEL = 2;
+            public const byte G_MDSFT_RENDERMODE = 3;
+
+            public const byte G_MDSFT_ALPHADITHER = 4;
+            public const byte G_MDSFT_RGBDITHER = 6;
+            public const byte G_MDSFT_COMBKEY = 8;
+            public const byte G_MDSFT_TEXTCONV = 9;
+            public const byte G_MDSFT_TEXTFILT = 12;
+            public const byte G_MDSFT_TEXTLUT = 14;
+            public const byte G_MDSFT_TEXTLOD = 16;
+            public const byte G_MDSFT_TEXTDETAIL = 17;
+            public const byte G_MDSFT_TEXTPERSP = 19;
+            public const byte G_MDSFT_CYCLETYPE = 20;
+            public const byte G_MDSFT_PIPELINE = 23;
+
+            public const byte G_TX_WRAP = 0x00;
+            public const byte G_TX_MIRROR = 0x01;
+            public const byte G_TX_CLAMP = 0x02;
+
+            public const byte G_CCMUX_COMBINED = 0;
+            public const byte G_CCMUX_TEXEL0 = 1;
+            public const byte G_CCMUX_TEXEL1 = 2;
+            public const byte G_CCMUX_PRIMITIVE = 3;
+            public const byte G_CCMUX_SHADE = 4;
+            public const byte G_CCMUX_ENVIRONMENT = 5;
+            public const byte G_CCMUX_CENTER = 6;
+            public const byte G_CCMUX_SCALE = 6;//??????? Should this be different!?!?!
+            public const byte G_CCMUX_COMBINED_ALPHA = 7;
+            public const byte G_CCMUX_TEXEL0_ALPHA = 8;
+            public const byte G_CCMUX_TEXEL1_ALPHA = 9;
+            public const byte G_CCMUX_PRIMITIVE_ALPHA = 10;
+            public const byte G_CCMUX_SHADE_ALPHA = 11;
+            public const byte G_CCMUX_ENV_ALPHA = 12;
+            public const byte G_CCMUX_LOD_FRACTION = 13;
+            public const byte G_CCMUX_PRIM_LOD_FRAC = 14;
+            public const byte G_CCMUX_NOISE = 7;
+            public const byte G_CCMUX_K4 = 7;
+            public const byte G_CCMUX_K5 = 15;
+            public const byte G_CCMUX_1 = 6;
+            public const byte G_CCMUX_0 = 31;
+
+            public const byte G_ACMUX_COMBINED = 0;
+            public const byte G_ACMUX_TEXEL0 = 1;
+            public const byte G_ACMUX_TEXEL1 = 2;
+            public const byte G_ACMUX_PRIMITIVE = 3;
+            public const byte G_ACMUX_SHADE = 4;
+            public const byte G_ACMUX_ENVIRONMENT = 5;
+            public const byte G_ACMUX_LOD_FRACTION = 0;
+            public const byte G_ACMUX_PRIM_LOD_FRAC = 6;
+            public const byte G_ACMUX_1 = 6;
+            public const byte G_ACMUX_0 = 7;
+
+            public const uint AA_EN = 0x00000008;
+            public const uint Z_CMP = 0x00000010;
+            public const uint Z_UPD = 0x00000020;
+            public const uint IM_RD = 0x00000040;
+            public const uint CLR_ON_CVG = 0x00000080;
+            public const uint CVG_DST_CLAMP = 0x00000000;
+            public const uint CVG_DST_WRAP = 0x00000100;
+            public const uint CVG_DST_FULL = 0x00000200;
+            public const uint CVG_DST_SAVE = 0x00000300;
+            public const uint ZMODE_OPA = 0x00000000;
+            public const uint ZMODE_INTER = 0x00000400;
+            public const uint ZMODE_XLU = 0x00000800;
+            public const uint ZMODE_DEC = 0x00000C00;
+            public const uint CVG_X_ALPHA = 0x00001000;
+            public const uint ALPHA_CVG_SEL = 0x00002000;
+            public const uint FORCE_BL = 0x00004000;
+
+            public const byte CHANGED_GEOMETRYMODE = 0x01;
+            public const byte CHANGED_RENDERMODE = 0x02;
+            public const byte CHANGED_ALPHACOMPARE = 0x04;
+        }
+
+        #endregion
+
+
+        public void UpdateStates()
+        {
+            if ((ChangedModes & F3DEXParser.Constants.CHANGED_GEOMETRYMODE) != 0x0)
+            {
+                if ((GeometryMode & F3DEXParser.Constants.F3DEX_CULL_BOTH) != 0x0)
+                {
+                    GL.Enable(EnableCap.CullFace);
+
+                    if ((GeometryMode & F3DEXParser.Constants.F3DEX_CULL_BACK) != 0x0)
+                        GL.CullFace(CullFaceMode.Back);
+                    else
+                        GL.CullFace(CullFaceMode.Front);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.CullFace);
+                }
+
+                if ((GeometryMode & F3DEXParser.Constants.F3DEX_SHADING_SMOOTH) != 0x0 || (GeometryMode & F3DEXParser.Constants.G_TEXTURE_GEN_LINEAR) == 0x0)
+                {
+                    GL.ShadeModel(ShadingModel.Smooth);
+                }
+                else
+                {
+                    GL.ShadeModel(ShadingModel.Flat);
+                }
+
+                if ((GeometryMode & F3DEXParser.Constants.G_LIGHTING) != 0x0)
+                {
+                    GL.Enable(EnableCap.Lighting);
+                    GL.Enable(EnableCap.Normalize);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.Lighting);
+                    GL.Disable(EnableCap.Normalize);
+                }
+
+                ChangedModes &= ~(uint)F3DEXParser.Constants.CHANGED_GEOMETRYMODE;
+            }
+            /*
+                if(Gfx.GeometryMode & G_ZBUFFER)
+                    glEnable(GL_DEPTH_TEST);
+                else
+                    glDisable(GL_DEPTH_TEST);
+            */
+            if ((ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                /*		if(Gfx.OtherModeL & Z_CMP)
+                            glDepthFunc(GL_LEQUAL);
+                        else
+                            glDepthFunc(GL_ALWAYS);
+                */
+                /*		if((Gfx.OtherModeL & Z_UPD) && !(Gfx.OtherModeL & ZMODE_INTER && Gfx.OtherModeL & ZMODE_XLU))
+                            glDepthMask(GL_TRUE);
+                        else
+                            glDepthMask(GL_FALSE);
+                */
+                if ((OtherModeL & F3DEXParser.Constants.ZMODE_DEC) != 0x0)
+                {
+                    GL.Enable(EnableCap.PolygonOffsetFill);
+                    GL.PolygonOffset(-3.0f, -3.0f);
+                }
+                else
+                {
+                    GL.Disable(EnableCap.PolygonOffsetFill);
+                }
+            }
+
+            if ((ChangedModes & F3DEXParser.Constants.CHANGED_ALPHACOMPARE) != 0x0 || (ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                if ((OtherModeL & F3DEXParser.Constants.ALPHA_CVG_SEL) == 0x0)
+                {
+                    GL.Enable(EnableCap.AlphaTest);
+                    GL.AlphaFunc((BlendColor.A > 0.0f) ? AlphaFunction.Gequal : AlphaFunction.Greater, BlendColor.A);
+                }
+                else if ((OtherModeL & F3DEXParser.Constants.CVG_X_ALPHA) != 0x0)
+                {
+                    GL.Enable(EnableCap.AlphaTest);
+                    GL.AlphaFunc(AlphaFunction.Gequal, 0.2f);
+                }
+                else
+                    GL.Disable(EnableCap.AlphaTest);
+            }
+
+            if ((ChangedModes & F3DEXParser.Constants.CHANGED_RENDERMODE) != 0x0)
+            {
+                if ((OtherModeL & F3DEXParser.Constants.FORCE_BL) != 0x0 && (OtherModeL & F3DEXParser.Constants.ALPHA_CVG_SEL) == 0x0)
+                {
+                    GL.Enable(EnableCap.Blend);
+
+                    switch (OtherModeL >> 16)
+                    {
+                        case 0x0448: // Add
+                        case 0x055A:
+                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.One);
+                            break;
+                        case 0x0C08: // 1080 Sky
+                        case 0x0F0A: // Used LOTS of places
+                            GL.BlendFunc(BlendingFactorSrc.One, BlendingFactorDest.Zero);
+                            break;
+                        case 0xC810: // Blends fog
+                        case 0xC811: // Blends fog
+                        case 0x0C18: // Standard interpolated blend
+                        case 0x0C19: // Used for antialiasing
+                        case 0x0050: // Standard interpolated blend
+                        case 0x0055: // Used for antialiasing
+                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                            break;
+                        case 0x0FA5: // Seems to be doing just blend color - maybe combiner can be used for this?
+                        case 0x5055: // Used in Paper Mario intro, I'm not sure if this is right...
+                            GL.BlendFunc(BlendingFactorSrc.Zero, BlendingFactorDest.One);
+                            break;
+
+                        default:
+                            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+                            break;
+                    }
+                }
+                else
+                {
+                    GL.Disable(EnableCap.Blend);
+                }
+            }
+        }
+
 
         private void DrawTextureRGBA(byte[] textureData, int width, int height, string fileName)
         {

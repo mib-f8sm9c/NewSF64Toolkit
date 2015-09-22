@@ -1,4 +1,4 @@
-﻿namespace NewSF64Toolkit
+﻿namespace NewSF64Toolkit.Tools.Controls
 {
     partial class AboutControl
     {
@@ -88,9 +88,9 @@
             this.lblVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblVersion.Location = new System.Drawing.Point(275, 12);
             this.lblVersion.Name = "lblVersion";
-            this.lblVersion.Size = new System.Drawing.Size(67, 25);
+            this.lblVersion.Size = new System.Drawing.Size(71, 25);
             this.lblVersion.TabIndex = 4;
-            this.lblVersion.Text = "V.0.0";
+            this.lblVersion.Text = "V.X.X";
             // 
             // lblCRC
             // 

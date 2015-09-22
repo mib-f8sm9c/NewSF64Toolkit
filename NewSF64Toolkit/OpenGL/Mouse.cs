@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NewSF64Toolkit
+namespace NewSF64Toolkit.OpenGL
 {
     public static class Mouse
     {

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace NewSF64Toolkit
+namespace NewSF64Toolkit.Tools.Controls
 {
     public partial class AboutControl : UserControl
     {
