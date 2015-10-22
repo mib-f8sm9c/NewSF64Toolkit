@@ -63,6 +63,8 @@ namespace NewSF64Toolkit
                     menuStripFileRecent.DropDownItems.Add(newMenu);
                 }
             }
+
+            SetDebugToolsVisible();
         }
 
         private void recentlyOpened_Click(object sender, EventArgs e)
@@ -133,6 +135,9 @@ namespace NewSF64Toolkit
             //We need a way to discriminate the endianess of the system, and keep the data
             //    right side forward. EDIT: Endianness is described at header of ROM file, see
             //    http://www.emutalk.net/archive/index.php/t-16045.html
+
+            if (ToolSettings.Instance.AutoDecompress)
+                SF64ROM.Instance.Decompress();
         }
 
 
@@ -150,10 +155,15 @@ namespace NewSF64Toolkit
                 return;
             }
 
-            //TEST THIS LATER PLEASE
             if (!SF64ROM.Instance.HasGoodChecksum)
             {
-                DialogResult result = MessageBox.Show("ROM has bad CRCs, fix?", "Warning", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                DialogResult result;
+
+                if(ToolSettings.Instance.AutoCRCFix)
+                    result = System.Windows.Forms.DialogResult.Yes;
+                else
+                    result = MessageBox.Show("ROM has bad CRCs, fix?", "Warning", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+                
                 if (result == System.Windows.Forms.DialogResult.Yes)
                     SF64ROM.Instance.FixCRC();
                 else if (result == System.Windows.Forms.DialogResult.Cancel)
@@ -383,24 +393,34 @@ namespace NewSF64Toolkit
 
         private void UpdateMenuStripToolCheckState(ToolStripMenuItem checkedItem)
         {
-            foreach (ToolStripMenuItem m in menuStripTools.DropDownItems)
+            foreach (ToolStripItem i in menuStripTools.DropDownItems)
             {
-                if (m == checkedItem)
-                    m.CheckState = CheckState.Indeterminate;
-                else
-                    m.CheckState = CheckState.Unchecked;
+                if (i is ToolStripMenuItem)
+                {
+                    ToolStripMenuItem m = (ToolStripMenuItem)i;
+
+                    if (m == checkedItem)
+                        m.CheckState = CheckState.Indeterminate;
+                    else
+                        m.CheckState = CheckState.Unchecked;
+                }
             }
         }
 
         private void SwitchToolkitMode(ToolTypes type)
         {
+            BaseToolkitTool newTool = ToolkitFactory.GetTool(type);
+
+            if (_currentTool == newTool)
+                return;
+
             if (_currentTool != null)
             {
                 pnlCurrentTool.Controls.Remove(_currentTool.GetToolControl());
                 _currentTool.DeActivate();
             }
 
-            _currentTool = ToolkitFactory.GetTool(type);
+            _currentTool = newTool;
 
             _currentTool.Activate();
             pnlCurrentTool.Controls.Add(_currentTool.GetToolControl());
@@ -417,6 +437,67 @@ namespace NewSF64Toolkit
         private void menuStripFileExit_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void btnInfo_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.RomInfo);
+            UpdateMenuStripToolCheckState(menuStripToolsInfo);
+        }
+
+        private void btnHex_Click(object sender, EventArgs e)
+        {
+
+            SwitchToolkitMode(ToolTypes.HexEditor);
+            UpdateMenuStripToolCheckState(menuStripToolsHex);
+        }
+
+        private void btnLevel_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.LevelViewer);
+            UpdateMenuStripToolCheckState(menuStripToolsLevel);
+        }
+
+        private void menuStripSettingsSettings_Click(object sender, EventArgs e)
+        {
+            //Bring up the settings window
+            ProgramSettingsForm form = new ProgramSettingsForm();
+            form.ShowDialog();
+
+            SetDebugToolsVisible();
+        }
+
+        private void btnF3DEX_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.F3DEXViewer);
+            UpdateMenuStripToolCheckState(menuStripToolsF3DEX);
+        }
+
+        private void menuStripToolsF3DEX_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.F3DEXViewer);
+            UpdateMenuStripToolCheckState(menuStripToolsF3DEX);
+        }
+
+        private void SetDebugToolsVisible()
+        {
+            btnF3DEX.Visible = ToolSettings.Instance.DisplayDebugTools;
+            menuStripToolsSep1.Visible = ToolSettings.Instance.DisplayDebugTools;
+            menuStripToolsF3DEX.Visible = ToolSettings.Instance.DisplayDebugTools;
+
+            btnResource.Visible = ToolSettings.Instance.DisplayDebugTools;
+        }
+
+        private void btnResource_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.ResourceViewer);
+            UpdateMenuStripToolCheckState(menuStripToolsResource);
+        }
+
+        private void menuStripToolsResource_Click(object sender, EventArgs e)
+        {
+            SwitchToolkitMode(ToolTypes.ResourceViewer);
+            UpdateMenuStripToolCheckState(menuStripToolsResource);
         }
 
     }

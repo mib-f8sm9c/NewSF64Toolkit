@@ -37,12 +37,23 @@ namespace NewSF64Toolkit.OpenGL
         public List<SFLevelObject> LevelObjects;
         public int SelectedObjectIndex;
 
+        public int[] SingleObjectDLIndices;
+
+        public enum DisplayMode
+        {
+            LevelView,
+            SingleModelView
+        }
+        public DisplayMode Mode;
+
         public OpenGLControl()
         {
             InitializeComponent();
 
             Renderables = new List<IGLRenderable>();
             SFCamera.UpdateCamera += UpdateCamera;
+
+            Mode = DisplayMode.LevelView;
         }
 
         public void UpdateCamera()
@@ -287,92 +298,116 @@ namespace NewSF64Toolkit.OpenGL
 
 	        GL.Disable(EnableCap.Texture2D);
             GL.Disable(EnableCap.Lighting);
-	        GL.Color3(0.5f, 0.5f, 0.5f);
-            //glEnable(GL_TEXTURE_2D);
-            GL.Enable(EnableCap.Texture2D);
-            GL.BindTexture(TextureTarget.Texture2D, 1);
 
-	        GL.Begin(PrimitiveType.Quads);
-		        GL.Vertex3(-12.0f, -0.01f,-1000.0f);
-		        GL.Vertex3(-12.0f, -0.01f,   10.0f);
-		        GL.Vertex3( 12.0f, -0.01f,   10.0f);
-		        GL.Vertex3( 12.0f, -0.01f,-1000.0f);
-	        GL.End();
+            if (Mode == DisplayMode.LevelView)
+            {
+                /*GL.Color3(0.5f, 0.5f, 0.5f);
+                GL.Enable(EnableCap.Texture2D);
+                GL.BindTexture(TextureTarget.Texture2D, 1);
+
+                GL.Begin(PrimitiveType.Quads);
+                GL.Vertex3(-12.0f, -0.01f, -1000.0f);
+                GL.Vertex3(-12.0f, -0.01f, 10.0f);
+                GL.Vertex3(12.0f, -0.01f, 10.0f);
+                GL.Vertex3(12.0f, -0.01f, -1000.0f);
+                GL.End();*/
+            }
 
             GL.Color3(1.0f, 1.0f, 1.0f);
             GL.Scale(0.004f, 0.004f, 0.004f);
 
 	        //int ObjectNo = 0;
             //while (ObjectNo < F3DEXParser.GameObjCount)
-            IGLRenderable renderable;
-
-            if (LevelObjects == null || LevelObjects.Count == 0)
-                return;
-
-            for(int i = 0; i < LevelObjects.Count; i++)
+            if(Mode == DisplayMode.LevelView)
             {
-                //F3DEXParser.GameObject gameObject = F3DEXParser.GameObjects[ObjectNo];
-                renderable = LevelObjects[i];
+                IGLRenderable renderable;
 
-                if (Math.Abs(SFCamera.Z * 250 - renderable.GL_Z) > 30000)
+                if (LevelObjects == null || LevelObjects.Count == 0)
+                    return;
+
+                for (int i = 0; i < LevelObjects.Count; i++)
                 {
-                    continue;
+                    //F3DEXParser.GameObject gameObject = F3DEXParser.GameObjects[ObjectNo];
+                    renderable = LevelObjects[i];
+
+                    if (Math.Abs(SFCamera.Z * 250 - renderable.GL_Z) > 30000)
+                    {
+                        continue;
+                    }
+
+                    if (ToolSettings.Instance.UseWireframe)
+                    {
+                        GL.PushMatrix();
+                        if (i == SelectedObjectIndex)
+                        {
+                            GL.Color3(0.0f, 1.0f, 0.0f);
+                        }
+                        else
+                        {
+                            GL.Color3(1.0f, 1.0f, 1.0f);
+                        }
+
+                        GL.Disable(EnableCap.Lighting);
+
+                        GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
+                        GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
+                        GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
+                        GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
+
+                        GL.CallList(renderable.GL_DisplayListIndex[2]);//F3DEXParser.WireframeGameObjectDListIndices[renderable.DListOffset]);
+
+                        GL.Enable(EnableCap.Lighting);
+
+                        GL.PopMatrix();
+                    }
+                    else
+                    {
+                        if (i == SelectedObjectIndex)
+                        {
+                            GL.PushMatrix();
+
+                            GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
+                            GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
+                            GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
+                            GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
+
+                            GL.CallList(renderable.GL_DisplayListIndex[1]);//F3DEXParser.SelectedGameObjectDListIndices[renderable.DListOffset]);
+
+                            GL.PopMatrix();
+                        }
+                        else
+                        {
+                            GL.PushMatrix();
+
+                            GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
+                            GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
+                            GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
+                            GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
+
+                            GL.CallList(renderable.GL_DisplayListIndex[0]);//F3DEXParser.GameObjectDListIndices[gameObject.DListOffset]);
+
+                            GL.PopMatrix();
+                        }
+                    }
                 }
+            }
+            else if (Mode == DisplayMode.SingleModelView)
+            {
+                if (SingleObjectDLIndices == null)
+                    return;
+
+                GL.PushMatrix();
 
                 if (ToolSettings.Instance.UseWireframe)
                 {
-                    GL.PushMatrix();
-                    if (i == SelectedObjectIndex)
-                    {
-                        GL.Color3(0.0f, 1.0f, 0.0f);
-                    }
-                    else
-                    {
-                        GL.Color3(1.0f, 1.0f, 1.0f);
-                    }
-
-                    GL.Disable(EnableCap.Lighting);
-
-                    GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
-                    GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
-                    GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
-                    GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
-
-                    GL.CallList(renderable.GL_DisplayListIndex[2]);//F3DEXParser.WireframeGameObjectDListIndices[renderable.DListOffset]);
-
-                    GL.Enable(EnableCap.Lighting);
-
-                    GL.PopMatrix();
+                    GL.Color3(1.0f, 1.0f, 1.0f);
+                    GL.CallList(SingleObjectDLIndices[2]);
                 }
                 else
-                {
-                    if (i == SelectedObjectIndex)
-                    {
-                        GL.PushMatrix();
+                    GL.CallList(SingleObjectDLIndices[0]);
 
-                        GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
-                        GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
-                        GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
-                        GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
 
-                        GL.CallList(renderable.GL_DisplayListIndex[1]);//F3DEXParser.SelectedGameObjectDListIndices[renderable.DListOffset]);
-
-                        GL.PopMatrix();
-                    }
-                    else
-                    {
-                        GL.PushMatrix();
-
-                        GL.Translate((float)renderable.GL_X, (float)renderable.GL_Y, (float)renderable.GL_Z);
-                        GL.Rotate((float)renderable.GL_XRot, 1.0f, 0, 0);
-                        GL.Rotate((float)renderable.GL_YRot, 0, 1.0f, 0);
-                        GL.Rotate((float)renderable.GL_ZRot, 0, 0, 1.0f);
-
-                        GL.CallList(renderable.GL_DisplayListIndex[0]);//F3DEXParser.GameObjectDListIndices[gameObject.DListOffset]);
-
-                        GL.PopMatrix();
-                    }
-                }
+                GL.PopMatrix();
             }
         }
 

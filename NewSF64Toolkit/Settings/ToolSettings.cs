@@ -23,6 +23,48 @@ namespace NewSF64Toolkit.Settings
 
         public static SettingsUpdatedEvent SettingsUpdated = delegate { };
 
+        private bool _autoDecompress;
+        public bool AutoDecompress
+        {
+            get
+            {
+                return _autoDecompress;
+            }
+            set
+            {
+                _autoDecompress = value;
+                SettingsUpdated(SettingsUpdatedType.BaseSystemChange);
+            }
+        }
+
+        private bool _autoCRCFix;
+        public bool AutoCRCFix
+        {
+            get
+            {
+                return _autoCRCFix;
+            }
+            set
+            {
+                _autoCRCFix = value;
+                SettingsUpdated(SettingsUpdatedType.BaseSystemChange);
+            }
+        }
+
+        private bool _displayDebugTools;
+        public bool DisplayDebugTools
+        {
+            get
+            {
+                return _displayDebugTools;
+            }
+            set
+            {
+                _displayDebugTools = value;
+                SettingsUpdated(SettingsUpdatedType.BaseSystemChange);
+            }
+        }
+
         private bool _displayInHex;
         public bool DisplayInHex
         {
@@ -84,6 +126,9 @@ namespace NewSF64Toolkit.Settings
         {
             _displayInHex = true;
             _useWireframe = false;
+            _autoCRCFix = false;
+            _autoDecompress = false;
+            _displayDebugTools = false;
             _recentlyOpened = new List<string>();
         }
 
@@ -110,6 +155,15 @@ namespace NewSF64Toolkit.Settings
                                             case "displayhex":
                                                 _displayInHex = bool.Parse(xml.Value);
                                                 break;
+                                            case "autocrc":
+                                                _autoCRCFix = bool.Parse(xml.Value);
+                                                break;
+                                            case "autodecompress":
+                                                _autoDecompress = bool.Parse(xml.Value);
+                                                break;
+                                            case "displaydebugtools":
+                                                _displayDebugTools = bool.Parse(xml.Value);
+                                                break;
                                         }
                                     }
                                 }
@@ -135,6 +189,10 @@ namespace NewSF64Toolkit.Settings
                 xml.WriteStartElement("settings");
                 xml.WriteAttributeString("usewireframe", _useWireframe.ToString());
                 xml.WriteAttributeString("displayhex", _displayInHex.ToString());
+                xml.WriteAttributeString("autocrc", _autoCRCFix.ToString());
+                xml.WriteAttributeString("autodecompress", _autoDecompress.ToString());
+                xml.WriteAttributeString("displaydebugtools", _displayDebugTools.ToString());
+
 
                 xml.WriteStartElement("recentlyopened");
                 foreach (string str in _recentlyOpened)

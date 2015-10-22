@@ -5,6 +5,8 @@ using System.Text;
 using OpenTK.Graphics.OpenGL;
 using System.Drawing;
 using NewSF64Toolkit.OpenGL;
+using NewSF64Toolkit.DataStructures.DataObjects.F3DEX;
+using NewSF64Toolkit.DataStructures.DMA;
 
 namespace NewSF64Toolkit.OpenGL.F3DEX
 {
@@ -20,6 +22,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
         public DrawingModeType DrawingMode;
 
         public static int[] InvalidBox = new int[3] {0, 1, 2};
+        private static bool InvalidBoxesInitialized = false;
 
         public F3DEXParser()
         {
@@ -33,6 +36,9 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
         public void InitInvalidModels()
         {
+            if (InvalidBoxesInitialized)
+                return;
+
             int listBase = GL.GenLists(3);
 
             //Normal
@@ -77,6 +83,8 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
             DrawingMode = F3DEXParser.DrawingModeType.Texture;
 
             InvalidBox = new int[3] { listBase, listBase + 1, listBase + 2 };
+
+            InvalidBoxesInitialized = true;
         }
 
         private void DrawInvalidModel()
@@ -136,10 +144,18 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
         //NOTE: We should make a way to clean up [DELETE] the old GL display lists
 
-        public int[] ReadGameObject(byte[] bytes, uint fullOffset)//F3DEXParser.GameObject gameObject)
+        public int[] ReadGameObject(DMAFile dma, uint fullOffset)
+        {
+            return ReadGameObject(dma, dma.GetAsBytes(), fullOffset);
+
+        }
+
+        public int[] ReadGameObject(DMAFile dma, byte[] bytes, uint fullOffset)//F3DEXParser.GameObject gameObject)
         {
             //byte bankNo = (byte)((gameObject.DListOffset & 0xFF000000) >> 24);
             uint offset = fullOffset & 0x00FFFFFF;
+
+            _currentDMA = dma;
 
             //Is 0 a valid location?
             if (offset == 0)// || !MemoryManager.Instance.HasBank(bankNo) || !MemoryManager.Instance.LocateBank(bankNo, offset).IsValid())
@@ -195,6 +211,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
         }
 
         private byte[] currentBytes;
+        private DMAFile _currentDMA;
 
         private void ReadF3DEX(byte[] bytes, uint offset)
         {
@@ -798,7 +815,8 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
             char PalSegment;
             uint PalOffset;
 
-            SplitAddress(Textures[CurrentTexture].PalOffset, out PalSegment, out PalOffset);
+            //SplitAddress(Textures[CurrentTexture].PalOffset, out PalSegment, out PalOffset);
+            SplitAddress(Textures[CurrentTexture].Offset, out PalSegment, out PalOffset);
 
             //if (!MemoryManager.Instance.LocateBank((byte)PalSegment, PalOffset).IsValid()) return;
             
@@ -940,6 +958,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 	        CurrentTexture = 0;
 	        IsMultiTexture = false;
 
+            Textures[CurrentTexture].PalOffset = Textures[CurrentTexture].Offset; //Hack, but maybe it'll work
 	        Textures[CurrentTexture].Offset = w1;
         }
 
@@ -1740,6 +1759,7 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
                 CalcTextureSize((int)TexID);
 
                 GLID = LoadTexture((int)TexID);
+                Textures[CurrentTexture].PalOffset = Textures[CurrentTexture].Offset; //Hack, but maybe it'll work
                 TextureCache[TextureCachePosition].Offset = Textures[TexID].Offset;
                 TextureCache[TextureCachePosition].RealWidth = Textures[TexID].RealWidth;
                 TextureCache[TextureCachePosition].RealHeight = Textures[TexID].RealHeight;
@@ -1866,188 +1886,201 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
                             break;
                         }
 
-                    //case 0x40:
-                    //case 0x50:
-                    //    {
-                    //        uint CI1, CI2;
-                    //        uint RGBA = 0;
+                    case 0x40:
+                    case 0x50:
+                        {
+                            uint CI1, CI2;
+                            uint RGBA = 0;
 
-                    //        for (j = 0; j < Textures[TextureID].Height; j++)
-                    //        {
-                    //            for (i = 0; i < Textures[TextureID].Width / 2; i++)
-                    //            {
-                    //                CI1 = (RAM[TexSegment].Data[TexOffset] & 0xF0) >> 4;
-                    //                CI2 = (RAM[TexSegment].Data[TexOffset] & 0x0F);
+                            for (j = 0; j < Textures[TextureID].Height; j++)
+                            {
+                                for (i = 0; i < Textures[TextureID].Width / 2; i++)
+                                {
+                                    byte Raw = ByteHelper.ReadByte(currentBytes, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
 
-                    //                RGBA = ((uint)F3DEXParser.Palettes[CI1].R << 24);
-                    //                RGBA |= ((uint)F3DEXParser.Palettes[CI1].G << 16);
-                    //                RGBA |= ((uint)F3DEXParser.Palettes[CI1].B << 8);
-                    //                RGBA |= (uint)F3DEXParser.Palettes[CI1].A;
-                    //                Write32(TextureData, GLTexPosition, RGBA);
+                                    CI1 = (uint)(Raw & 0xF0) >> 4;
+                                    CI2 = (uint)(Raw & 0x0F);
 
-                    //                RGBA = ((uint)F3DEXParser.Palettes[CI2].R << 24);
-                    //                RGBA |= ((uint)F3DEXParser.Palettes[CI2].G << 16);
-                    //                RGBA |= ((uint)F3DEXParser.Palettes[CI2].B << 8);
-                    //                RGBA |= (uint)F3DEXParser.Palettes[CI2].A;
-                    //                Write32(TextureData, GLTexPosition + 4, RGBA);
+                                    RGBA = ((uint)Palettes[CI1].R << 24);
+                                    RGBA |= ((uint)Palettes[CI1].G << 16);
+                                    RGBA |= ((uint)Palettes[CI1].B << 8);
+                                    RGBA |= (uint)Palettes[CI1].A;
+                                    Write32(TextureData, GLTexPosition, RGBA);
 
-                    //                TexOffset += 1;
-                    //                GLTexPosition += 8;
-                    //            }
-                    //            TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
-                    //        }
-                    //        break;
-                    //    }
+                                    RGBA = ((uint)Palettes[CI2].R << 24);
+                                    RGBA |= ((uint)Palettes[CI2].G << 16);
+                                    RGBA |= ((uint)Palettes[CI2].B << 8);
+                                    RGBA |= (uint)Palettes[CI2].A;
+                                    Write32(TextureData, GLTexPosition + 4, RGBA);
 
-                    //case 0x48:
-                    //    {
-                    //        ushort Raw;
-                    //        uint RGBA = 0;
+                                    TexOffset += 1;
+                                    GLTexPosition += 8;
+                                }
+                                TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
+                            }
+                            break;
+                        }
 
-                    //        for (j = 0; j < Textures[TextureID].Height; j++)
-                    //        {
-                    //            for (i = 0; i < Textures[TextureID].Width; i++)
-                    //            {
-                    //                Raw = RAM[TexSegment].Data[TexOffset];
+                    case 0x48:
+                        {
+                            uint RGBA = 0;
 
-                    //                RGBA = ((uint)F3DEXParser.Palettes[Raw].R << 24);
-                    //                RGBA |= ((uint)F3DEXParser.Palettes[Raw].G << 16);
-                    //                RGBA |= ((uint)F3DEXParser.Palettes[Raw].B << 8);
-                    //                RGBA |= (uint)F3DEXParser.Palettes[Raw].A;
-                    //                Write32(TextureData, GLTexPosition, RGBA);
+                            for (j = 0; j < Textures[TextureID].Height; j++)
+                            {
+                                for (i = 0; i < Textures[TextureID].Width; i++)
+                                {
+                                    byte Raw = ByteHelper.ReadByte(currentBytes, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
 
-                    //                TexOffset += 1;
-                    //                GLTexPosition += 4;
-                    //            }
-                    //            TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
-                    //        }
-                    //        break;
-                    //    }
+                                    RGBA = ((uint)Palettes[Raw].R << 24);
+                                    RGBA |= ((uint)Palettes[Raw].G << 16);
+                                    RGBA |= ((uint)Palettes[Raw].B << 8);
+                                    RGBA |= (uint)Palettes[Raw].A;
+                                    Write32(TextureData, GLTexPosition, RGBA);
 
-                    //case 0x60:
-                    //    {
-                    //        ushort Raw;
-                    //        uint RGBA = 0;
+                                    TexOffset += 1;
+                                    GLTexPosition += 4;
+                                }
+                                TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
+                            }
+                            break;
+                        }
 
-                    //        for (j = 0; j < Textures[TextureID].Height; j++)
-                    //        {
-                    //            for (i = 0; i < Textures[TextureID].Width / 2; i++)
-                    //            {
-                    //                Raw = (RAM[TexSegment].Data[TexOffset] & 0xF0) >> 4;
-                    //                RGBA = (((Raw & 0x0E) << 4) << 24);
-                    //                RGBA |= (((Raw & 0x0E) << 4) << 16);
-                    //                RGBA |= (((Raw & 0x0E) << 4) << 8);
-                    //                if ((Raw & 0x01)) RGBA |= 0xFF;
-                    //                Write32(TextureData, GLTexPosition, RGBA);
+                    case 0x60:
+                        {
+                            uint RGBA = 0;
+                            uint CI1, CI2;
 
-                    //                Raw = (RAM[TexSegment].Data[TexOffset] & 0x0F);
-                    //                RGBA = (((Raw & 0x0E) << 4) << 24);
-                    //                RGBA |= (((Raw & 0x0E) << 4) << 16);
-                    //                RGBA |= (((Raw & 0x0E) << 4) << 8);
-                    //                if ((Raw & 0x01)) RGBA |= 0xFF;
-                    //                Write32(TextureData, GLTexPosition + 4, RGBA);
+                            for (j = 0; j < Textures[TextureID].Height; j++)
+                            {
+                                for (i = 0; i < Textures[TextureID].Width / 2; i++)
+                                {
+                                    byte Raw = ByteHelper.ReadByte(currentBytes, TexOffset);
+                                    CI1 = (uint)(Raw & 0xF0) >> 4;
+                                    CI2 = (uint)(Raw & 0x0F);
 
-                    //                TexOffset += 1;
-                    //                GLTexPosition += 8;
-                    //            }
-                    //            TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
-                    //        }
-                    //        break;
-                    //    }
+                                    RGBA = ((CI1 << 4) << 24);
+                                    RGBA |= ((CI1 << 4) << 16);
+                                    RGBA |= ((CI1 << 4) << 8);
+                                    if ((CI1 & 0x01) == 0x01) RGBA |= 0xFF;
+                                    Write32(TextureData, GLTexPosition, RGBA);
 
-                    //case 0x68:
-                    //    {
-                    //        ushort Raw;
-                    //        uint RGBA = 0;
+                                    RGBA = ((CI2 << 4) << 24);
+                                    RGBA |= ((CI2 << 4) << 16);
+                                    RGBA |= ((CI2 << 4) << 8);
+                                    if ((Raw & 0x01) == 0x01) RGBA |= 0xFF;
+                                    Write32(TextureData, GLTexPosition + 4, RGBA);
 
-                    //        for (j = 0; j < Textures[TextureID].Height; j++)
-                    //        {
-                    //            for (i = 0; i < Textures[TextureID].Width; i++)
-                    //            {
-                    //                Raw = RAM[TexSegment].Data[TexOffset];
-                    //                RGBA = (((Raw & 0xF0) + 0x0F) << 24);
-                    //                RGBA |= (((Raw & 0xF0) + 0x0F) << 16);
-                    //                RGBA |= (((Raw & 0xF0) + 0x0F) << 8);
-                    //                RGBA |= ((Raw & 0x0F) << 4);
-                    //                Write32(TextureData, GLTexPosition, RGBA);
+                                    TexOffset += 1;
+                                    GLTexPosition += 8;
+                                }
+                                TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
+                            }
+                            break;
+                        }
 
-                    //                TexOffset += 1;
-                    //                GLTexPosition += 4;
-                    //            }
-                    //            TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
-                    //        }
-                    //        break;
-                    //    }
+                    case 0x68:
+                        {
+                            uint RGBA = 0;
 
-                    //case 0x70:
-                    //    {
-                    //        for (j = 0; j < Textures[TextureID].Height; j++)
-                    //        {
-                    //            for (i = 0; i < Textures[TextureID].Width; i++)
-                    //            {
-                    //                TextureData[GLTexPosition] = RAM[TexSegment].Data[TexOffset];
-                    //                TextureData[GLTexPosition + 1] = RAM[TexSegment].Data[TexOffset];
-                    //                TextureData[GLTexPosition + 2] = RAM[TexSegment].Data[TexOffset];
-                    //                TextureData[GLTexPosition + 3] = RAM[TexSegment].Data[TexOffset + 1];
+                            for (j = 0; j < Textures[TextureID].Height; j++)
+                            {
+                                for (i = 0; i < Textures[TextureID].Width; i++)
+                                {
+                                    byte Raw = ByteHelper.ReadByte(currentBytes, TexOffset);
 
-                    //                TexOffset += 2;
-                    //                GLTexPosition += 4;
-                    //            }
-                    //            TexOffset += Textures[TextureID].LineSize * 4 - Textures[TextureID].Width;
-                    //        }
-                    //        break;
-                    //    }
+                                    RGBA = (uint)(((Raw & 0xF0) + 0x0F) << 24);
+                                    RGBA |= (uint)(((Raw & 0xF0) + 0x0F) << 16);
+                                    RGBA |= (uint)(((Raw & 0xF0) + 0x0F) << 8);
+                                    RGBA |= (uint)((Raw & 0x0F) << 4);
+                                    Write32(TextureData, GLTexPosition, RGBA);
 
-                    //case 0x80:
-                    //case 0x90:
-                    //    {
-                    //        ushort Raw;
-                    //        uint RGBA = 0;
+                                    TexOffset += 1;
+                                    GLTexPosition += 4;
+                                }
+                                TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
+                            }
+                            break;
+                        }
 
-                    //        for (j = 0; j < Textures[TextureID].Height; j++)
-                    //        {
-                    //            for (i = 0; i < Textures[TextureID].Width / 2; i++)
-                    //            {
-                    //                Raw = (RAM[TexSegment].Data[TexOffset] & 0xF0) >> 4;
-                    //                RGBA = (((Raw & 0x0F) << 4) << 24);
-                    //                RGBA |= (((Raw & 0x0F) << 4) << 16);
-                    //                RGBA |= (((Raw & 0x0F) << 4) << 8);
-                    //                RGBA |= 0xFF;
-                    //                Write32(TextureData, GLTexPosition, RGBA);
+                    case 0x70:
+                        {
+                            for (j = 0; j < Textures[TextureID].Height; j++)
+                            {
+                                for (i = 0; i < Textures[TextureID].Width; i++)
+                                {
+                                    byte byt = ByteHelper.ReadByte(currentBytes, TexOffset);
 
-                    //                Raw = (RAM[TexSegment].Data[TexOffset] & 0x0F);
-                    //                RGBA = (((Raw & 0x0F) << 4) << 24);
-                    //                RGBA |= (((Raw & 0x0F) << 4) << 16);
-                    //                RGBA |= (((Raw & 0x0F) << 4) << 8);
-                    //                RGBA |= 0xFF;
-                    //                Write32(TextureData, GLTexPosition + 4, RGBA);
+                                    TextureData[GLTexPosition] = byt;//RAM[TexSegment].Data[TexOffset];
+                                    TextureData[GLTexPosition + 1] = byt;//RAM[TexSegment].Data[TexOffset];
+                                    TextureData[GLTexPosition + 2] = byt;//RAM[TexSegment].Data[TexOffset];
 
-                    //                TexOffset += 1;
-                    //                GLTexPosition += 8;
-                    //            }
-                    //            TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
-                    //        }
-                    //        break;
-                    //    }
+                                    byt = ByteHelper.ReadByte(currentBytes, TexOffset + 1);
 
-                    //case 0x88:
-                    //    {
-                    //        for (j = 0; j < Textures[TextureID].Height; j++)
-                    //        {
-                    //            for (i = 0; i < Textures[TextureID].Width; i++)
-                    //            {
-                    //                TextureData[GLTexPosition] = RAM[TexSegment].Data[TexOffset];
-                    //                TextureData[GLTexPosition + 1] = RAM[TexSegment].Data[TexOffset];
-                    //                TextureData[GLTexPosition + 2] = RAM[TexSegment].Data[TexOffset];
-                    //                TextureData[GLTexPosition + 3] = 0xFF;
+                                    TextureData[GLTexPosition + 3] = byt;//RAM[TexSegment].Data[TexOffset + 1];
 
-                    //                TexOffset += 1;
-                    //                GLTexPosition += 4;
-                    //            }
-                    //            TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
-                    //        }
-                    //        break;
-                    //    }
+                                    TexOffset += 2;
+                                    GLTexPosition += 4;
+                                }
+                                TexOffset += Textures[TextureID].LineSize * 4 - Textures[TextureID].Width;
+                            }
+                        }
+                        break;
+
+                    case 0x80:
+                    case 0x90:
+                        {
+                            uint RGBA = 0;
+                            uint CI1, CI2;
+
+                            for (j = 0; j < Textures[TextureID].Height; j++)
+                            {
+                                for (i = 0; i < Textures[TextureID].Width / 2; i++)
+                                {
+                                    byte Raw = ByteHelper.ReadByte(currentBytes, TexOffset);//(RAM[TexSegment].Data[TexOffset] << 8) | RAM[TexSegment].Data[TexOffset + 1];
+
+                                    CI1 = (uint)(Raw & 0xF0) >> 4;
+                                    CI2 = (uint)(Raw & 0x0F);
+
+                                    RGBA = ((CI1 << 4) << 24);
+                                    RGBA |= ((CI1 << 4) << 16);
+                                    RGBA |= ((CI1 << 4) << 8);
+                                    RGBA |= 0xFF;
+                                    Write32(TextureData, GLTexPosition, RGBA);
+
+                                    RGBA = ((CI2 << 4) << 24);
+                                    RGBA |= ((CI2 << 4) << 16);
+                                    RGBA |= ((CI2 << 4) << 8);
+                                    RGBA |= 0xFF;
+                                    Write32(TextureData, GLTexPosition + 4, RGBA);
+
+                                    TexOffset += 1;
+                                    GLTexPosition += 8;
+                                }
+                                TexOffset += Textures[TextureID].LineSize * 8 - (Textures[TextureID].Width / 2);
+                            }
+                            break;
+                        }
+
+                    case 0x88:
+                        {
+                            for (j = 0; j < Textures[TextureID].Height; j++)
+                            {
+                                for (i = 0; i < Textures[TextureID].Width; i++)
+                                {
+                                    byte Raw = ByteHelper.ReadByte(currentBytes, TexOffset);
+
+                                    TextureData[GLTexPosition] = Raw;
+                                    TextureData[GLTexPosition + 1] = Raw;
+                                    TextureData[GLTexPosition + 2] = Raw;
+                                    TextureData[GLTexPosition + 3] = 0xFF;
+
+                                    TexOffset += 1;
+                                    GLTexPosition += 4;
+                                }
+                                TexOffset += Textures[TextureID].LineSize * 8 - Textures[TextureID].Width;
+                            }
+                            break;
+                        }
 
                     default:
                         //memset(TextureData, 0xFF, BufferSize);

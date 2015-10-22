@@ -3,27 +3,31 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NewSF64Toolkit.DataStructures.DataObjects;
+using System.Windows.Forms;
 
 namespace NewSF64Toolkit.DataStructures.DMA
 {
     public class LevelDMAFile : DMAFile
     {
         private int _levelInfoOffset = -1;
+        private int _levelHeaderOffset = -1;
 
         public LevelHeader LevelHeader;
         public List<SFLevelObject> LevelObjects;
+        public List<SFAdvancedObjectScript> LevelScripts;
 
-        public LevelDMAFile(byte[] data, int offset)
-            : base(data)
+        public LevelDMAFile(byte[] data, int dmaIndex, int headerOffset, int objectOffset)
+            : base(data, dmaIndex)
         {
-            _levelInfoOffset = offset & 0x00FFFFFF; //Remove the segment number
+            _levelHeaderOffset = headerOffset & 0x00FFFFFF; //Remove the segment number
+            _levelInfoOffset = objectOffset & 0x00FFFFFF; //Remove the segment number
             LoadFromBytes(data);
         }
 
         public override bool LoadFromBytes(byte[] bytes)
         {
             //Need the offset before loading
-            if (_levelInfoOffset == -1)
+            if (_levelInfoOffset == -1 || _levelHeaderOffset == -1)
                 return false;
 
             base.LoadFromBytes(bytes);
@@ -33,15 +37,19 @@ namespace NewSF64Toolkit.DataStructures.DMA
 
             LevelObjects.Clear();
 
-            int levelObjectOffset = _levelInfoOffset;
+            if (LevelScripts == null)
+                LevelScripts = new List<SFAdvancedObjectScript>();
+
+            LevelScripts.Clear();
+
             byte[] data;
 
-            if (!_dmaData.TakeMemory(levelObjectOffset, LevelHeader.Size, out data))
+            if (!_dmaData.TakeMemory(_levelHeaderOffset, LevelHeader.Size, out data))
                 return false;
 
-            LevelHeader = new DataObjects.LevelHeader(levelObjectOffset, data);
+            LevelHeader = new DataObjects.LevelHeader(_levelHeaderOffset, data);
 
-            levelObjectOffset += LevelHeader.Size;
+            int levelObjectOffset = _levelInfoOffset;
 
             bool one = true;
             while (one)
@@ -68,11 +76,12 @@ namespace NewSF64Toolkit.DataStructures.DMA
         {
             byte[] bytes = base.GetAsBytes();
 
+            if (IsCompressed)
+                return bytes;
+
+            Array.Copy(LevelHeader.GetAsBytes(), 0, bytes, _levelHeaderOffset, LevelHeader.Size);
+
             int levelObjectOffset = _levelInfoOffset;
-
-            Array.Copy(LevelHeader.GetAsBytes(), 0, bytes, levelObjectOffset, LevelHeader.Size);
-
-            levelObjectOffset += LevelHeader.Size;
 
             for(int i = 0; i < LevelObjects.Count; i++)
             {
@@ -93,6 +102,38 @@ namespace NewSF64Toolkit.DataStructures.DMA
             ByteHelper.WriteUShort(0xFFFF, bytes, levelObjectOffset + 0x10);
 
             return bytes;
+        }
+
+        public override TreeNode GetTreeNode()
+        {
+            TreeNode node = new TreeNode();
+
+            node.Text = "DMA " + Index + " - Level File";
+
+            node.Tag = this;
+
+
+            TreeNode LevelObjectTable = new TreeNode();
+            LevelObjectTable.Text = "Level Objects Table";
+            LevelObjectTable.Tag = LevelObjects;
+            int objCount = 0;
+            foreach (SFLevelObject obj in LevelObjects)
+            {
+                TreeNode newN = new TreeNode();
+                newN.Tag = obj;
+                newN.Text = "Entry " + objCount;
+                objCount++;
+                LevelObjectTable.Nodes.Add(newN);
+            }
+
+            node.Nodes.Add(LevelObjectTable);
+
+            //foreach (DMAFile dma in DMATable)
+            //{
+            //    node.Nodes.Add(dma.GetTreeNode());
+            //}
+
+            return node;
         }
 
     }

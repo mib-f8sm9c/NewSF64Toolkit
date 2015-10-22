@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace NewSF64Toolkit.DataStructures.DMA
 {
@@ -14,8 +15,8 @@ namespace NewSF64Toolkit.DataStructures.DMA
         public uint CRC1;
         public uint CRC2;
 
-        public HeaderDMAFile(byte[] data)
-            : base(data)
+        public HeaderDMAFile(byte[] data, int dmaIndex)
+            : base(data, dmaIndex)
         {
 
         }
@@ -49,6 +50,22 @@ namespace NewSF64Toolkit.DataStructures.DMA
             ByteHelper.WriteUInt(CRC2, bytes, 20);
 
             return bytes;
+        }
+
+        public override TreeNode GetTreeNode()
+        {
+            TreeNode node = new TreeNode();
+
+            node.Text = "DMA " + Index + " - Header File";
+
+            node.Tag = this;
+
+            //foreach (DMAFile dma in DMATable)
+            //{
+            //    node.Nodes.Add(dma.GetTreeNode());
+            //}
+
+            return node;
         }
 
     }

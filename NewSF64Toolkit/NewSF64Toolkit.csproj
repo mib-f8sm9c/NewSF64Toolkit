@@ -51,6 +51,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStructures\IResource.cs" />
+    <Compile Include="DataStructures\DataObjects\SFAdvancedObjectScript.cs" />
+    <Compile Include="DataStructures\DataObjects\RefAdvancedObject.cs" />
+    <Compile Include="DataStructures\DataObjects\F3DEX\F3DEXCollection.cs" />
+    <Compile Include="DataStructures\DataObjects\F3DEX\DListCommand.cs" />
+    <Compile Include="DataStructures\DataObjects\F3DEX\Vertex.cs" />
+    <Compile Include="DataStructures\DataObjects\F3DEX\VertexCollection.cs" />
+    <Compile Include="DataStructures\DataObjects\F3DEX\DListCollection.cs" />
+    <Compile Include="DataStructures\DataObjects\F3DEX\Texture.cs" />
     <Compile Include="DataStructures\DataObjects\LevelHeader.cs" />
     <Compile Include="DataStructures\DataObjects\RAMTableEntry.cs" />
     <Compile Include="DataStructures\DataObjects\RefSimpleObject.cs" />
@@ -60,6 +69,12 @@
     <Compile Include="DataStructures\DMA\LevelDMAFile.cs" />
     <Compile Include="DataStructures\DataObjects\DMATableEntry.cs" />
     <Compile Include="OpenGL\GLRenderable.cs" />
+    <Compile Include="ProgramSettingsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ProgramSettingsForm.Designer.cs">
+      <DependentUpon>ProgramSettingsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\Controls\AboutControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -89,6 +104,42 @@
       <DependentUpon>OpenGLControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
+    <Compile Include="Tools\Controls\ResourceSubControls\LevelDMAResourceControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\LevelDMAResourceControl.Designer.cs">
+      <DependentUpon>LevelDMAResourceControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\RamTableResourceControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\RamTableResourceControl.Designer.cs">
+      <DependentUpon>RamTableResourceControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\DMAResourceControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\DMAResourceControl.Designer.cs">
+      <DependentUpon>DMAResourceControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\SF64RomResourceControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\SF64RomResourceControl.Designer.cs">
+      <DependentUpon>SF64RomResourceControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\ResourceControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceSubControls\ResourceControl.Designer.cs">
+      <DependentUpon>ResourceControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceViewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Tools\Controls\ResourceViewControl.Designer.cs">
+      <DependentUpon>ResourceViewControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Tools\Controls\HexEditorControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -107,6 +158,14 @@
     <Compile Include="Tools\Controls\RomInfoControl.Designer.cs">
       <DependentUpon>RomInfoControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\ResourceViewTool.cs" />
+    <Compile Include="Tools\Debug\Controls\F3DEXViewerControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Tools\Debug\Controls\F3DEXViewerControl.Designer.cs">
+      <DependentUpon>F3DEXViewerControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Tools\Debug\F3DEXViewerTool.cs" />
     <Compile Include="Tools\LevelViewerTool.cs" />
     <Compile Include="Tools\HexEditorTool.cs" />
     <Compile Include="Tools\BaseToolkitTool.cs" />
@@ -116,6 +175,9 @@
     <Compile Include="DataStructures\SF64ROM.cs" />
     <Compile Include="StarFoxRomInfo.cs" />
     <Compile Include="Settings\ToolSettings.cs" />
+    <EmbeddedResource Include="ProgramSettingsForm.resx">
+      <DependentUpon>ProgramSettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Tools\Controls\AboutControl.resx">
       <DependentUpon>AboutControl.cs</DependentUpon>
     </EmbeddedResource>
@@ -124,6 +186,21 @@
     </EmbeddedResource>
     <EmbeddedResource Include="OpenGL\OpenGLControl.resx">
       <DependentUpon>OpenGLControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\Controls\ResourceSubControls\LevelDMAResourceControl.resx">
+      <DependentUpon>LevelDMAResourceControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\Controls\ResourceSubControls\RamTableResourceControl.resx">
+      <DependentUpon>RamTableResourceControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\Controls\ResourceSubControls\DMAResourceControl.resx">
+      <DependentUpon>DMAResourceControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\Controls\ResourceSubControls\SF64RomResourceControl.resx">
+      <DependentUpon>SF64RomResourceControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Tools\Controls\ResourceViewControl.resx">
+      <DependentUpon>ResourceViewControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\Controls\HexEditorControl.resx">
       <DependentUpon>HexEditorControl.cs</DependentUpon>
@@ -144,6 +221,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <EmbeddedResource Include="Tools\Debug\Controls\F3DEXViewerControl.resx">
+      <DependentUpon>F3DEXViewerControl.cs</DependentUpon>
+    </EmbeddedResource>
     <None Include="app.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

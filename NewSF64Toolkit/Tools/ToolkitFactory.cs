@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using NewSF64Toolkit.Tools.Debug;
 
 namespace NewSF64Toolkit.Tools
 {
@@ -9,7 +10,9 @@ namespace NewSF64Toolkit.Tools
     {
         RomInfo,
         HexEditor,
-        LevelViewer//,
+        LevelViewer,
+        F3DEXViewer,
+        ResourceViewer//,
         //ModelViewer
     }
 
@@ -30,6 +33,12 @@ namespace NewSF64Toolkit.Tools
                     break;
                 case ToolTypes.HexEditor:
                     newTool = new HexEditorTool();
+                    break;
+                case ToolTypes.F3DEXViewer:
+                    newTool = new F3DEXViewerTool();
+                    break;
+                case ToolTypes.ResourceViewer:
+                    newTool = new ResourceViewTool();
                     break;
                 case ToolTypes.LevelViewer:
                 default: //To Do: add a default null tool

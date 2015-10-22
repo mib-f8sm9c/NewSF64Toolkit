@@ -175,28 +175,6 @@
             this.cbLevelSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbLevelSelect.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.cbLevelSelect.FormattingEnabled = true;
-            this.cbLevelSelect.Items.AddRange(new object[] {
-            "1: Corneria",
-            "2: Meteo",
-            "3: Sector X",
-            "4: Area 6",
-            "5: N/A",
-            "6: Sector Y",
-            "7: Venom 1",
-            "8: Solar",
-            "9: Zoness",
-            "10: Venom 2",
-            "11: Training Mode",
-            "12: Macbeth",
-            "13: Titania",
-            "14: Aquas",
-            "15: Fortuna",
-            "16: N/A",
-            "17: Katina",
-            "18: Bolse",
-            "19: Sector Z",
-            "20: Venom (Star Wolf)",
-            "21: Corneria (Multi)"});
             this.cbLevelSelect.Location = new System.Drawing.Point(6, 241);
             this.cbLevelSelect.Name = "cbLevelSelect";
             this.cbLevelSelect.Size = new System.Drawing.Size(183, 24);

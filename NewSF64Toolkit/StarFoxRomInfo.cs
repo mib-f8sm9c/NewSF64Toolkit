@@ -55,7 +55,38 @@ namespace NewSF64Toolkit
 
         public static uint[] EndiannessMarkers = { 0x80371240, 0x40123780, 0x37804012, 0x12408037 };
 
-        public static int[] LevelIndexAndDMAs = { 18, 19, 26, 29, 29, 35, 30, 36, 37, 47, 53, -1, -1, -1, 34, -1, 38, 33, 27, 31, 12 };
+        public static int[] LevelIndexAndDMAs = { 18, 19, 26, 29, 29, 35,
+                                                    30, 36, 37, 47, 53, 39, 20, 28, 34, -1, 38, 
+                                                    33, 27, 31, 12 };
+
+        public static int[] LevelIndexAndAdvItemIndex = { 0x3D9E8, 0x2F3AC, 0x320D0, 0x27F50, 0x289FC, 0x32E10,
+                                                            0x1B1D8, 0x0, 0x2AAC0, 0x37E3C, 0x9B34, 0x381D8, 0x0, 0x308B8, 0x0, 0x0, 0x0,
+                                                            0x0, 0x0, 0x0, 0x0 };
+
+        public static string[] LevelNamesByIndex = new string[]
+        {
+            "Corneria",
+            "Meteo",
+            "Sector X",
+            "Area 6",
+            "N/A",
+            "Sector Y",
+            "Venom 1",
+            "Solar",
+            "Zoness",
+            "Venom 2",
+            "Training Mode",
+            "Macbeth",
+            "Titania",
+            "Aquas",
+            "Fortuna",
+            "N/A",
+            "Katina",
+            "Bolse",
+            "Sector Z",
+            "Venom (Star Wolf)",
+            "Corneria (Multi)"
+        };
 
         public static int DMATableToLevelIndex(int dmaTable)
         {

@@ -22,6 +22,8 @@ namespace NewSF64Toolkit.Tools.Controls
         {
             InitializeComponent();
 
+            PopulateLevelNames();
+
             _glControl = new OpenGLControl();
             this.glPanel.Controls.Add(_glControl);
             _glControl.Dock = DockStyle.Fill;
@@ -29,11 +31,19 @@ namespace NewSF64Toolkit.Tools.Controls
             cbLevelSelect.SelectedIndex = 0;
         }
 
+        private void PopulateLevelNames()
+        {
+            for (int i = 0; i < StarFoxRomInfo.LevelNamesByIndex.Length; i++)
+            {
+                cbLevelSelect.Items.Add(string.Format("{0:00}: {1}", i, StarFoxRomInfo.LevelNamesByIndex[i]));
+            }
+        }
+
         private void cbLevelSelect_SelectedIndexChanged(object sender, EventArgs e)
         {
             //Include index 4?
-            if (cbLevelSelect.SelectedIndex == 11 || cbLevelSelect.SelectedIndex == 12 ||
-                cbLevelSelect.SelectedIndex == 13 || cbLevelSelect.SelectedIndex == 15)
+            if (/*cbLevelSelect.SelectedIndex == 11 || cbLevelSelect.SelectedIndex == 12 ||
+                cbLevelSelect.SelectedIndex == 13 ||*/ cbLevelSelect.SelectedIndex == 15)
             {
                 btnLoadLevel.Enabled = false;
             }
@@ -121,11 +131,11 @@ namespace NewSF64Toolkit.Tools.Controls
                 case 10:
                     return 53;
                 case 11:
-                    return -1;
+                    return 39;
                 case 12:
-                    return -1;
+                    return 20;
                 case 13:
-                    return -1;
+                    return 28;
                 case 14:
                     return 34;
                 case 15:

@@ -20,11 +20,15 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
 
         public uint DListOffset;
 
+        public SFAdvancedObjectScript AdvancedScript;
+
         public int Offset;
 
         public SFLevelObject(int offset, byte[] bytes)
         {
             Offset = offset;
+
+            AdvancedScript = null;
 
             LoadFromBytes(bytes);
         }
@@ -83,6 +87,8 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
             {
                 if (ID < 0x190)
                     return SF64ROM.Instance.ReferenceDMA.SimpleObjects[ID].GLDisplayListOffset;
+                else if (ID >= 0x3F8 && AdvancedScript != null && AdvancedScript.AdvancedObjectIndex != -1 && AdvancedScript.AdvancedObjectIndex < SF64ROM.Instance.ReferenceDMA.AdvancedObjects.Count)
+                    return SF64ROM.Instance.ReferenceDMA.AdvancedObjects[AdvancedScript.AdvancedObjectIndex].GLDisplayListOffset;
                 //NOTE THIS IS WRONG!!
                 return NewSF64Toolkit.OpenGL.F3DEX.F3DEXParser.InvalidBox;
             } 

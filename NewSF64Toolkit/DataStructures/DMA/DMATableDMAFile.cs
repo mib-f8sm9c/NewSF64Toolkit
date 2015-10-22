@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NewSF64Toolkit.DataStructures.DataObjects;
+using System.Windows.Forms;
 
 namespace NewSF64Toolkit.DataStructures.DMA
 {
@@ -10,8 +11,8 @@ namespace NewSF64Toolkit.DataStructures.DMA
     {
         public List<DMATableEntry> DMATableEntries;
 
-        public DMATableDMAFile(byte[] data)
-            : base(data)
+        public DMATableDMAFile(byte[] data, int dmaIndex)
+            : base(data, dmaIndex)
         {
         }
 
@@ -57,5 +58,22 @@ namespace NewSF64Toolkit.DataStructures.DMA
 
             return bytes;
         }
+
+        public override TreeNode GetTreeNode()
+        {
+            TreeNode node = new TreeNode();
+
+            node.Text = "DMA " + Index + " - DMA Table File";
+
+            node.Tag = this;
+
+            //foreach (DMAFile dma in DMATable)
+            //{
+            //    node.Nodes.Add(dma.GetTreeNode());
+            //}
+
+            return node;
+        }
+
     }
 }

@@ -26,6 +26,19 @@ namespace NewSF64Toolkit
             return val.ToString();
         }
 
+        public static string DisplayValue(int val)
+        {
+            if (ToolSettings.Instance.DisplayInHex)
+            {
+                if(val < 0)
+                    return string.Format("-0x{0:X}", Math.Abs(val));
+                else
+                    return string.Format("0x{0:X}", val);
+            }
+
+            return val.ToString();
+        }
+
         #region Byte[] to Byte/Char/Short/UShort/Int/UInt/Float
 
         public static uint ReadUInt(byte[] data, uint position, Endianness endian = Endianness.BigEndian)

@@ -7,10 +7,11 @@ using NewSF64Toolkit.Settings;
 using NewSF64Toolkit.DataStructures.DMA;
 using NewSF64Toolkit.DataStructures.DataObjects;
 using NewSF64Toolkit.OpenGL.F3DEX;
+using System.Windows.Forms;
 
 namespace NewSF64Toolkit.DataStructures
 {
-    public class SF64ROM : IGameDataStructure
+    public class SF64ROM : IGameDataStructure, IResource
     {
         #region Properties & Variables
 
@@ -261,26 +262,28 @@ namespace NewSF64Toolkit.DataStructures
                     switch(DMATable.Count) //Should act as an index for the current dma file
                     {
                         case 0: //Header DMA
-                            entry = new HeaderDMAFile(dmaBytes);
+                            entry = new HeaderDMAFile(dmaBytes, DMATable.Count);
                             _headerDMA = (HeaderDMAFile)entry;
                             break;
                         case 1: //Reference DMA
-                            entry = new ReferenceDMAFile(dmaBytes);
+                            entry = new ReferenceDMAFile(dmaBytes, DMATable.Count);
                             _referenceDMA = (ReferenceDMAFile)entry;
                             break;
                         case 2: //DMA Table DMA
-                            entry = new DMATableDMAFile(dmaBytes);
+                            entry = new DMATableDMAFile(dmaBytes, DMATable.Count);
                             _dmaTableDMA = (DMATableDMAFile)entry;
                             break;
                         case 54: //Dialogue DMA
-                            entry = new DialogueDMAFile(dmaBytes);
+                            entry = new DialogueDMAFile(dmaBytes, DMATable.Count);
                             _dialogueDMA = (DialogueDMAFile)entry;
                             break;
                         //case 12: Appears broken right now, the Game Object table is set up differently than the other files. Possibly a prototype setup?
                         case 18:
                         case 19:
+                        case 20:
                         case 26:
                         case 27:
+                        case 28:
                         case 29:
                         case 30:
                         case 31:
@@ -290,13 +293,15 @@ namespace NewSF64Toolkit.DataStructures
                         case 36:
                         case 37:
                         case 38:
+                        case 39:
                         case 47:
                         case 53:
-                            entry = new LevelDMAFile(dmaBytes, (int)_referenceDMA.LevelInfoOffsets[StarFoxRomInfo.DMATableToLevelIndex(DMATable.Count)]);
+                            entry = new LevelDMAFile(dmaBytes, DMATable.Count, (int)_referenceDMA.LevelHeaderOffsets[StarFoxRomInfo.DMATableToLevelIndex(DMATable.Count)], 
+                                (int)_referenceDMA.LevelInfoOffsets[StarFoxRomInfo.DMATableToLevelIndex(DMATable.Count)]);
                             _levelDMAs.Add(entry as LevelDMAFile);
                             break;
                         default: //Others
-                            entry = new DMAFile(dmaBytes);
+                            entry = new DMAFile(dmaBytes, DMATable.Count);
                             break;
                     }
 
@@ -487,9 +492,116 @@ namespace NewSF64Toolkit.DataStructures
                 obj.GLDisplayListOffset = F3DEXParser.InvalidBox;
             }
 
+            //Init the simple objects to use the invalid box dlist indices
+            foreach (RefAdvancedLevelObject obj in _referenceDMA.AdvancedObjects)
+            {
+                obj.GLDisplayListOffset = F3DEXParser.InvalidBox;
+            }
+
+            //Make a list of the level indices, just for optimization sake later on
+            List<int> levelIndices = StarFoxRomInfo.LevelIndexAndDMAs.ToList();
+
             foreach (LevelDMAFile level in _levelDMAs)
             {
                 byte[] levelBytes = level.GetAsBytes();
+
+                Dictionary<int, byte[]> ramBytes = new Dictionary<int, byte[]>();
+                int count = _referenceDMA.RAMTable.Count(r => r.Seg6Start == level.DMAInfo.PStart);
+                int xs = count;
+                RAMTableEntry ramInfo = _referenceDMA.RAMTable.FirstOrDefault(r => r.Seg6Start == level.DMAInfo.PStart);
+                if (ramInfo != null)
+                {
+                    //Load it all in!!
+                    DMAFile dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg1Start);
+                    if(dma == null)
+                        ramBytes.Add(1, null);
+                    else
+                        ramBytes.Add(1, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg2Start);
+                    if (dma == null)
+                        ramBytes.Add(2, null);
+                    else
+                        ramBytes.Add(2, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg3Start);
+                    if (dma == null)
+                        ramBytes.Add(3, null);
+                    else
+                        ramBytes.Add(3, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg4Start);
+                    if (dma == null)
+                        ramBytes.Add(4, null);
+                    else
+                        ramBytes.Add(4, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg5Start);
+                    if (dma == null)
+                        ramBytes.Add(5, null);
+                    else
+                        ramBytes.Add(5, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg6Start);
+                    if (dma == null)
+                        ramBytes.Add(6, null);
+                    else
+                        ramBytes.Add(6, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg7Start);
+                    if (dma == null)
+                        ramBytes.Add(7, null);
+                    else
+                        ramBytes.Add(7, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg8Start);
+                    if (dma == null)
+                        ramBytes.Add(8, null);
+                    else
+                        ramBytes.Add(8, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.Seg9Start);
+                    if (dma == null)
+                        ramBytes.Add(9, null);
+                    else
+                        ramBytes.Add(9, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.SegAStart);
+                    if (dma == null)
+                        ramBytes.Add(0xA, null);
+                    else
+                        ramBytes.Add(0xA, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.SegBStart);
+                    if (dma == null)
+                        ramBytes.Add(0xB, null);
+                    else
+                        ramBytes.Add(0xB, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.SegCStart);
+                    if (dma == null)
+                        ramBytes.Add(0xC, null);
+                    else
+                        ramBytes.Add(0xC, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.SegDStart);
+                    if (dma == null)
+                        ramBytes.Add(0xD, null);
+                    else
+                        ramBytes.Add(0xD, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.SegEStart);
+                    if (dma == null)
+                        ramBytes.Add(0xE, null);
+                    else
+                        ramBytes.Add(0xE, dma.GetAsBytes());
+
+                    dma = SF64ROM.Instance.DMATable.SingleOrDefault(d => d.DMAInfo.PStart == ramInfo.SegFStart);
+                    if (dma == null)
+                        ramBytes.Add(0xF, null);
+                    else
+                        ramBytes.Add(0xF, dma.GetAsBytes());
+                }
 
                 foreach(SFLevelObject obj in level.LevelObjects)
                 {
@@ -499,23 +611,109 @@ namespace NewSF64Toolkit.DataStructures
                         obj.DListOffset = _referenceDMA.SimpleObjects[obj.ID].DListOffset;
 
                         // dlist offset sanity checks
-                        if (((obj.DListOffset & 3) != 0x0) ||							// dlist offset not 4 byte aligned
-                          ((obj.DListOffset & 0xFF000000) == 0x80000000))	// dlist offset lies in ram, leave it alone for now
+                        if (((obj.DListOffset & 4) != 0x0) ||							// dlist offset not 4 byte aligned
+                            ((obj.DListOffset & 0xFF000000) == 0x80000000) ||	// dlist offset lies in ram, leave it alone for now
+                            ((obj.DListOffset & 0xFF000000) == 0x00000000))	// invalid dlist
                             obj.DListOffset = 0x00;
 
-                        else if (obj.DListOffset != 0x00 && (byte)((obj.DListOffset & 0xFF000000) >> 24) == 0x06) //Need segment 6
+                        else
                         {
-                            //Load through the F3DEX parser, assign the DisplayListIndex to the Simple Object in the Reference DMA
-                            //In the future we'll serialize the F3DEX commands/textures/vertices too, but for functional purposes
-                            // we'll just use the blank binary
-                            if(_referenceDMA.SimpleObjects[obj.ID].GLDisplayListOffset == F3DEXParser.InvalidBox)
-                                _referenceDMA.SimpleObjects[obj.ID].GLDisplayListOffset = _f3dex.ReadGameObject(levelBytes, obj.DListOffset); //KEEP AN EYE OUT FOR ANY CROSS-DMA REFERENCES
+                            byte[] bytes = ramBytes[(int)((obj.DListOffset & 0xFF000000) >> 24)];
+
+                            if (obj.DListOffset != 0x00 && bytes != null) //Need segment 6
+                            {
+                                //Load through the F3DEX parser, assign the DisplayListIndex to the Simple Object in the Reference DMA
+                                //In the future we'll serialize the F3DEX commands/textures/vertices too, but for functional purposes
+                                // we'll just use the blank binary
+                                if (_referenceDMA.SimpleObjects[obj.ID].GLDisplayListOffset == F3DEXParser.InvalidBox)
+                                    _referenceDMA.SimpleObjects[obj.ID].GLDisplayListOffset = _f3dex.ReadGameObject(level, bytes, obj.DListOffset); //KEEP AN EYE OUT FOR ANY CROSS-DMA REFERENCES
+                            }
+                        }
+                    }
+                    //We know that the 0x3E8 is the start of advanced objects
+                    else if (obj.ID >= 0x3E8)
+                    {
+                        int scriptID = obj.ID - 0x3E8;
+
+                        //Have to go digging around and creating the object scripts
+                        int scriptStartOffset = StarFoxRomInfo.LevelIndexAndAdvItemIndex[levelIndices.IndexOf(DMATable.IndexOf(level))];
+
+                        if (scriptStartOffset == 0)
+                            continue;
+
+                        SFAdvancedObjectScript script = level.LevelScripts.SingleOrDefault(s => s.ScriptIndex == scriptID);
+
+                        if (script == null)
+                        {
+                            int scriptOffset = ByteHelper.ReadInt(levelBytes, scriptStartOffset + scriptID * 0x4);
+
+                            int scriptOffsetShort = scriptOffset & 0x00FFFFFF;
+
+                            int size = 0;
+                            uint nextLine = 0x0;
+
+                            do
+                            {
+                                nextLine = ByteHelper.ReadUInt(levelBytes, scriptOffsetShort + size);
+                                size += 4;
+                            } while (nextLine != 0xFE000000);
+
+                            byte[] scriptBytes = new byte[size];
+                            Array.Copy(levelBytes, scriptOffsetShort, scriptBytes, 0, size);
+
+                            script = new SFAdvancedObjectScript(scriptOffset, scriptID, scriptBytes);
+
+                            level.LevelScripts.Add(script);
+
+                        }
+
+                        obj.AdvancedScript = script;
+
+                        if (script.AdvancedObjectIndex != -1 && script.AdvancedObjectIndex < _referenceDMA.AdvancedObjects.Count)
+                        {
+                            obj.DListOffset = _referenceDMA.AdvancedObjects[script.AdvancedObjectIndex].DListOffset;
+
+                            // dlist offset sanity checks
+                            if (((obj.DListOffset & 4) != 0x0) ||							// dlist offset not 4 byte aligned
+                                ((obj.DListOffset & 0xFF000000) == 0x80000000) ||	// dlist offset lies in ram, leave it alone for now
+                                ((obj.DListOffset & 0xFF000000) == 0x00000000))	// invalid dlist
+                                obj.DListOffset = 0x00;
+
+                            else
+                            {
+                                byte[] bytes = ramBytes[(int)((obj.DListOffset & 0xFF000000) >> 24)];
+
+                                if (obj.DListOffset != 0x00 && bytes != null) //Need segment 6
+                                {
+                                    //Load through the F3DEX parser, assign the DisplayListIndex to the Simple Object in the Reference DMA
+                                    //In the future we'll serialize the F3DEX commands/textures/vertices too, but for functional purposes
+                                    // we'll just use the blank binary
+                                    if (_referenceDMA.AdvancedObjects[script.AdvancedObjectIndex].GLDisplayListOffset == F3DEXParser.InvalidBox)
+                                        _referenceDMA.AdvancedObjects[script.AdvancedObjectIndex].GLDisplayListOffset = _f3dex.ReadGameObject(level, bytes, obj.DListOffset); //KEEP AN EYE OUT FOR ANY CROSS-DMA REFERENCES
+                                }
+                            }
                         }
                     }
                 }
             }
 
             _resourcesLoaded = true;
+        }
+
+        public TreeNode GetTreeNode()
+        {
+            TreeNode node = new TreeNode();
+
+            node.Text = "SF64Rom";
+
+            node.Tag = this;
+
+            foreach (DMAFile dma in DMATable)
+            {
+                node.Nodes.Add(dma.GetTreeNode());
+            }
+
+            return node;
         }
 
     }

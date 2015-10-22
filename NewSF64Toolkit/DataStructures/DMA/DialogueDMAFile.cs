@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
 namespace NewSF64Toolkit.DataStructures.DMA
 {
     public class DialogueDMAFile : DMAFile
     {
-        public DialogueDMAFile(byte[] data)
-            : base(data)
+        public DialogueDMAFile(byte[] data, int dmaIndex)
+            : base(data, dmaIndex)
         {
 
         }
@@ -42,6 +43,22 @@ namespace NewSF64Toolkit.DataStructures.DMA
             //ByteHelper.WriteUInt(CRC2, bytes, 20);
 
             return bytes;
+        }
+
+        public override TreeNode GetTreeNode()
+        {
+            TreeNode node = new TreeNode();
+
+            node.Text = "DMA " + Index + " - Dialogue File";
+
+            node.Tag = this;
+
+            //foreach (DMAFile dma in DMATable)
+            //{
+            //    node.Nodes.Add(dma.GetTreeNode());
+            //}
+
+            return node;
         }
 
     }
