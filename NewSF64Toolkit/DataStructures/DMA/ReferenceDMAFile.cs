@@ -169,7 +169,7 @@ namespace NewSF64Toolkit.DataStructures.DMA
 
             TreeNode RamTable = new TreeNode();
             RamTable.Text = "Ram Table";
-            node.Tag = RAMTable;
+            RamTable.Tag = RAMTable;
             int ramCount = 0;
             foreach (RAMTableEntry ram in RAMTable)
             {
@@ -185,7 +185,7 @@ namespace NewSF64Toolkit.DataStructures.DMA
 
             TreeNode SimpleTable = new TreeNode();
             SimpleTable.Text = "Simple Objects Table";
-            node.Tag = SimpleObjects;
+            SimpleTable.Tag = SimpleObjects;
             int simpleCount = 0;
             foreach (RefSimpleLevelObject simp in SimpleObjects)
             {
@@ -201,7 +201,7 @@ namespace NewSF64Toolkit.DataStructures.DMA
 
             TreeNode AdvancedTable = new TreeNode();
             AdvancedTable.Text = "Advanced Objects Table";
-            node.Tag = AdvancedObjects;
+            AdvancedTable.Tag = AdvancedObjects;
             int advCount = 0;
             foreach (RefAdvancedLevelObject simp in AdvancedObjects)
             {

@@ -104,36 +104,6 @@
       <DependentUpon>OpenGLControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
-    <Compile Include="Tools\Controls\ResourceSubControls\LevelDMAResourceControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\LevelDMAResourceControl.Designer.cs">
-      <DependentUpon>LevelDMAResourceControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\RamTableResourceControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\RamTableResourceControl.Designer.cs">
-      <DependentUpon>RamTableResourceControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\DMAResourceControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\DMAResourceControl.Designer.cs">
-      <DependentUpon>DMAResourceControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\SF64RomResourceControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\SF64RomResourceControl.Designer.cs">
-      <DependentUpon>SF64RomResourceControl.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\ResourceControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="Tools\Controls\ResourceSubControls\ResourceControl.Designer.cs">
-      <DependentUpon>ResourceControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Tools\Controls\ResourceViewControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -158,6 +128,20 @@
     <Compile Include="Tools\Controls\RomInfoControl.Designer.cs">
       <DependentUpon>RomInfoControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="Tools\ResourceInfo\SFLevelObjectInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\RefAdvancedObjectInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\ListInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\RAMTableEntryInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\DMATableDMAFileInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\HeaderDMAFileInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\DialogueDMAFileInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\ReferenceDMAFileInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\LevelDMAFileInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\DMAFileInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\IResourceInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\RefSimpleObjectInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\ResourceInfoFactory.cs" />
+    <Compile Include="Tools\ResourceInfo\SF64RomInfo.cs" />
     <Compile Include="Tools\ResourceViewTool.cs" />
     <Compile Include="Tools\Debug\Controls\F3DEXViewerControl.cs">
       <SubType>UserControl</SubType>
@@ -186,18 +170,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="OpenGL\OpenGLControl.resx">
       <DependentUpon>OpenGLControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\Controls\ResourceSubControls\LevelDMAResourceControl.resx">
-      <DependentUpon>LevelDMAResourceControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\Controls\ResourceSubControls\RamTableResourceControl.resx">
-      <DependentUpon>RamTableResourceControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\Controls\ResourceSubControls\DMAResourceControl.resx">
-      <DependentUpon>DMAResourceControl.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Tools\Controls\ResourceSubControls\SF64RomResourceControl.resx">
-      <DependentUpon>SF64RomResourceControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Tools\Controls\ResourceViewControl.resx">
       <DependentUpon>ResourceViewControl.cs</DependentUpon>

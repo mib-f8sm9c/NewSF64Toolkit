@@ -64,7 +64,7 @@ namespace NewSF64Toolkit.Tools.Controls
             {
                 DMAFile entry = SF64ROM.Instance.DMATable[i];
 
-                dgvDMA.Rows[i].Cells[0].Value = i + 1;
+                dgvDMA.Rows[i].Cells[0].Value = i;
                 dgvDMA.Rows[i].Cells[1].Value = ByteHelper.DisplayValue(entry.DMAInfo.VStart);
                 dgvDMA.Rows[i].Cells[2].Value = ByteHelper.DisplayValue(entry.DMAInfo.PStart);
                 dgvDMA.Rows[i].Cells[3].Value = ByteHelper.DisplayValue(entry.DMAInfo.PEnd);

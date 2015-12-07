@@ -108,7 +108,8 @@ namespace NewSF64Toolkit.DataStructures.DMA
         {
             TreeNode node = new TreeNode();
 
-            node.Text = "DMA " + Index + " - Level File";
+            node.Text = string.Format("DMA {0} - Level File ({1})", Index, 
+                StarFoxRomInfo.LevelNamesByIndex[StarFoxRomInfo.DMATableToLevelIndex(Index)]);
 
             node.Tag = this;
 
