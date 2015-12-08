@@ -29,25 +29,25 @@ namespace NewSF64Toolkit.Tools.ResourceInfo
             get { return _dma.IsCompressed; }
         }
 
-        [CategoryAttribute("DMA Info"), DescriptionAttribute("Size in bytes of the DMA file")]
+        [CategoryAttribute("DMA Info"), DescriptionAttribute("Size in bytes of the DMA file"), TypeConverter(typeof(Int32HexTypeConverter))]
         public int Size
         {
             get { return _dma.Size; }
         }
 
-        [CategoryAttribute("DMA Info"), DescriptionAttribute("Physical start location of the DMA file")]
+        [CategoryAttribute("DMA Info"), DescriptionAttribute("Physical start location of the DMA file"), TypeConverter(typeof(UInt32HexTypeConverter))]
         public uint PStart
         {
             get { return _dma.DMAInfo.PStart; }
         }
 
-        [CategoryAttribute("DMA Info"), DescriptionAttribute("Physical end location of the DMA file")]
+        [CategoryAttribute("DMA Info"), DescriptionAttribute("Physical end location of the DMA file"), TypeConverter(typeof(UInt32HexTypeConverter))]
         public uint PEnd
         {
             get { return _dma.DMAInfo.PEnd; }
         }
 
-        [CategoryAttribute("DMA Info"), DescriptionAttribute("Virtual start location of the DMA file")]
+        [CategoryAttribute("DMA Info"), DescriptionAttribute("Virtual start location of the DMA file"), TypeConverter(typeof(UInt32HexTypeConverter))]
         public uint VStart
         {
             get { return _dma.DMAInfo.VStart; }

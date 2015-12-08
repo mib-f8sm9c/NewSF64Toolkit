@@ -21,6 +21,12 @@ namespace NewSF64Toolkit.Tools.ResourceInfo
         Empty
     }
 
+    public enum AdvancedType
+    {
+        Model,
+        None
+    }
+
     public static class ResourceInfoFactory
     {
         public static IResourceInfo ConvertToResourceInfo(object obj)
@@ -76,6 +82,20 @@ namespace NewSF64Toolkit.Tools.ResourceInfo
             else
             {
                 return null;
+            }
+        }
+
+        public static AdvancedType GetAdvancedType(object obj)
+        {
+            if (obj is RefSimpleLevelObject ||
+                obj is RefAdvancedLevelObject ||
+                obj is SFLevelObject)
+            {
+                return AdvancedType.Model;
+            }
+            else
+            {
+                return AdvancedType.None;
             }
         }
     }

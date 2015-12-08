@@ -484,6 +484,11 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
 
                 UcodeCmd((byte)(w0 >> 24));//UcodeCmd[(byte)(w0 >> 24)]();
 
+                byte[] cmd = new byte[8];
+                Array.Copy(currentBytes, Offset, cmd, 0, 8);
+
+                _currentDMA.F3DEXData.AddDList(new DListCommand((int)Offset, cmd));
+
                 DListAddress += 8;
             }
         }
@@ -577,6 +582,11 @@ namespace NewSF64Toolkit.OpenGL.F3DEX
                 Vertices[V].G = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 13);//RAM[TempSegment].Data[TempOffset + i + 13];
                 Vertices[V].B = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 14);//RAM[TempSegment].Data[TempOffset + i + 14];
                 Vertices[V].A = (char)ByteHelper.ReadByte(currentBytes, TempOffset + (uint)i + 15);//RAM[TempSegment].Data[TempOffset + i + 15];
+
+                byte[] vert = new byte[16];
+                Array.Copy(currentBytes, TempOffset + i, vert, 0, 16);
+
+                _currentDMA.F3DEXData.AddVertex(new Vertex((int)TempOffset + i, vert)); 
 
 		        V++;
 	        }

@@ -61,7 +61,7 @@ namespace NewSF64Toolkit.Tools.ResourceInfo
             set { _dma.LevelHeader.AmbientLightingRed = value.R; _dma.LevelHeader.AmbientLightingGreen = value.G; _dma.LevelHeader.AmbientLightingBlue = value.B; }
         }
 
-        [CategoryAttribute("Level Header Settings"), DescriptionAttribute("Offset in the DMA where the level header starts")]
+        [CategoryAttribute("Level Header Settings"), DescriptionAttribute("Offset in the DMA where the level header starts"), TypeConverter(typeof(Int32HexTypeConverter))]
         public int HeaderOffset
         {
             get { return _dma.LevelHeader.Offset; }
@@ -102,22 +102,22 @@ namespace NewSF64Toolkit.Tools.ResourceInfo
             set { _dma.LevelHeader.Unk5 = value; }
         }
 
-        [CategoryAttribute("Level Header Unknowns"), DescriptionAttribute("Unknown 6")]
-        public uint Unknown6
+        [CategoryAttribute("Level Header Unknowns"), DescriptionAttribute("Unknown 6"), TypeConverter(typeof(FloatTypeConverter))]
+        public float Unknown6
         {
             get { return _dma.LevelHeader.Unk6; }
             set { _dma.LevelHeader.Unk6 = value; }
         }
 
-        [CategoryAttribute("Level Header Unknowns"), DescriptionAttribute("Unknown 7")]
-        public uint Unknown7
+        [CategoryAttribute("Level Header Unknowns"), DescriptionAttribute("Unknown 7"), TypeConverter(typeof(FloatTypeConverter))]
+        public float Unknown7
         {
             get { return _dma.LevelHeader.Unk7; }
             set { _dma.LevelHeader.Unk7 = value; }
         }
 
-        [CategoryAttribute("Level Header Unknowns"), DescriptionAttribute("Unknown 8")]
-        public uint Unknown8
+        [CategoryAttribute("Level Header Unknowns"), DescriptionAttribute("Unknown 8"), TypeConverter(typeof(FloatTypeConverter))]
+        public float Unknown8
         {
             get { return _dma.LevelHeader.Unk8; }
             set { _dma.LevelHeader.Unk8 = value; }

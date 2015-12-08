@@ -39,6 +39,8 @@ namespace NewSF64Toolkit.OpenGL
 
         public int[] SingleObjectDLIndices;
 
+        public SFCamera Camera;
+
         public enum DisplayMode
         {
             LevelView,
@@ -51,9 +53,11 @@ namespace NewSF64Toolkit.OpenGL
             InitializeComponent();
 
             Renderables = new List<IGLRenderable>();
-            SFCamera.UpdateCamera += UpdateCamera;
 
             Mode = DisplayMode.LevelView;
+
+            Camera = new SFCamera();
+            Camera.UpdateCamera += UpdateCamera;
         }
 
         public void UpdateCamera()
@@ -64,7 +68,7 @@ namespace NewSF64Toolkit.OpenGL
         private void glDisplay_Load(object sender, EventArgs e)
         {
             if (LicenseManager.UsageMode == LicenseUsageMode.Designtime) return;
-            SFCamera.Reset();
+            Camera.Reset();
 
             //If there are unitialized-related errors, it's probably setting this too early
             GL.ClearColor(Color.CornflowerBlue);
@@ -294,7 +298,7 @@ namespace NewSF64Toolkit.OpenGL
 
 	        GL.LoadIdentity();
 
-            gl_LookAt(SFCamera.X, SFCamera.Y, SFCamera.Z, SFCamera.X + SFCamera.LX, SFCamera.Y + SFCamera.LY, SFCamera.Z + SFCamera.LZ);
+            gl_LookAt(Camera.X, Camera.Y, Camera.Z, Camera.X + Camera.LX, Camera.Y + Camera.LY, Camera.Z + Camera.LZ);
 
 	        GL.Disable(EnableCap.Texture2D);
             GL.Disable(EnableCap.Lighting);
@@ -330,7 +334,7 @@ namespace NewSF64Toolkit.OpenGL
                     //F3DEXParser.GameObject gameObject = F3DEXParser.GameObjects[ObjectNo];
                     renderable = LevelObjects[i];
 
-                    if (Math.Abs(SFCamera.Z * 250 - renderable.GL_Z) > 30000)
+                    if (Math.Abs(Camera.Z * 250 - renderable.GL_Z) > 30000)
                     {
                         continue;
                     }
@@ -430,28 +434,28 @@ namespace NewSF64Toolkit.OpenGL
                 //Move camera here
 
                 if(e.KeyData == Keys.W)
-                    SFCamera.Movement(false, 6.0f);
+                    Camera.Movement(false, 6.0f);
 
                 if (e.KeyData == Keys.S)
-                    SFCamera.Movement(false, -6.0f);
+                    Camera.Movement(false, -6.0f);
 
                 if (e.KeyData == Keys.A)
-                    SFCamera.Movement(true, -6.0f);
+                    Camera.Movement(true, -6.0f);
 
                 if (e.KeyData == Keys.D)
-                    SFCamera.Movement(true, 6.0f);
+                    Camera.Movement(true, 6.0f);
 
                 if (e.KeyData == Keys.T)
-                    SFCamera.Movement(false, 24.0f);
+                    Camera.Movement(false, 24.0f);
 
                 if (e.KeyData == Keys.G)
-                    SFCamera.Movement(false, -24.0f);
+                    Camera.Movement(false, -24.0f);
 
                 if (e.KeyData == Keys.F)
-                    SFCamera.Movement(true, -24.0f);
+                    Camera.Movement(true, -24.0f);
 
                 if (e.KeyData == Keys.H)
-                    SFCamera.Movement(true, 24.0f);
+                    Camera.Movement(true, 24.0f);
 
             }
         }
@@ -615,7 +619,7 @@ namespace NewSF64Toolkit.OpenGL
         {
             if (Mouse.IsClicked)
             {
-                SFCamera.MouseMove(e.X, e.Y);
+                Camera.MouseMove(e.X, e.Y);
             }
         }
 

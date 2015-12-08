@@ -73,15 +73,15 @@ namespace NewSF64Toolkit.DataStructures.DataObjects.F3DEX
 
         public bool LoadFromBytes(byte[] bytes)
         {
-            if (bytes.Length == 0 || bytes.Length % 4 != 0)
+            if (bytes.Length == 0 || bytes.Length % 8 != 0)
                 return false;
 
             byte[] singleLine;
 
-            for (int i = 0; i < bytes.Length; i += 4)
+            for (int i = 0; i < bytes.Length; i += 8)
             {
-                singleLine = new byte[4];
-                Array.Copy(bytes, i, singleLine, 0, 4);
+                singleLine = new byte[8];
+                Array.Copy(bytes, i, singleLine, 0, 8);
                 CommandData.Add(singleLine);
             }
 
@@ -94,13 +94,13 @@ namespace NewSF64Toolkit.DataStructures.DataObjects.F3DEX
 
             for (int i = 0; i < CommandData.Count; i++)
             {
-                Array.Copy(CommandData[i], 0, bytes, i * 4, 4);
+                Array.Copy(CommandData[i], 0, bytes, i * 8, 8);
             }
 
             return bytes;
         }
 
-        public int Size { get { return CommandData.Count * 0x4; } }
+        public int Size { get { return CommandData.Count * 0x8; } }
 
         public CommandType GetCommandType()
         {

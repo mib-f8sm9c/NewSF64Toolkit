@@ -16,7 +16,7 @@ namespace NewSF64Toolkit.Tools.ResourceInfo
             _obj = obj;
         }
 
-        [CategoryAttribute("Object Info"), DescriptionAttribute("Position in the level where this object is at")]
+        [CategoryAttribute("Object Info"), DescriptionAttribute("Position in the level where this object is at"), TypeConverter(typeof(FloatTypeConverter))]
         public float LevelPosition
         {
             get { return _obj.LvlPos; }

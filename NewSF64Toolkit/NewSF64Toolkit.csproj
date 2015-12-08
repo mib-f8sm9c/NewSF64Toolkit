@@ -51,6 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataStructures\DataObjects\StaticMemoryMapping.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DataStructures\IResource.cs" />
     <Compile Include="DataStructures\DataObjects\SFAdvancedObjectScript.cs" />
     <Compile Include="DataStructures\DataObjects\RefAdvancedObject.cs" />
@@ -142,6 +145,7 @@
     <Compile Include="Tools\ResourceInfo\RefSimpleObjectInfo.cs" />
     <Compile Include="Tools\ResourceInfo\ResourceInfoFactory.cs" />
     <Compile Include="Tools\ResourceInfo\SF64RomInfo.cs" />
+    <Compile Include="Tools\ResourceInfo\TypeConverters.cs" />
     <Compile Include="Tools\ResourceViewTool.cs" />
     <Compile Include="Tools\Debug\Controls\F3DEXViewerControl.cs">
       <SubType>UserControl</SubType>

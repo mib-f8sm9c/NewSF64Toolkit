@@ -18,9 +18,9 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
         public uint FogBlue;
         public uint FogNearDist;
         public uint FogFarDist;
-        public uint Unk6;
-        public uint Unk7;
-        public uint Unk8;
+        public float Unk6;
+        public float Unk7;
+        public float Unk8;
         public uint AmbientLightingRed; //Ambient?
         public uint AmbientLightingGreen; //Ambient?
         public uint AmbientLightingBlue; //Ambient?
@@ -52,9 +52,9 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
             ByteHelper.WriteUInt(FogBlue, bytes, 0x14);
             ByteHelper.WriteUInt(FogNearDist, bytes, 0x18);
             ByteHelper.WriteUInt(FogFarDist, bytes, 0x1C);
-            ByteHelper.WriteUInt(Unk6, bytes, 0x20);
-            ByteHelper.WriteUInt(Unk7, bytes, 0x24);
-            ByteHelper.WriteUInt(Unk8, bytes, 0x28);
+            ByteHelper.WriteFloat(Unk6, bytes, 0x20);
+            ByteHelper.WriteFloat(Unk7, bytes, 0x24);
+            ByteHelper.WriteFloat(Unk8, bytes, 0x28);
             ByteHelper.WriteUInt(AmbientLightingRed, bytes, 0x2C);
             ByteHelper.WriteUInt(AmbientLightingGreen, bytes, 0x30);
             ByteHelper.WriteUInt(AmbientLightingBlue, bytes, 0x34);
@@ -81,9 +81,9 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
             FogBlue = ByteHelper.ReadUInt(bytes, 0x14);
             FogNearDist = ByteHelper.ReadUInt(bytes, 0x18);
             FogFarDist = ByteHelper.ReadUInt(bytes, 0x1C);
-            Unk6 = ByteHelper.ReadUInt(bytes, 0x20);
-            Unk7 = ByteHelper.ReadUInt(bytes, 0x24);
-            Unk8 = ByteHelper.ReadUInt(bytes, 0x28);
+            Unk6 = ByteHelper.ReadFloat(bytes, 0x20);
+            Unk7 = ByteHelper.ReadFloat(bytes, 0x24);
+            Unk8 = ByteHelper.ReadFloat(bytes, 0x28);
             AmbientLightingRed = ByteHelper.ReadUInt(bytes, 0x2C);
             AmbientLightingGreen = ByteHelper.ReadUInt(bytes, 0x30);
             AmbientLightingBlue = ByteHelper.ReadUInt(bytes, 0x34);

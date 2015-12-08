@@ -9,11 +9,11 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
     {
         public uint DListOffset;
         public uint Unk1;
-        public uint Unk2;
-        public uint Unk3;
-        public uint Unk4;
+        public float Unk2;
+        public float Unk3;
+        public float Unk4;
         public uint Unk5;
-        public uint Unk6;
+        public float Unk6;
         public uint Unk7;
 
         public int Offset;
@@ -34,11 +34,11 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
 
             ByteHelper.WriteUInt(DListOffset, bytes, 0x0);
             ByteHelper.WriteUInt(Unk1, bytes, 0x04);
-            ByteHelper.WriteUInt(Unk2, bytes, 0x08);
-            ByteHelper.WriteUInt(Unk3, bytes, 0x0C);
-            ByteHelper.WriteUInt(Unk4, bytes, 0x10);
+            ByteHelper.WriteFloat(Unk2, bytes, 0x08);
+            ByteHelper.WriteFloat(Unk3, bytes, 0x0C);
+            ByteHelper.WriteFloat(Unk4, bytes, 0x10);
             ByteHelper.WriteUInt(Unk5, bytes, 0x14);
-            ByteHelper.WriteUInt(Unk6, bytes, 0x18);
+            ByteHelper.WriteFloat(Unk6, bytes, 0x18);
             ByteHelper.WriteUInt(Unk7, bytes, 0x1C);
 
             return bytes;
@@ -51,11 +51,11 @@ namespace NewSF64Toolkit.DataStructures.DataObjects
 
             DListOffset = ByteHelper.ReadUInt(bytes, 0x0);
             Unk1 = ByteHelper.ReadUInt(bytes, 0x04);
-            Unk2 = ByteHelper.ReadUInt(bytes, 0x08);
-            Unk3 = ByteHelper.ReadUInt(bytes, 0x0C);
-            Unk4 = ByteHelper.ReadUInt(bytes, 0x10);
+            Unk2 = ByteHelper.ReadFloat(bytes, 0x08);
+            Unk3 = ByteHelper.ReadFloat(bytes, 0x0C);
+            Unk4 = ByteHelper.ReadFloat(bytes, 0x10);
             Unk5 = ByteHelper.ReadUInt(bytes, 0x14);
-            Unk6 = ByteHelper.ReadUInt(bytes, 0x18);
+            Unk6 = ByteHelper.ReadFloat(bytes, 0x18);
             Unk7 = ByteHelper.ReadUInt(bytes, 0x1C);
 
             return true;

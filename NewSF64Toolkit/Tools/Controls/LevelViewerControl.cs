@@ -188,7 +188,7 @@ namespace NewSF64Toolkit.Tools.Controls
             //Move the camera to the object
             SFLevelObject obj = objects[_selectedGameObject];
 
-            SFCamera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
+            _glControl.Camera.MoveCameraTo((float)obj.X, (float)obj.Y, (float)obj.Z - obj.LvlPos);
         }
 
         private void LoadModelNavigInfo()
